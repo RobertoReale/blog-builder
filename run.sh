@@ -104,18 +104,22 @@ get_step_usage() {
   local log_file="$1"
   [ -f "$log_file" ] || return
   node -e "
-    const fs = require('fs');
-    const lines = fs.readFileSync(process.argv[1], 'utf8').split('\n');
-    for (let i = lines.length - 1; i >= 0; i--) {
-      try {
-        const d = JSON.parse(lines[i]);
-        if (d.type === 'result' && d.usage) {
-          process.stdout.write((d.usage.input_tokens||0) + ' ' + (d.usage.output_tokens||0));
-          break;
-        }
-      } catch(e) {}
-    }
-  " "$log_file" 2>/dev/null
+    const chunks = [];
+    process.stdin.resume();
+    process.stdin.on('data', d => chunks.push(d));
+    process.stdin.on('end', () => {
+      const lines = Buffer.concat(chunks).toString().split('\n');
+      for (let i = lines.length - 1; i >= 0; i--) {
+        try {
+          const d = JSON.parse(lines[i]);
+          if (d.type === 'result' && d.usage) {
+            process.stdout.write((d.usage.input_tokens||0) + ' ' + (d.usage.output_tokens||0));
+            break;
+          }
+        } catch(e) {}
+      }
+    });
+  " < "$log_file" 2>/dev/null
 }
 
 fmt_num() {

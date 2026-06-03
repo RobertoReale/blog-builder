@@ -33,8 +33,6 @@ blog-builder/
 
 Running the full pipeline executes **9 separate Claude Code sessions**, each implementing a distinct feature. This is meaningful agentic work — expect hundreds of tool calls across all steps.
 
-**Rough estimate: ~500k–1.5M tokens total** depending on how much iteration Claude needs to fix build errors.
-
 The pipeline prints a running token counter after each step so you can monitor consumption in real time:
 ```
   Tokens this step: 52,410 in / 4,830 out   |   Total so far: 148,200 in / 13,500 out

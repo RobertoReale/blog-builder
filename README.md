@@ -52,7 +52,7 @@ This repository is a **general framework**. Before running the pipeline, you MUS
 
 4. Watch as Claude Code iteratively builds your blog, checks the code, and passes to the next step!
 
-## 🚀 Deployment
+## Deployment
 
 The final output is a fast, static Astro site. You can host it anywhere for free, but it's heavily optimized for **Vercel** or **GitHub Pages**.
 

@@ -11,7 +11,9 @@ A fully working blog where:
 - `npm run dev` and `npm run build` both succeed
 
 ## STACK
-- Astro 4 (latest stable)
+- Astro 4 — create the project with `npm create astro@4` to ensure Astro 4
+  is used regardless of which major version is current. Pin `"astro": "^4.0.0"`
+  in package.json.
 - @astrojs/tailwind
 - @astrojs/mdx
 - TypeScript (strict mode)

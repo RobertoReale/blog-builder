@@ -27,13 +27,23 @@ while getopts ":ps:" opt; do
 done
 
 PROMPTS=(
-  "prompts/prompt_blog_00_foundation.txt"
-  "prompts/prompt_blog_01_testing.txt"
-  "prompts/prompt_blog_02_seo.txt"
-  "prompts/prompt_blog_03_reading_ux.txt"
-  "prompts/prompt_blog_04_search.txt"
-  "prompts/prompt_blog_05_series.txt"
-  "prompts/prompt_blog_06_related.txt"
+  "prompt_blog_00_foundation.txt"
+  "prompt_blog_01_testing.txt"
+  "prompt_blog_02_seo.txt"
+  "prompt_blog_03_reading_ux.txt"
+  "prompt_blog_04_search.txt"
+  "prompt_blog_05_series.txt"
+  "prompt_blog_06_related.txt"
+)
+
+STEP_NAMES=(
+  "Foundation"
+  "Testing setup"
+  "SEO"
+  "Reading UX"
+  "Search"
+  "Series"
+  "Related articles"
 )
 
 # --- Preliminary checks ---
@@ -93,11 +103,11 @@ for (( i=START_STEP; i<${#PROMPTS[@]}; i++ )); do
 
   # New separate session: context is only CLAUDE.md + files on disk.
   set +e
-  cat "$FILE" | claude -p "$INSTRUCTION" \
+  claude -p "$INSTRUCTION" \
     --permission-mode acceptEdits \
     --allowedTools "Bash,Read,Edit,Write,Glob,Grep" \
-    --output-format json 2>&1 | tee "logs/step_$i.json"
-  CLAUDE_EXIT=${PIPESTATUS[1]}
+    --output-format json < "$FILE" 2>&1 | tee "logs/step_$i.json"
+  CLAUDE_EXIT=${PIPESTATUS[0]}
   set -e
 
   if [ $CLAUDE_EXIT -ne 0 ]; then
@@ -126,6 +136,10 @@ for (( i=START_STEP; i<${#PROMPTS[@]}; i++ )); do
     echo -e "\033[1;33m       ./run.sh -s $i\033[0m"
     break
   fi
+
+  # Git checkpoint: commit generated code so each step is a rollback point
+  git add -A 2>/dev/null
+  git commit -m "Step $i: ${STEP_NAMES[$i]}" --quiet 2>/dev/null || true
 
   echo ""
   echo -e "\033[0;32m  STEP $i OK — build (and unit tests) passed.\033[0m"

@@ -106,20 +106,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  const items = headings.map(el => ({
-    text: el.textContent,
-    id: el.id,
-    level: el.tagName.toLowerCase()
-  }));
-  
-  container.innerHTML = `
-    <p class="toc-label">Contents</p>
-    <ul class="toc-list">
-      ${items.map(item => `
-        <li class="toc-${item.level}"><a href="#${item.id}">${item.text}</a></li>
-      `).join('')}
-    </ul>
-  `;
+  // Build DOM programmatically — never interpolate heading text into innerHTML
+  // (heading titles can contain characters like < > & that break HTML if injected raw)
+  const label = document.createElement('p');
+  label.className = 'toc-label';
+  label.textContent = 'Contents';
+  container.appendChild(label);
+
+  const ul = document.createElement('ul');
+  ul.className = 'toc-list';
+  headings.forEach(h => {
+    const li = document.createElement('li');
+    li.className = `toc-${h.tagName.toLowerCase()}`;
+    const a = document.createElement('a');
+    a.href = `#${h.id}`;
+    a.textContent = h.textContent ?? '';
+    li.appendChild(a);
+    ul.appendChild(li);
+  });
+  container.appendChild(ul);
 });
 ```
 

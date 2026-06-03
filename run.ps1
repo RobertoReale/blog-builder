@@ -19,13 +19,23 @@ $ErrorActionPreference = "Stop"
 
 # Ordine degli step. Lo step 0 (foundation) crea il progetto; gli altri lo estendono.
 $prompts = @(
-  "prompts\prompt_blog_00_foundation.txt",  # 0  Foundation
-  "prompts\prompt_blog_01_testing.txt",     # 1  Testing (Vitest + Playwright)
-  "prompts\prompt_blog_02_seo.txt",         # 2  Feature 01 - SEO
-  "prompts\prompt_blog_03_reading_ux.txt",  # 3  Feature 02 - Reading UX
-  "prompts\prompt_blog_04_search.txt",      # 4  Feature 03 - Search (Pagefind)
-  "prompts\prompt_blog_05_series.txt",      # 5  Feature 04 - Series
-  "prompts\prompt_blog_06_related.txt"      # 6  Feature 05 - Related
+  "prompt_blog_00_foundation.txt",  # 0  Foundation
+  "prompt_blog_01_testing.txt",     # 1  Testing (Vitest + Playwright)
+  "prompt_blog_02_seo.txt",         # 2  Feature 01 - SEO
+  "prompt_blog_03_reading_ux.txt",  # 3  Feature 02 - Reading UX
+  "prompt_blog_04_search.txt",      # 4  Feature 03 - Search (Pagefind)
+  "prompt_blog_05_series.txt",      # 5  Feature 04 - Series
+  "prompt_blog_06_related.txt"      # 6  Feature 05 - Related
+)
+
+$stepNames = @(
+  "Foundation",
+  "Testing setup",
+  "SEO",
+  "Reading UX",
+  "Search",
+  "Series",
+  "Related articles"
 )
 
 # --- Controlli preliminari -------------------------------------------------
@@ -119,6 +129,10 @@ for ($i = $StartStep; $i -lt $prompts.Count; $i++) {
     Write-Host "       .\run.ps1 -StartStep $i" -ForegroundColor Yellow
     break
   }
+
+  # Git checkpoint: commit generated code so each step is a rollback point
+  git add -A 2>&1 | Out-Null
+  git commit -m "Step ${i}: $($stepNames[$i])" --quiet 2>&1 | Out-Null
 
   Write-Host ""
   Write-Host "  STEP $i OK — build (e test unit) passati." -ForegroundColor Green

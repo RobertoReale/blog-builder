@@ -1,42 +1,47 @@
 # Blog Builder
 
-A powerful, iterative framework to build a complete, production-ready personal blog using Astro 4, Tailwind CSS, and MDX, entirely generated through sequenced LLM prompts via Claude Code.
+A framework to build a complete, production-ready personal blog using Astro 4, Tailwind CSS, and MDX — generated entirely through sequenced LLM prompts via Claude Code.
 
 ## Concept: Iterative AI Generation
 
-Instead of generating an entire codebase in one massive prompt (which often leads to context overflow, hallucinations, and broken code), this project uses a **sequenced prompt architecture**.
+Instead of generating an entire codebase in one massive prompt (which causes context overflow, hallucinations, and broken code), this project uses a **sequenced prompt architecture**.
 
-> **The Context Window Philosophy**: By splitting the generation into 7 distinct sequential steps, the LLM context window never fills up. Each prompt runs in a fresh session. The LLM only receives the project rules (`CLAUDE.md`) and the specific feature instructions, while reading the existing code on disk. This prevents the AI from forgetting previous instructions or hallucinating features, ensuring a highly stable and deterministic build.
+> **The Context Window Philosophy**: The build is split into 7 distinct sequential steps. Each prompt runs in a fresh Claude Code session, so the context window never fills up. The LLM only receives the project rules (`CLAUDE.md`) and the specific feature instructions, while reading the existing code on disk. This prevents the AI from forgetting previous instructions or hallucinating features.
 
-The build is broken down into small, verifiable steps. The automation scripts (`run.sh` for Linux/macOS, `run.ps1` for Windows) execute these steps sequentially using **Claude Code**. After each prompt, the script runs a build check (`npm run build`) and automated tests. If the build breaks, the pipeline stops immediately, preventing the AI from building on top of a broken state.
+Each step is independently verified (`npm run build` + unit tests) before the next one starts. If the build breaks, the pipeline stops immediately — it never builds on top of a broken state. After every successful step, a git commit is created automatically as a rollback point.
 
 ## Project Structure
 
-- **`CLAUDE.md`**: The core rules of the project. It acts as the system prompt and is read by Claude at every step. It defines the stack, the design system, frontmatter schemas, and strictly forbids unwanted features.
-- **`prompt_blog_*.txt`**: The sequenced prompts.
-  - `00_foundation`: Basic layout, dark mode, typography, MDX setup.
-  - `01_testing`: Unit and E2E test setup (Vitest + Playwright).
-  - `02_seo`: RSS, Sitemap, JSON-LD, Robots.txt.
-  - `03_reading_ux`: Progress bar, Back to top, Table of Contents.
-  - `04_search`: Pagefind static search integration.
-  - `05_series`: Article series grouping.
-  - `06_related`: Related articles recommendation.
-- **`run.sh` & `run.ps1`**: The automation pipeline scripts for Linux/macOS and Windows respectively. They run Claude Code for each prompt and enforce the build tests.
-- **`SETUP.md`**: Detailed instructions on prerequisites and how to launch the build.
+```
+blog-builder/
+  CLAUDE.md                        The project rules — read by Claude at every step
+  prompt_blog_00_foundation.txt    Step 0: layout, dark mode, MDX setup
+  prompt_blog_01_testing.txt       Step 1: Vitest + Playwright test suite
+  prompt_blog_02_seo.txt           Step 2: RSS, sitemap, robots.txt, JSON-LD
+  prompt_blog_03_reading_ux.txt    Step 3: progress bar, TOC, back to top, share
+  prompt_blog_04_search.txt        Step 4: Pagefind static search
+  prompt_blog_05_series.txt        Step 5: article series grouping
+  prompt_blog_06_related.txt       Step 6: related articles recommendation
+  run.sh                           Pipeline script (Linux/macOS)
+  run.ps1                          Pipeline script (Windows)
+  SETUP.md                         Detailed setup and usage guide
+```
 
-## Customization (Pre-requisites)
+## Customization
 
-This repository is a **general framework**. Before running the pipeline, you MUST customize it to fit your brand and style.
+This repository is a **general framework**. Before running the pipeline, open `CLAUDE.md` and fill in the sections marked `USER ACTION REQUIRED`:
 
-`CLAUDE.md` is your control panel. Open it and edit the following sections:
-1. **SITE CONFIG**: Set your blog's title, description, and author.
-2. **DESIGN SYSTEM**: Change the CSS variables to match your preferred color palette.
-3. **TYPOGRAPHY**: Specify your preferred Google Fonts.
-4. **CUSTOM MDX COMPONENTS**: Add any custom components you want the AI to build.
+1. **SITE CONFIG** — blog title, description, author.
+2. **DESIGN SYSTEM** — CSS color variables for your brand palette.
+3. **TYPOGRAPHY** — your preferred Google Fonts.
+4. **CUSTOM MDX COMPONENTS** — any components beyond the built-in ones.
 
-## How to use
-1. Follow the instructions in **[`SETUP.md`](SETUP.md)** to install the prerequisites (Node.js LTS, Git, and Claude Code).
-2. Open your terminal in this folder.
+## How to Use
+
+Follow **[`SETUP.md`](SETUP.md)** for full instructions. Quick start:
+
+1. Install prerequisites: Node.js LTS, Git, Claude Code (paid plan required).
+2. Open a terminal in this folder.
 3. Run the pipeline:
 
    **Linux / macOS:**
@@ -47,26 +52,29 @@ This repository is a **general framework**. Before running the pipeline, you MUS
 
    **Windows (PowerShell):**
    ```powershell
+   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
    .\run.ps1
    ```
 
-4. Watch as Claude Code iteratively builds your blog, checks the code, and passes to the next step!
+4. Watch Claude Code iteratively build the blog, verify each step, commit a checkpoint, and move to the next.
 
 ## Deployment
 
-The final output is a fast, static Astro site. You can host it anywhere for free, but it's heavily optimized for **Vercel** or **GitHub Pages**.
+The output is a fast static Astro site. You can host it anywhere, but it's optimized for **Vercel** or **GitHub Pages**.
 
-- **Vercel**: Just connect your GitHub repository to a new Vercel project. No framework adapter is needed (it's statically generated). Vercel will automatically detect the `build` script and publish it.
-- Before publishing, remember to update `src/config.ts` (title, URL) and `public/robots.txt`!
+- **Vercel**: connect your GitHub repository to a new Vercel project. No framework adapter needed — Vercel detects the `build` script automatically.
+- Before publishing, update `src/config.ts` (title, URL) and `public/robots.txt`.
 
-For detailed pre-launch steps (like configuring `.gitignore`), check step 6 in **[`SETUP.md`](SETUP.md)**.
+See step 6 in [`SETUP.md`](SETUP.md) for the full pre-launch checklist.
 
-## Why this approach?
+## Why This Approach?
 
-- **Zero Drift**: By verifying the compilation (`npm run build`) after each step, we ensure the project is always in a working state.
-- **Maintainable**: The rules are clearly defined in `CLAUDE.md`, making it easy to add new prompts without breaking the architecture.
-- **Educational**: By reading the prompts, you learn how to instruct LLMs effectively for complex software engineering tasks.
+- **Zero Drift**: `npm run build` is verified after every step — the project is always in a working state.
+- **Rollback Points**: a git commit is created after each verified step, so any step can be undone with `git reset --hard`.
+- **Reproducible**: Astro 4 is pinned explicitly; the same prompts produce the same blog regardless of when you run them.
+- **Maintainable**: rules live in `CLAUDE.md`, making it easy to add new prompts without breaking the architecture.
+- **Educational**: reading the prompts teaches you how to instruct LLMs effectively for complex engineering tasks.
 
 ---
 
-*This repository is a template. You can customize `CLAUDE.md` and the prompts to build your own custom AI-generated projects!*
+*This repository is a template. Customize `CLAUDE.md` and the prompts to generate your own AI-built projects.*

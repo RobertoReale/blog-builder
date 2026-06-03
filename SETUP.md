@@ -1,31 +1,31 @@
 # How to build the blog automatically
 
-This package contains:
-- `CLAUDE.md` — the project rules (read by Claude Code at each step)
-- `prompts/` — the 7 prompts, already corrected, in order
-- `run.sh` & `run.ps1` — the automation scripts for Linux/macOS and Windows
+This folder contains everything needed to generate the blog:
+
+- `CLAUDE.md` — the project rules, read by Claude Code at every step
+- `prompt_blog_*.txt` — the 7 prompts, in order
+- `run.sh` / `run.ps1` — the pipeline scripts (Linux/macOS and Windows)
 - `SETUP.md` — this guide
 
-Core idea: **each prompt is executed in a separate Claude Code session**, so the context window never fills up. After each step, the script automatically verifies that `npm run build` (and unit tests) pass and **stops at the first issue**, preventing building on top of a broken state.
+Core idea: **each prompt runs in a separate Claude Code session**, so the context window never fills up. After each step, the script independently verifies that `npm run build` (and unit tests) pass, commits a git checkpoint, then **stops at the first failure** — it never builds on top of a broken state.
 
 ---
 
 ## 1. Prerequisites (one time only)
 
 1. **Git** — required by Claude Code.
-   - **Windows**: Download from [https://git-scm.com/download/win](https://git-scm.com/download/win)
+   - **Windows**: [https://git-scm.com/download/win](https://git-scm.com/download/win)
    - **Linux**: `sudo apt install git`
    - **macOS**: `brew install git` or use the one bundled with Xcode.
 
 2. **Node.js LTS** — needed to build the blog (Astro).
-   Download it from [https://nodejs.org](https://nodejs.org) , then in a new terminal verify:
+   Download from [https://nodejs.org](https://nodejs.org), then verify in a new terminal:
 
        node -v
 
-   It must be 18 or higher.
+   Version 18 or higher required.
 
-3. **Claude Code** (requires a paid plan: Pro, Max, Team, or Enterprise — 
-   the free plan does not include Claude Code):
+3. **Claude Code** (requires a paid plan: Pro, Max, Team, or Enterprise):
 
        winget install Anthropic.ClaudeCode
 
@@ -33,55 +33,60 @@ Core idea: **each prompt is executed in a separate Claude Code session**, so the
 
        npm install -g @anthropic-ai/claude-code
 
-   **Close and reopen PowerShell**, then verify:
+   Close and reopen the terminal, then verify:
 
        claude doctor
 
-   If it says `claude` is not recognized, it's just a PATH issue: close and reopen 
-   the terminal; if it persists, follow the PATH section of the official guide.
+   If `claude` is not recognized, it's a PATH issue — close and reopen the terminal.
 
-4. **Login** (also authenticates automated runs). Run once interactively:
+4. **Login** (authenticates automated runs too). Run once interactively:
 
        claude
 
-   Complete the login in the browser, then exit by typing `/exit`.
+   Complete the browser login, then exit with `/exit`.
 
-> Cost note: from June 15, 2026, the use of `claude -p` on subscription plans draws from a 
-> separate "Agent SDK" monthly credit, distinct from interactive use limits. Check your plan details.
+> Cost note: the use of `claude -p` on subscription plans draws from a separate "Agent SDK"
+> monthly credit, distinct from interactive use limits. Check your plan details before running.
 
 ---
 
-## 2. Prepare the folder
+## 2. Customize before running
 
-1. Place this `blog-builder` folder wherever you prefer (e.g., `Documents/blog-builder`).
-2. Open your terminal (or PowerShell on Windows) and `cd` to the folder.
-3. **No need for `/init`**: you already have `CLAUDE.md`. (`/init` is only needed to *generate* a CLAUDE.md 
-   from scratch and is an interactive command, not useful here.)
-4. **On Linux/macOS**, make the script executable:
-       chmod +x run.sh
-   **On Windows**, allow script execution for this window:
-       Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+Open `CLAUDE.md` and fill in the sections marked **USER ACTION REQUIRED**:
+
+- **SITE CONFIG**: your blog title, description, URL, and author name.
+- **DESIGN SYSTEM**: your CSS color palette (replace the placeholder hex values).
+- **TYPOGRAPHY**: your preferred Google Fonts.
+- **CUSTOM MDX COMPONENTS**: any components beyond the built-in Callout / ImageWithCaption / Sources.
+
+These placeholders will be used literally by Claude — fill them in before running the pipeline.
 
 ---
 
 ## 3. Run
+
+Allow script execution (Windows only, once per terminal session):
+
+    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
 Normal execution (stops automatically at the first error):
 
     Linux/macOS:  ./run.sh
     Windows:      .\run.ps1
 
-Maximum supervision (pauses after EVERY step to check carefully):
+Pause after every step to inspect the output before continuing:
 
     Linux/macOS:  ./run.sh -p
     Windows:      .\run.ps1 -Pause
 
-If the script stops at step N after you fix it, resume from there:
+Resume from step N after fixing an error:
 
     Linux/macOS:  ./run.sh -s 3
     Windows:      .\run.ps1 -StartStep 3
 
-The logs of each step end up in `logs\step_N.json` (they also include the call cost).
+Logs for each step are saved to `logs/step_N.json` (output + call cost).
+
+After every successful step, the script commits a git checkpoint (`Step N: <name>`), so any step can be rolled back with `git reset --hard HEAD~1` if needed.
 
 ---
 
@@ -89,41 +94,56 @@ The logs of each step end up in `logs\step_N.json` (they also include the call c
 
 The script **does not proceed** if the build breaks. When it stops:
 
-1. Open the folder in **VS Code** (`code .`).
-2. Launch Claude interactively: `claude`
-3. Paste the build error (or describe what is wrong) and let it fix the issue.
-4. Verify manually that it turns green:
+1. Open this folder in **VS Code** (`code .`).
+2. Run `claude` (interactive) and paste the build error or describe what is wrong.
+3. Verify manually that the build is green:
 
        npm run build
 
-5. Resume the pipeline from the stopped step:
+4. Resume the pipeline from the failed step:
 
        Linux/macOS:  ./run.sh -s N
        Windows:      .\run.ps1 -StartStep N
 
-Terminal or VS Code extension? Same engine. The **pipeline must be launched from the terminal** (the `-p` mode is made for scripts). The **VS Code extension** is handy during 
-the manual correction phases of step 4.
+**Terminal vs VS Code extension**: same engine. Launch the pipeline from the terminal; use the VS Code extension for the manual fix in step 2.
+
+If you want to undo the partial work from a failed step entirely, roll back to the previous checkpoint:
+
+    git reset --hard HEAD~1
 
 ---
 
 ## 5. At the end
 
+Start the dev server:
+
     npm run dev
 
-Open http://localhost:4321 . For full E2E tests (optional, they launch a browser):
+Open [http://localhost:4321](http://localhost:4321). For the full E2E test suite (optional, launches a browser):
 
     npm run test:e2e
 
-Test article: create `src/content/articles/test.mdx` with `status: published` following 
-the schema in `CLAUDE.md`.
+To test with a real article: create `src/content/articles/test.mdx` with `status: published` following the schema in `CLAUDE.md`.
 
 ---
 
 ## 6. Before publishing to GitHub / Vercel
 
-- Fill out `src/config.ts` (title, url, author) and update `yourdomain.com` in `public/robots.txt`.
-- Add a `.gitignore` with at least: `node_modules/`, `dist/`, `.astro/`, `test-results/`, 
-  `playwright-report/`, and the service files of this package if you don't want them in the repo 
-  (`run.sh`, `run.ps1`, `prompts/`, `SETUP.md`, `logs/`).
-- On Vercel: connect the repo, automatic build (the `build` script already includes Pagefind). 
-  No Vercel adapter: the site is static.
+- Fill in `src/config.ts` (title, url, author) and replace `yourdomain.com` in `public/robots.txt`.
+- Add a `.gitignore` with at least:
+
+      node_modules/
+      dist/
+      .astro/
+      test-results/
+      playwright-report/
+      logs/
+
+  Optionally also exclude the builder infrastructure if you don't want it in the published repo:
+
+      SETUP.md
+      run.sh
+      run.ps1
+      prompt_blog_*.txt
+
+- **Vercel**: connect the repo, select the project. No framework adapter needed — the site is statically generated and the `build` script includes Pagefind indexing automatically.

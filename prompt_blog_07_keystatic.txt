@@ -106,14 +106,21 @@ This schema mirrors `src/content/config.ts` field by field.
 ```ts
 import { config, collection, fields } from '@keystatic/core'
 
+// In development: write files directly to disk (no OAuth needed).
+// In production (Vercel): commit via GitHub OAuth.
+const storage: Parameters<typeof config>[0]['storage'] =
+  process.env.NODE_ENV === 'development'
+    ? { kind: 'local' }
+    : {
+        kind: 'github',
+        repo: {
+          owner: 'GITHUB_OWNER', // PLACEHOLDER — user must replace with their GitHub username/org
+          name: 'GITHUB_REPO',   // PLACEHOLDER — user must replace with their repository name
+        },
+      }
+
 export default config({
-  storage: {
-    kind: 'github',
-    repo: {
-      owner: 'GITHUB_OWNER', // PLACEHOLDER — user must replace with their GitHub username/org
-      name: 'GITHUB_REPO',   // PLACEHOLDER — user must replace with their repository name
-    },
-  },
+  storage,
   ui: {
     brand: { name: 'Blog Admin' },
   },

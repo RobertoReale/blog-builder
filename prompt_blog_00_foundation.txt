@@ -279,10 +279,12 @@ In ArticleLayout (or article/[slug].astro <head>):
 <meta property="og:description" content={description} />
 <meta property="og:type" content="article" />
 <meta property="og:url" content={`${SITE.url}/article/${slug}`} />
-<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:card" content={coverImage ? 'summary_large_image' : 'summary'} />
 ```
 If coverImage exists: add og:image with full URL.
 Else: omit og:image (no default placeholder needed for now).
+Note: twitter:card must be 'summary_large_image' only when an og:image is present.
+Using 'summary_large_image' without an image produces an oversized empty card on X/Twitter.
 
 ## PROJECT STRUCTURE
 ```

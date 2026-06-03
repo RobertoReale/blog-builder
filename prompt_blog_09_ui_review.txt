@@ -188,7 +188,7 @@ Read the source of each page template and verify the following:
 Verify the render order matches the CLAUDE.md specification exactly:
   1. Header (title, date, reading time, tags, share button)
   2. SeriesNav (if article is in a series)
-  3. TOC (if article has ≥ 2 headings)
+  3. TOC (if article has ≥ 3 headings)
   4. Article body (MDX)
   5. Sources
   6. --- separator ---
@@ -232,7 +232,7 @@ Open the example article in src/content/articles/ (the one created in Step 0).
 Verify:
 - status: published (so it appears in the listing and triggers TOC rendering)
 - date is a past date (not far in the future)
-- The article body has at least 2 h2 or h3 headings (so the TOC renders)
+- The article body has at least 3 h2 or h3 headings (so the TOC renders)
 - The body has meaningful text (not placeholder Lorem ipsum)
 - There is no `coverImage:` line with an empty value (would cause Zod error)
 - The title is descriptive (not "Example" or "Test")
@@ -306,7 +306,7 @@ the correct ones from CLAUDE.md.
 
 **Step E — Grep for hardcoded author/title strings in page files.**
 
-Run: grep -r "Your Name\|Your Blog\|example\.com\|yourdomain\|Author Name\|John Doe" src/
+Run: grep -r "Your Name\|Your Blog\|example\.com\|yourdomain\|Author Name\|John Doe" src/ astro.config.mjs
 
 Any match outside of comments must be replaced with the appropriate SITE
 constant imported from src/config.ts:
@@ -351,7 +351,7 @@ After all fixes:
 - [ ] All interactive elements have visible hover states
 - [ ] Article render order matches the CLAUDE.md spec
 - [ ] 404 page exists with a homepage link
-- [ ] Example article has ≥ 2 headings, past date, status: published
+- [ ] Example article has ≥ 3 headings, past date, status: published
 - [ ] src/config.ts has the user's real title, URL, author, description
 - [ ] @fontsource @import lines in global.css load the correct fonts (no Google Fonts <link> tag)
 - [ ] CSS color variables in global.css match the user's chosen palette

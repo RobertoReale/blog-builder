@@ -86,8 +86,8 @@ Step 1 — Create TOC.astro (src/components/ui/TOC.astro)
 - Renders an empty container div with id="toc-container"
 - A client-side script runs after DOM ready and:
   1. Queries all `h2, h3` elements within the article body
-  2. If count < 2: hides the container (do not render)
-  3. If count >= 2: builds and injects the TOC HTML
+  2. If count < 3: hides the container (do not render)
+  3. If count >= 3: builds and injects the TOC HTML
 
 Client-side script:
 ```js
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!articleBody) return;
   const headings = [...articleBody.querySelectorAll('h2, h3')];
   const container = document.getElementById('toc-container');
-  if (!container || headings.length < 2) {
+  if (!container || headings.length < 3) {
     if (container) container.style.display = 'none';
     return;
   }
@@ -158,6 +158,6 @@ as before: after the article header, before the article body.
 - [ ] Share button copies URL and shows "Copied!" feedback
 - [ ] TOC appears on example article (which has headings)
 - [ ] TOC collapses on mobile via details/summary
-- [ ] TOC does not appear on pages/articles with < 2 headings
+- [ ] TOC does not appear on pages/articles with < 3 headings
 - [ ] `npm run build` succeeds
 - [ ] None of these features break if JS is disabled

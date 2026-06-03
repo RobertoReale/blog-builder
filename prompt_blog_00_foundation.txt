@@ -2,7 +2,7 @@ You are building a personal blog from scratch.
 This is the FOUNDATION build — focus on correctness and completeness.
 Do not add anything beyond what is specified here. No extra features.
 
-CRITICAL INSTRUCTION: Before you begin writing code, please use your web search tools to check for the latest Astro 4 best practices, breaking changes, or updated implementation patterns. Ensure your implementation relies on the most up-to-date documentation.
+CRITICAL INSTRUCTION: Before you begin writing code, use your web search tools to check for the latest Astro 4 best practices, breaking changes, or updated implementation patterns. Ensure your implementation relies on the most up-to-date documentation. If you encounter a bug you cannot resolve by reading the code, search online for known issues and solutions before giving up.
 
 ## GOAL
 A fully working blog where:

@@ -12,10 +12,14 @@ Install: `npm install pagefind`
 Update package.json scripts:
 ```json
 "build": "astro build && pagefind --site dist",
+"build:astro": "astro build",
+"build:index": "pagefind --site dist",
 "preview": "astro preview"
 ```
 
 The pagefind command runs after the Astro build and indexes the dist/ folder.
+Note: on Windows, `&&` in npm scripts can be unreliable. If `npm run build` fails,
+run the two steps separately: `npm run build:astro` then `npm run build:index`.
 
 ---
 

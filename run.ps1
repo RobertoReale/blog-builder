@@ -82,6 +82,13 @@ function Test-Project {
   return $true
 }
 
+# --- Git init (se necessario) ---------------------------------------------
+if (-not (Test-Path ".git")) {
+  git init | Out-Null
+  git add -A | Out-Null
+  $null = git commit -m "Initial commit (pre-pipeline)" --quiet 2>&1
+}
+
 # --- Loop principale -------------------------------------------------------
 $instruction = @"
 Sei in una cartella di progetto che contiene CLAUDE.md: leggilo PRIMA di tutto e rispetta ogni sua regola.
@@ -106,7 +113,7 @@ for ($i = $StartStep; $i -lt $prompts.Count; $i++) {
   # Il prompt vero passa via stdin (niente problemi di quoting con testi lunghi).
   Get-Content $file -Raw | claude -p $instruction `
     --permission-mode acceptEdits `
-    --allowedTools "Bash,Read,Edit,Write,Glob,Grep" `
+    --allowedTools "Bash,Read,Edit,Write,Glob,Grep,MultiEdit" `
     --output-format json 2>&1 | Tee-Object -FilePath "logs\step_$i.json"
   $claudeExit = $LASTEXITCODE
 
@@ -134,8 +141,7 @@ for ($i = $StartStep; $i -lt $prompts.Count; $i++) {
 
   # Git checkpoint: commit generated code so each step is a rollback point
   git add -A
-  git commit -m "Step ${i}: $($stepNames[$i])" --quiet
-  $LASTEXITCODE = 0 # Ignore commit failures (e.g., if nothing changed)
+  $null = git commit -m "Step ${i}: $($stepNames[$i])" --quiet 2>&1
 
   Write-Host ""
   Write-Host "  STEP $i OK — build (e test unit) passati." -ForegroundColor Green

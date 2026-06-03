@@ -45,7 +45,7 @@ Add the Vercel adapter and Keystatic integration. Preserve ALL existing integrat
 import { defineConfig } from 'astro/config'
 import tailwind from '@astrojs/tailwind'
 import mdx from '@astrojs/mdx'
-import vercel from '@astrojs/vercel'
+import vercel from '@astrojs/vercel/serverless' // older versions: '@astrojs/vercel'
 import keystatic from '@keystatic/astro'
 
 export default defineConfig({

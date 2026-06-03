@@ -1,0 +1,151 @@
+## FEATURE 05 — Related Articles
+
+The blog foundation is already built. Add a "Related articles"
+section at the bottom of each article page.
+Everything is computed at build time — no client-side JS needed.
+
+---
+
+### Logic
+
+For a given article, find related articles by:
+1. Collecting all other published articles
+2. Scoring each by number of shared tags with the current article
+3. Filtering out any with 0 shared tags
+4. Sorting by score descending, then by date descending as tiebreaker
+5. Taking the top 3
+
+If no related articles exist: render nothing. No empty section, no fallback.
+
+---
+
+### RelatedArticles component
+
+Create src/components/ui/RelatedArticles.astro
+
+Props:
+```ts
+{
+  articles: Array<{
+    title: string
+    slug: string
+    date: Date
+    tags: string[]
+    description: string
+    readingTime: string
+  }>
+}
+```
+
+UI design:
+
+Section label: "Related" — DM Sans, 12px, uppercase, letter-spacing 0.08em,
+var(--color-muted), margin-bottom 24px
+
+Layout:
+- 3-column grid on desktop (gap 32px)
+- 1-column on mobile
+- Use CSS grid: `grid-template-columns: repeat(auto-fill, minmax(180px, 1fr))`
+
+Each card (compact version of ArticleCard):
+- Title: Lora, links to /article/[slug], 16px, normal weight
+  Hover: underline only
+- Tags: small tag pills (same TagPill component, non-linking version)
+- Date + reading time: DM Sans, 13px, var(--color-muted)
+- No description (keep it compact)
+- No border, no card shadow — just clean spacing
+
+Separator:
+Add a thin border-top (1px solid var(--color-border)) above the section,
+with 48px margin-top and 32px margin-bottom before the label.
+
+---
+
+### Position in article layout
+
+In src/pages/article/[slug].astro or ArticleLayout.astro:
+
+Order at bottom of article:
+1. Article body (MDX content)
+2. Origin block (if originPosition === 'bottom')
+3. Sources
+4. ─────── separator ───────
+5. Related Articles (if any exist)
+6. Footer
+
+---
+
+### Wire up in getStaticPaths
+
+CRITICAL — there is only ONE getStaticPaths in src/pages/article/[slug].astro.
+Astro does not allow two. If Feature 04 (Series) has already been implemented,
+it ALSO computes data inside this same getStaticPaths and returns it in `props`
+(e.g. `seriesParts`). Do NOT paste a second `return allPublished.map(...)` that
+overwrites it — that silently drops the series prop and breaks SeriesNav.
+EXTEND the existing map: compute `related` alongside whatever Feature 04 already
+computes, and return BOTH in the same props object.
+
+The article-level computation to add (merge into the existing per-entry map):
+
+```ts
+// allPublished is already fetched at the top of getStaticPaths.
+// Inside the existing `allPublished.map(entry => { ... })`:
+
+const related = allPublished
+  .filter(other => other.slug !== entry.slug)
+  .map(other => ({
+    ...other,
+    sharedTags: other.data.tags.filter(t => entry.data.tags.includes(t)).length
+  }))
+  .filter(other => other.sharedTags > 0)
+  .sort((a, b) => b.sharedTags - a.sharedTags ||
+    b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 3)
+  .map(r => ({
+    title: r.data.title,
+    slug: r.slug,
+    date: r.data.date,
+    tags: r.data.tags,
+    description: r.data.description,
+    readingTime: getReadingTime(r.body),
+  }))
+
+return {
+  params: { slug: entry.slug },
+  // Keep every prop the page already needs. If Feature 04 added seriesParts,
+  // it MUST remain here — only `related` is new.
+  props: { entry, related /*, seriesParts (from Feature 04, if present) */ }
+}
+```
+
+If Feature 04 is NOT yet implemented, the props object is simply
+`{ entry, related }`. Either way, never replace props you didn't author.
+
+Pass `related` as a prop to the page component,
+then pass it to `<RelatedArticles articles={related} />`.
+
+---
+
+### Test
+
+This test needs at least two published articles. The foundation ships only
+one (example-critical-thinking). If Feature 04 (Series) has been implemented it
+already created example-critical-thinking-2 — reuse it. If not, create a second
+minimal published article first, otherwise no "related" results can ever appear.
+
+Add overlapping tags to the two example articles so they appear
+as related to each other. Verify:
+- Related section appears on both
+- Clicking a related article card navigates correctly
+- Articles with no shared tags show no related section
+
+---
+
+### Checklist before finishing
+- [ ] Related section appears on example article with at least 1 result
+- [ ] Maximum 3 articles shown
+- [ ] Articles with no related content show no section (no empty state)
+- [ ] Related cards are compact (no description)
+- [ ] Grid collapses to 1 column on mobile
+- [ ] All links work correctly
+- [ ] `npm run build` succeeds with no type errors

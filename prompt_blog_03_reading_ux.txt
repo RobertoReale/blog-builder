@@ -1,0 +1,163 @@
+## FEATURE 02 — Reading UX
+
+The blog foundation is already built. Add the following reading
+experience improvements to the existing codebase.
+Do not change any existing functionality or design.
+All features are progressive enhancements — if JS is disabled, nothing breaks.
+
+---
+
+### 1. Reading progress bar
+
+Where: article pages only (/article/[slug])
+Position: fixed, top of viewport, above everything (z-index high)
+Height: 3px
+Color: var(--color-accent)
+Width: 0% → 100% as user scrolls from top to bottom of article
+Transition: none (real-time, no lag)
+
+Implementation:
+- Add a <div id="progress-bar"> in ArticleLayout.astro
+- Small inline <script> that listens to scroll and updates width
+- Calculate: scrollY / (documentHeight - viewportHeight) * 100
+
+CSS:
+```css
+#progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0%;
+  background: var(--color-accent);
+  z-index: 9999;
+  pointer-events: none;
+}
+```
+
+---
+
+### 2. Back to top button
+
+Where: all pages
+Appears: only after user scrolls down 400px
+Position: fixed, bottom-right (24px from edges)
+
+Design:
+- Small square button, 40×40px
+- Background: var(--color-bg), border: 1px solid var(--color-border)
+- Icon: upward arrow SVG (inline, 16px), color var(--color-muted)
+- On hover: border color becomes var(--color-accent)
+- Hidden by default (opacity 0, pointer-events none)
+- Visible when scrollY > 400 (opacity 1, pointer-events auto)
+- Smooth opacity transition: 200ms
+- On click: window.scrollTo({ top: 0, behavior: 'smooth' })
+
+Add the component (BackToTop.astro) to BaseLayout so it appears on every page.
+
+---
+
+### 3. Share button (copy link)
+
+Where: article header, after the tags row
+Design: small button, DM Sans, 14px, var(--color-muted)
+Default text: "Copy link" with a small link icon (inline SVG)
+On click: navigator.clipboard.writeText(window.location.href)
+Feedback: button text changes to "Copied!" for 2 seconds, then reverts
+No social widgets, no external services
+
+Fallback if clipboard API unavailable:
+- Select a hidden <input> with the URL and copy that way
+
+---
+
+### 4. Table of Contents
+
+Where: article pages only
+Position: above the article body (after header + Origin if 'top')
+Render only if article has 3 or more QA blocks.
+If fewer than 3 QA blocks: render nothing.
+
+IMPORTANT: This blog uses <QA question="..."> components, NOT markdown
+headings. There are no h2/h3 elements to parse. The TOC must be built
+from QA questions — not from DOM headings.
+
+Step 1 — Update QA.astro (required for TOC to work)
+Add two attributes to the QA outer wrapper element:
+- id="qa-{slugifiedQuestion}" where slugifiedQuestion is the question
+  prop passed through a slugify function (lowercase, spaces→hyphens,
+  strip special chars)
+- data-qa-question="{question}" (the raw question text as-is)
+
+Add a simple inline slugify to QA.astro (or import from utils/slugify.ts
+if Feature 04 has already been implemented):
+```ts
+const slug = question.toLowerCase().trim()
+  .replace(/[^\w\s-]/g, '')
+  .replace(/[\s_]+/g, '-')
+  .replace(/-+/g, '-')
+```
+
+Step 2 — Create TOC.astro (src/components/ui/TOC.astro)
+- Renders an empty container div with id="toc-container"
+- A client-side script runs after DOM ready and:
+  1. Queries all [data-qa-question] elements
+  2. If count < 3: hides the container (do not render)
+  3. If count >= 3: builds and injects the TOC HTML
+
+Client-side script:
+```js
+document.addEventListener('DOMContentLoaded', () => {
+  const questions = [...document.querySelectorAll('[data-qa-question]')]
+  const container = document.getElementById('toc-container')
+  if (!container || questions.length < 3) {
+    if (container) container.style.display = 'none'
+    return
+  }
+  const items = questions.map(el => ({
+    text: el.getAttribute('data-qa-question'),
+    id: el.id
+  }))
+  container.innerHTML = `
+    <p class="toc-label">Contents</p>
+    <ul class="toc-list">
+      ${items.map(item => `
+        <li><a href="#${item.id}">${item.text}</a></li>
+      `).join('')}
+    </ul>
+  `
+})
+```
+
+UI design:
+- Label "Contents": DM Sans, 11px, uppercase, letter-spacing 0.08em,
+  var(--color-muted)
+- List items: DM Sans, 15px, var(--color-muted), no list-style-type
+- Hover: var(--color-text), underline
+- Outer block: border-left 2px solid var(--color-border), padding 16px 20px
+- No background color change
+- Mobile: collapsed behind a "Contents ↓" toggle button (details/summary
+  HTML element is the simplest approach — no extra JS)
+  Desktop: always expanded
+
+Active question highlight (optional but recommended):
+- Use IntersectionObserver to watch [data-qa-question] elements
+- When one enters the viewport: add active class to its TOC link
+- Active link: var(--color-accent), no other decoration
+
+Step 3 — Add TOC to article layout
+In src/pages/article/[slug].astro, render <TOC /> in the same position
+as before: after the article header, before the article body.
+
+---
+
+### Checklist before finishing
+- [ ] Progress bar visible and moves correctly on article pages
+- [ ] Back to top button appears after 400px scroll on all pages
+- [ ] Share button copies URL and shows "Copied!" feedback
+- [ ] QA.astro has id and data-qa-question on each wrapper
+- [ ] TOC appears on example article (which has 3+ QA blocks)
+- [ ] TOC collapses on mobile via details/summary
+- [ ] TOC does not appear on pages/articles with < 3 QA blocks
+- [ ] `npm run build` succeeds
+- [ ] None of these features break if JS is disabled

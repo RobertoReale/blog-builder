@@ -1,0 +1,157 @@
+## FEATURE 04 — Article Series
+
+The blog foundation is already built. The frontmatter schema
+already includes `series?: string` and `part?: number`.
+Add full series support: navigation, index page, and card badges.
+
+---
+
+### 1. SeriesNav component
+
+Create src/components/ui/SeriesNav.astro
+
+Props:
+```ts
+{
+  series: string          // series name (display)
+  seriesSlug: string      // URL-safe version (lowercase, hyphens)
+  currentPart: number
+  allParts: Array<{
+    part: number
+    title: string
+    slug: string
+    status: 'draft' | 'published'
+  }>
+}
+```
+
+UI design:
+- Label: "Series" + series name — DM Sans, small, var(--color-muted)
+- Subtitle: "Part {currentPart} of {totalParts}"
+  Lora, slightly larger than body, var(--color-text)
+- List of all parts:
+  - Each item: "Part N — Article title", links to /article/[slug]
+  - Current part: var(--color-accent) color, no link (just text or cursor:default)
+  - Other parts: var(--color-muted), underline on hover
+  - Draft parts (status: 'draft'): show title grayed out with "(coming soon)",
+    no link
+- Previous / Next navigation:
+  Two small links below the list (if prev/next exist):
+  "← Part N: Title" and "Part N: Title →"
+  DM Sans, 14px, var(--color-muted) → var(--color-text) on hover
+- Outer wrapper: border-left 3px solid var(--color-border), padding 16px 20px
+- Background: none (keep it clean)
+
+Position in article layout:
+SeriesNav renders immediately after the article header (title, date, reading
+time, tags) and before everything else in the body region.
+
+Canonical order of elements after the header (so Features 02 and 04 don't
+fight over the same slot):
+  1. SeriesNav            (this feature, if the article is in a series)
+  2. Origin block         (only if originPosition === 'top')
+  3. TOC                  (Feature 02, if 3+ QA blocks)
+  4. Article body (MDX)
+The "before the Origin block regardless of originPosition" rule only concerns a
+top Origin; a bottom Origin stays at the bottom near Sources, untouched.
+
+---
+
+### 2. Pass series data to the article page
+
+In src/pages/article/[slug].astro, inside getStaticPaths:
+
+For each article that has a series:
+1. Find all articles in the same series (match by series field)
+2. Sort by part number ascending
+3. Pass as a prop to the page (e.g. `seriesParts`)
+
+CRITICAL — there is only ONE getStaticPaths in this file, and Feature 05
+(Related) also adds data to it. Compute `seriesParts` inside the existing
+`allPublished.map(entry => { ... })` and return it in the SAME props object,
+e.g. `props: { entry, seriesParts /*, related (from Feature 05, if present) */ }`.
+Never paste a second `return allPublished.map(...)` — it would overwrite the
+other feature's props.
+
+In the page component:
+- If the article has series + part, render <SeriesNav> with the full list
+- If no series, render nothing
+
+---
+
+### 3. Series badge on ArticleCard
+
+Update ArticleCard.astro to accept optional `series` and `part` props
+(these are already in the schema, just need to pass them through).
+
+If both are present, show a small badge above or below the tags:
+- Text: "Part {N} · {series name}"
+- Style: DM Sans, 12px, var(--color-muted), no background, no border
+- Just a subtle line of text, not a pill
+
+---
+
+### 4. Series index page
+
+Create src/pages/series/[series].astro
+
+getStaticPaths:
+- Collect all unique series values from published articles
+- Generate URL-safe slug for each series name (lowercase, replace spaces with hyphens)
+- Pass seriesName and seriesSlug as props
+
+Page:
+- H1: "{Series Name}" (Lora)
+- Subtitle: "{N} articles" in muted DM Sans
+- List articles in this series sorted by part number ascending
+- Use ArticleCard component
+- Each card shows its Part badge
+
+Add series links:
+- On article pages, the series name in SeriesNav should link to /series/[seriesSlug]
+- No need for a global series listing page (yet)
+
+---
+
+### 5. URL-safe series slug utility
+
+Create or add to src/utils/slugify.ts:
+```ts
+export function slugify(str: string): string {
+  return str
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')   // remove special chars
+    .replace(/[\s_]+/g, '-')    // spaces AND underscores → hyphens
+    .replace(/-+/g, '-')        // collapse consecutive hyphens
+}
+```
+
+Use this everywhere series names are used in URLs.
+
+---
+
+### Test: add series to the example article
+
+In src/content/articles/example-critical-thinking.mdx,
+add to frontmatter:
+```yaml
+series: "Thinking Tools"
+part: 1
+```
+
+Create a second minimal article to test the series navigation:
+src/content/articles/example-critical-thinking-2.mdx
+- Same series, part: 2, status: 'published'
+- Minimal content (2-3 QA blocks)
+- This lets you verify the SeriesNav shows both parts correctly
+
+---
+
+### Checklist before finishing
+- [ ] SeriesNav renders on the example article with correct prev/next links
+- [ ] /series/thinking-tools lists both example articles
+- [ ] ArticleCards for series articles show the Part badge
+- [ ] Draft parts in a series show "(coming soon)" without a link
+- [ ] Articles without a series are unaffected
+- [ ] `npm run build` succeeds

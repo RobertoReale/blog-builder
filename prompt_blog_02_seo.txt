@@ -1,0 +1,118 @@
+## FEATURE 01 — SEO & Discoverability
+
+The blog foundation is already built. Add the following SEO and
+discoverability features to the existing codebase.
+Do not change any existing functionality or design.
+
+---
+
+### 1. RSS feed at /rss.xml
+
+Install @astrojs/rss.
+Create src/pages/rss.xml.ts.
+
+Feed content:
+- Title: SITE.title
+- Description: SITE.description
+- Site: SITE.url
+- Items: all published articles, sorted by date descending
+- Each item: title, description, pubDate (from frontmatter date),
+  link (/article/[slug]), and full content if possible
+
+---
+
+### 2. sitemap.xml
+
+Install @astrojs/sitemap.
+Add to astro.config.mjs integrations.
+Configure with SITE.url as the base.
+
+Include in sitemap:
+- / (homepage)
+- /articles
+- /about
+- /now
+- /article/[slug] for all published articles
+- /tag/[tag] for all tags
+
+Exclude: drafts, /rss.xml
+
+---
+
+### 3. robots.txt
+
+Create public/robots.txt:
+```
+User-agent: *
+Allow: /
+Sitemap: https://yourdomain.com/sitemap-index.xml
+```
+
+Use SITE.url for the Sitemap line — generate this file dynamically
+if needed, or use a static file with a clear TODO comment for the URL.
+
+---
+
+### 4. Canonical URL
+
+In BaseLayout.astro <head>, add:
+```html
+<link rel="canonical" href={canonicalURL} />
+```
+
+BaseLayout should accept a `canonicalURL` prop (string).
+Each page constructs its canonical URL as: `${SITE.url}${Astro.url.pathname}`
+Pass it to BaseLayout from every page.
+
+---
+
+### 5. 404 page
+
+Create src/pages/404.astro.
+
+Design:
+- Use BaseLayout
+- Centered content (same max-width as rest of site)
+- Large "404" in Lora, muted color
+- Short message: "This page doesn't exist."
+- Link back to homepage: "← Back to home"
+- No other content, no suggestions, no search
+
+---
+
+### 6. JSON-LD structured data (Article pages only)
+
+In ArticleLayout.astro or src/pages/article/[slug].astro, add to <head>:
+
+```html
+<script type="application/ld+json" set:html={JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": title,
+  "description": description,
+  "datePublished": date.toISOString(),
+  "author": {
+    "@type": "Person",
+    "name": SITE.author
+  },
+  "url": `${SITE.url}/article/${slug}`,
+  "publisher": {
+    "@type": "Person",
+    "name": SITE.author
+  }
+})} />
+```
+
+If coverImage is present, add "image" field with full URL.
+Only render on article pages, nowhere else.
+
+---
+
+### Checklist before finishing
+- [ ] `npm run build` succeeds
+- [ ] /rss.xml is accessible and valid XML
+- [ ] /sitemap-index.xml (or /sitemap.xml) is accessible
+- [ ] /robots.txt is accessible
+- [ ] Every page has a canonical <link> in <head>
+- [ ] /404 renders on a bad URL (test locally or check Vercel config)
+- [ ] Article pages have JSON-LD in page source

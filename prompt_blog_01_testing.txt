@@ -1,0 +1,278 @@
+## TESTING SETUP
+
+The blog foundation is already built. Add a lightweight test suite
+using Vitest (unit tests) and Playwright (E2E smoke tests).
+This is not a feature — it's a safety net for all future development.
+
+---
+
+### 1. Install dependencies
+
+```bash
+npm install -D vitest @vitest/ui playwright @playwright/test happy-dom
+npx playwright install chromium
+```
+
+---
+
+### 2. Configure Vitest
+
+Create vitest.config.ts in the project root:
+
+```ts
+import { getViteConfig } from 'astro/config'
+
+export default getViteConfig({
+  test: {
+    globals: true,
+    environment: 'happy-dom',
+    include: ['tests/unit/**/*.test.ts'],
+  },
+})
+```
+
+---
+
+### 3. Configure Playwright
+
+Create playwright.config.ts in the project root:
+
+```ts
+import { defineConfig, devices } from '@playwright/test'
+
+export default defineConfig({
+  testDir: './tests/e2e',
+  fullyParallel: true,
+  retries: 0,
+  use: {
+    baseURL: 'http://localhost:4321',
+  },
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+  ],
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:4321',
+    reuseExistingServer: true,
+  },
+})
+```
+
+---
+
+### 4. Add scripts to package.json
+
+```json
+"test:unit": "vitest run",
+"test:unit:watch": "vitest",
+"test:e2e": "playwright test",
+"test:e2e:ui": "playwright test --ui",
+"test": "vitest run && playwright test"
+```
+
+---
+
+### 5. Create folder structure
+
+```
+tests/
+  unit/
+    utils.test.ts
+  e2e/
+    blog.spec.ts
+```
+
+---
+
+### 6. Unit tests — src/utils/
+
+File: tests/unit/utils.test.ts
+
+Test all three utility functions:
+
+```ts
+import { describe, test, expect } from 'vitest'
+import { getReadingTime } from '../../src/utils/readingTime'
+import { formatDate } from '../../src/utils/formatDate'
+import { slugify } from '../../src/utils/slugify'
+
+describe('getReadingTime', () => {
+  test('200 words = 1 min read', () => {
+    const text = 'word '.repeat(200)
+    expect(getReadingTime(text)).toBe('1 min read')
+  })
+  test('400 words = 2 min read', () => {
+    const text = 'word '.repeat(400)
+    expect(getReadingTime(text)).toBe('2 min read')
+  })
+  test('empty string = 1 min read (minimum)', () => {
+    expect(getReadingTime('')).toBe('1 min read')
+  })
+})
+
+describe('formatDate', () => {
+  test('formats date correctly', () => {
+    const date = new Date('2025-06-03')
+    expect(formatDate(date)).toBe('June 3, 2025')
+  })
+  test('pads single-digit days without zero', () => {
+    const date = new Date('2025-01-07')
+    expect(formatDate(date)).toBe('January 7, 2025')
+  })
+})
+
+describe('slugify', () => {
+  test('lowercases and replaces spaces', () => {
+    expect(slugify('Hello World')).toBe('hello-world')
+  })
+  test('replaces underscores with hyphens', () => {
+    expect(slugify('First_Principles')).toBe('first-principles')
+  })
+  test('collapses consecutive hyphens', () => {
+    expect(slugify('hello   world')).toBe('hello-world')
+  })
+  test('removes special characters', () => {
+    expect(slugify('What is X, really?')).toBe('what-is-x-really')
+  })
+  test('trims whitespace', () => {
+    expect(slugify('  hello  ')).toBe('hello')
+  })
+})
+```
+
+Note: slugify.ts may not exist yet at this stage (it's added in Feature 04).
+If it doesn't exist, create it now with the function from Feature 04:
+
+```ts
+// src/utils/slugify.ts
+export function slugify(str: string): string {
+  return str
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_]+/g, '-')
+    .replace(/-+/g, '-')
+}
+```
+
+---
+
+### 7. E2E smoke tests
+
+File: tests/e2e/blog.spec.ts
+
+These tests verify that every page loads and core interactions work.
+They run against the dev server (started automatically by Playwright).
+
+```ts
+import { test, expect } from '@playwright/test'
+
+test('homepage loads with h1 and article cards', async ({ page }) => {
+  await page.goto('/')
+  await expect(page.locator('h1').first()).toBeVisible()
+  // at least one article card should exist (example article)
+  await expect(page.locator('article, [data-article-card]').first()).toBeVisible()
+})
+
+test('example article page renders', async ({ page }) => {
+  await page.goto('/article/example-critical-thinking')
+  await expect(page.locator('h1').first()).toBeVisible()
+  // at least one QA block should render
+  await expect(page.locator('[data-qa-question]').first()).toBeVisible()
+})
+
+test('/articles page loads', async ({ page }) => {
+  await page.goto('/articles')
+  await expect(page.locator('h1').first()).toBeVisible()
+})
+
+test('/about page loads', async ({ page }) => {
+  await page.goto('/about')
+  await expect(page.locator('h1').first()).toBeVisible()
+})
+
+test('/now page loads', async ({ page }) => {
+  await page.goto('/now')
+  await expect(page.locator('h1').first()).toBeVisible()
+})
+
+test('dark mode toggle persists across reload', async ({ page }) => {
+  await page.goto('/')
+  // click the dark mode toggle
+  await page.click('[aria-label="Toggle dark mode"]')
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+  // reload and verify preference was saved
+  await page.reload()
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+})
+
+test('tag filter shows only matching articles', async ({ page }) => {
+  await page.goto('/')
+  // get all article cards before filtering
+  const initialCount = await page.locator('[data-article-card]').count()
+  if (initialCount < 2) return // skip if only 1 article (can't test filtering)
+  // click the first non-"All" tag pill
+  const tagPill = page.locator('[data-tag-pill]').first()
+  const tag = await tagPill.getAttribute('data-tag')
+  await tagPill.click()
+  // every still-visible card must carry the selected tag
+  const visible = page.locator('[data-article-card]:visible')
+  const count = await visible.count()
+  expect(count).toBeGreaterThan(0)
+  for (let i = 0; i < count; i++) {
+    const tags = (await visible.nth(i).getAttribute('data-tags'))?.split(',') ?? []
+    expect(tags).toContain(tag)
+  }
+})
+
+test('404 page renders on unknown URL', async ({ page }) => {
+  await page.goto('/this-page-does-not-exist')
+  await expect(page.locator('text=404')).toBeVisible()
+})
+```
+
+NOTE on the 404 test: src/pages/404.astro is created in Feature 01 (SEO), NOT
+in the foundation. If you run this suite immediately after the foundation, the
+Astro dev server's built-in fallback happens to contain "404" so the test may
+pass by accident — but it only reliably passes once Feature 01 is implemented.
+Treat a failure here before Feature 01 as expected, like the [data-qa-question]
+line below.
+
+IMPORTANT — data attributes needed in components:
+For the E2E tests above to work, add these data attributes to the
+relevant components in the foundation:
+
+- ArticleCard.astro wrapper: add `data-article-card` and
+  `data-tags="{tags.join(',')}"` to the outer element
+- TagPill.astro (in TagFilter): add `data-tag-pill` and
+  `data-tag="{tag}"` to the pill button/element
+
+If [data-qa-question] isn't already on QA.astro
+(it's added in Feature 02), that test line can be skipped for now —
+remove it or comment it out until Feature 02 is implemented.
+
+---
+
+### 8. Add tests/.gitkeep if tests folder is empty initially
+
+Not required, but good practice to commit the empty folder structure.
+
+---
+
+### Checklist before finishing
+- [ ] `npm run test:unit` passes all utils tests
+- [ ] `npm run test:e2e` passes all smoke tests
+- [ ] `npm run build` still succeeds
+- [ ] No type errors in test files
+- [ ] data-article-card attribute added to ArticleCard.astro
+- [ ] data-tag-pill and data-tag attributes added to TagPill.astro
+
+---
+
+### When to run tests
+
+After each feature prompt:
+- `npm run build` — always (already in each checklist)
+- `npm run test:unit` — if the feature touches utils
+- `npm run test:e2e` — if the feature touches pages or components
+- `npm run test` — full suite before a deploy

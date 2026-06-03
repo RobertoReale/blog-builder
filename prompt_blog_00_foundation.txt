@@ -1,0 +1,360 @@
+You are building a personal blog from scratch.
+This is the FOUNDATION build — focus on correctness and completeness.
+Do not add anything beyond what is specified here. No extra features.
+
+## GOAL
+A fully working blog where:
+- All pages render without errors
+- Dark mode works and persists via localStorage
+- MDX articles render with all custom components
+- The example article is complete and shows everything working
+- `npm run dev` and `npm run build` both succeed
+
+## STACK
+- Astro 4 (latest stable)
+- @astrojs/tailwind
+- @astrojs/mdx
+- TypeScript (strict mode)
+- Google Fonts: Lora + DM Sans (via <link> in BaseLayout head)
+- Output: static (output: 'static' in astro.config.mjs)
+- Deploy target: Vercel — NO adapter needed. Vercel serves static files
+  natively. Do NOT install @astrojs/vercel. Add a vercel.json only if
+  you need custom headers or redirects (not required for the foundation).
+
+## SITE CONFIG
+Create src/config.ts:
+```ts
+export const SITE = {
+  title: "Blog Title",
+  description: "Short one-line blog description.",
+  url: "https://yourdomain.com",
+  author: "Your Name",
+}
+```
+Use SITE wherever site-level data is needed (meta tags, nav, footer).
+These are placeholders — the user will fill them in.
+
+## DESIGN SYSTEM
+Implement via CSS custom properties in src/styles/global.css.
+
+:root (light mode, default)
+--color-bg: #FFFFFF
+--color-text: #1A1A1A
+--color-muted: #6B6B6B
+--color-accent: #2D5016
+--color-border: #E8E8E8
+--color-origin-bg: #F7F7F5
+
+[data-theme="dark"]
+--color-bg: #0F0F0F
+--color-text: #E8E8E8
+--color-muted: #888888
+--color-accent: #7AB648
+--color-border: #2A2A2A
+--color-origin-bg: #1A1A1A
+
+Do NOT hardcode colors in Tailwind classes.
+Use Tailwind only for spacing, layout, and sizing.
+All colors must reference CSS variables.
+
+## TYPOGRAPHY
+- Headings (h1–h3): Lora, serif
+- Body + UI elements: DM Sans, sans-serif
+- Base body size: 18px, line-height: 1.75
+- Max content width: 680px centered
+- Load from Google Fonts in BaseLayout <head>:
+  Lora:wght@400;600;700 and DM+Sans:wght@400;500;600
+
+## LAYOUT RULES
+- Single centered column
+- Padding: 24px mobile, 48px desktop (horizontal only)
+- No sidebars, no decorative elements, no gradients, no shadows
+- Subtle fade-in on page load: opacity 0 → 1, 300ms ease, on <main>
+- Nav: blog title (left) + dark/light toggle (right), simple top bar
+- Footer: minimal, just copyright line
+
+## DARK MODE
+- localStorage key: "theme" (values: "light" | "dark")
+- On page load: read localStorage → fallback to system prefers-color-scheme
+- Apply data-theme="dark" on <html> BEFORE first paint
+  → Inline <script> in <head> (prevents flash of wrong theme)
+- Toggle button: top-right, sun/moon inline SVG icon, no label
+- Toggle saves choice to localStorage and updates data-theme on <html>
+
+Inline script template (place in BaseLayout <head> before any CSS):
+```html
+<script is:inline>
+  const theme = localStorage.getItem('theme') ||
+    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  document.documentElement.setAttribute('data-theme', theme);
+</script>
+```
+
+## LANGUAGE
+The frontmatter `language` field ('en' | 'it', default 'en') must actually be
+consumed — it sets the document language for accessibility and SEO.
+
+- BaseLayout.astro accepts a `lang` prop (string, default 'en') and renders
+  `<html lang={lang} ...>`.
+- Every page passes a value:
+  - Article pages pass `entry.data.language`.
+  - Static pages (home, /articles, /about, /now, /tag, /search, 404) pass 'en'
+    (or omit, relying on the default).
+- The inline theme script still sets data-theme on the same <html> element;
+  lang and data-theme coexist.
+
+## ARTICLE FRONTMATTER SCHEMA
+Define in src/content/config.ts using Astro content collections + zod:
+
+```ts
+{
+  title: z.string(),
+  date: z.date(),
+  tags: z.array(z.string()),
+  description: z.string(),
+  origin: z.string().optional(),
+  originPosition: z.enum(['top', 'bottom']).optional().default('bottom'),
+  coverImage: z.string().optional(),
+  sources: z.array(z.object({
+    label: z.string(),
+    href: z.string(),
+  })).optional().default([]),
+  status: z.enum(['draft', 'published']),
+  series: z.string().optional(),
+  part: z.number().optional(),
+  language: z.enum(['en', 'it']).optional().default('en'),
+}
+```
+
+Only articles with status: 'published' appear in listings.
+Drafts are accessible by direct URL only (filter in getCollection calls).
+
+## CUSTOM MDX COMPONENTS
+
+### QA.astro
+Props: question (string)
+Slot: default (answer content — full MDX)
+
+Styles:
+- question: Lora, 1.15× body size, var(--color-accent), 
+  border-left 3px solid var(--color-accent), padding-left 16px
+- answer: DM Sans, normal body text, margin-top 12px
+- Outer wrapper: margin-bottom 48px
+
+### Origin.astro
+Slot: default (origin content)
+
+Styles:
+- Background: var(--color-origin-bg)
+- Border-left: 3px solid var(--color-accent)
+- Padding: 20px 24px
+- Small label "How I got here" above content:
+  uppercase, 11px, var(--color-muted), with inline lightbulb SVG (16px)
+- Text: italic, DM Sans
+- Margin: 32px 0
+
+### ImageWithCaption.astro
+Props: src (string), alt (string), caption (string), size ('full' | 'half') default 'full'
+
+Styles:
+- Centered block
+- size="half": max-width 50%, margin auto
+- size="full": 100% width
+- In dark mode: background white, padding 12px (so illustrations stay readable)
+- Caption: 14px, var(--color-muted), text-align center, margin-top 8px, DM Sans
+
+### Sources.astro
+Props: sources (Array<{ label: string; href: string }>, defaults to [])
+
+Render only if sources array is non-empty.
+- Label: "Sources", small, uppercase, var(--color-muted), margin-bottom 12px
+- Numbered list, DM Sans, 15px
+- Each item: number. label — linked if href is a URL, plain text if not
+
+IMPORTANT — how to pass sources data:
+In Astro MDX, the `frontmatter` variable is automatically in scope inside
+the MDX file. Use it to pass sources explicitly at the bottom of every article:
+  <Sources sources={frontmatter.sources} />
+
+Do NOT try to read sources from a layout or global context.
+Do NOT use "No props" pattern — always pass sources as an explicit prop.
+
+## PAGES
+
+### / (Homepage) — src/pages/index.astro
+- Hero: blog name (Lora h1) + one-line description (DM Sans, muted)
+- Tag filter pills (TagFilter component — client-side, no page reload)
+  - Clicking a tag shows only articles with that tag
+  - "All" pill resets the filter
+  - Active pill: accent color background, white text
+- Article list: ArticleCard components
+  - Published articles only, sorted by date descending
+
+### /articles — src/pages/articles.astro
+- H1: "Articles" (Lora)
+- Same tag filter + article list as homepage
+- No hero section
+
+### /article/[slug] — src/pages/article/[slug].astro
+- getStaticPaths from content collection (published only)
+- Header: title (Lora h1), date (formatted), reading time, tags
+- If originPosition === 'top': render <Origin> here, after header
+- MDX body (render with components map: QA, Origin, ImageWithCaption, Sources)
+- If originPosition === 'bottom' (default): render <Origin> before Sources
+- <Sources sources={entry.data.sources} /> at the bottom
+  Note: inside MDX files this is written as <Sources sources={frontmatter.sources} />
+- Open Graph meta tags in <head>
+
+### /tag/[tag] — src/pages/tag/[tag].astro
+- getStaticPaths: collect all unique tags from published articles
+- H1: "#tagname" (Lora)
+- Article list filtered by tag, sorted by date descending
+
+### /about — src/pages/about.astro
+- Static page
+- Placeholder content: who I am, what the blog is about,
+  philosophy (curiosity-driven, first principles, no definitive answers)
+- Note "// TODO: fill in your own content" in the MDX/HTML
+
+### /now — src/pages/now.astro
+- Static page
+- Placeholder content: what I'm currently exploring/reading/thinking
+- Show "Last updated: [hardcoded date]" in muted text below the title
+- Note "// TODO: fill in your own content"
+
+## UTILITIES
+
+### src/utils/readingTime.ts
+```ts
+export function getReadingTime(content: string): string {
+  const words = content.trim().split(/\s+/).length
+  const minutes = Math.ceil(words / 200)
+  return `${minutes} min read`
+}
+```
+
+### src/utils/formatDate.ts
+Format: "June 3, 2025" (no weekday, no time)
+```ts
+export function formatDate(date: Date): string {
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC'
+  })
+}
+```
+IMPORTANT — timeZone: 'UTC' is required, not optional. YAML frontmatter dates
+(e.g. `date: 2025-06-03`) are parsed by Astro as UTC midnight. Without
+timeZone: 'UTC', toLocaleDateString uses the build/server local timezone, so
+in any negative-offset timezone (e.g. the US) an article dated 2025-06-03
+would render as "June 2, 2025". Forcing UTC makes the displayed day match the
+frontmatter day everywhere, and makes the unit tests deterministic across CI
+machines regardless of their TZ.
+
+## UI COMPONENTS
+
+### ArticleCard.astro
+Props: title, description, date, slug, tags, readingTime, series?, part?
+- Title: Lora, links to /article/[slug]
+- Description: DM Sans, muted
+- Bottom row: date (muted, small) + reading time (muted, small) + tag pills
+- No border, no card shadow — just clean vertical spacing
+- Hover: title underline only
+
+### TagPill.astro
+Props: tag (string), href?: string, active?: boolean
+- Rounded pill, small DM Sans
+- Default: var(--color-border) bg, var(--color-muted) text
+- Active: var(--color-accent) bg, white text
+- Links to /tag/[tag] if href provided
+
+### TagFilter.astro
+- Renders all unique tags as pills + "All" pill
+- Client-side JS: clicking a tag adds data-tag attribute to articles,
+  hides non-matching cards
+- Uses data attributes on ArticleCard wrappers for filtering
+- No page reload, no framework needed — vanilla JS
+
+### ThemeToggle.astro
+- Button with sun/moon SVG (inline, 20px)
+- On click: toggles data-theme on <html>, saves to localStorage
+- No label, just icon
+- aria-label: "Toggle dark mode"
+
+## OPEN GRAPH META TAGS
+In ArticleLayout (or article/[slug].astro <head>):
+```html
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:type" content="article" />
+<meta property="og:url" content={`${SITE.url}/article/${slug}`} />
+<meta name="twitter:card" content="summary_large_image" />
+```
+If coverImage exists: add og:image with full URL.
+Else: omit og:image (no default placeholder needed for now).
+
+## PROJECT STRUCTURE
+```
+src/
+  components/
+    mdx/
+      QA.astro
+      Origin.astro
+      ImageWithCaption.astro
+      Sources.astro
+    ui/
+      ThemeToggle.astro
+      ArticleCard.astro
+      TagPill.astro
+      TagFilter.astro
+  layouts/
+    BaseLayout.astro
+    ArticleLayout.astro
+  pages/
+    index.astro
+    articles.astro
+    article/
+      [slug].astro
+    tag/
+      [tag].astro
+    about.astro
+    now.astro
+  content/
+    config.ts
+    articles/
+      example-critical-thinking.mdx
+  utils/
+    readingTime.ts
+    formatDate.ts
+  styles/
+    global.css
+  config.ts
+astro.config.mjs
+tailwind.config.mjs
+tsconfig.json
+```
+
+## EXAMPLE ARTICLE
+File: src/content/articles/example-critical-thinking.mdx
+
+Requirements:
+- Full frontmatter: all fields populated including origin (1-2 sentences),
+  originPosition: 'bottom', status: 'published', 3–4 tags,
+  at least 3 sources with real (plausible) labels and URLs,
+  series and part left empty (omitted)
+- At least 3 <QA> blocks following first principles logic:
+  Q1: What is critical thinking, really?
+  Q2: Where does it come from / why did it develop?
+  Q3: What common misconceptions exist about it?
+  + at least 1 more question
+- 1 <ImageWithCaption> with size="half" and a descriptive caption
+- <Origin> block rendered at bottom
+- <Sources sources={frontmatter.sources} /> at the end (explicit prop — required)
+- Real, non-lorem-ipsum content — short but meaningful answers
+
+## CONSTRAINTS
+- TypeScript strict mode — no `any` types
+- All colors via CSS variables — no hardcoded hex in Tailwind classes
+- Mobile-first responsive (content readable on 375px width)
+- `npm run build` must succeed with zero errors
+- No comments system, no newsletter, no analytics, no auth
+- No features beyond what's listed here

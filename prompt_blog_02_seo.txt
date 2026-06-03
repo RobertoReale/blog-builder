@@ -4,6 +4,8 @@ The blog foundation is already built. Add the following SEO and
 discoverability features to the existing codebase.
 Do not change any existing functionality or design.
 
+CRITICAL INSTRUCTION: Before writing any code, use your web search tools to verify the current best practices for RSS feeds, JSON-LD structured data, sitemaps, and canonical URLs in Astro 4 — both the official Astro docs and community patterns. If you encounter a bug you cannot resolve by reading the code, search online for known issues and solutions before giving up.
+
 ---
 
 ### 1. RSS feed at /rss.xml

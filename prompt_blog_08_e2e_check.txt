@@ -3,6 +3,8 @@
 All 8 features are already built and individually verified. Your job in this
 step is to run the full E2E test suite and fix any failures you find.
 
+CRITICAL INSTRUCTION: If you encounter test failures or build errors that you cannot resolve by reading the existing code, use your web search tools to find known bugs, recent changelogs, or community workarounds for the relevant packages before giving up.
+
 ---
 
 ### Instructions

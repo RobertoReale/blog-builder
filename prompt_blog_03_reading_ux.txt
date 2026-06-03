@@ -5,6 +5,8 @@ experience improvements to the existing codebase.
 Do not change any existing functionality or design.
 All features are progressive enhancements — if JS is disabled, nothing breaks.
 
+CRITICAL INSTRUCTION: Before writing any code, use your web search tools to check for the most current and widely used implementations of reading progress bars, table of contents (with scroll-spy), and clipboard share APIs in Astro. If you encounter a bug you cannot resolve by reading the code, search online for known issues and solutions before giving up.
+
 ---
 
 ### 1. Reading progress bar

@@ -7,6 +7,8 @@ at `/keystatic`, without editing `.mdx` files manually.
 When the user writes an article and clicks "Create" or "Save", Keystatic commits the
 `.mdx` file to GitHub. Vercel detects the push and rebuilds the blog automatically.
 
+CRITICAL INSTRUCTION: Before writing any code, use your web search tools to check the current Keystatic documentation and changelog — `@keystatic/core`, `@keystatic/astro`, and `@astrojs/vercel` evolve quickly and have had breaking API changes. Verify: (1) the correct import path for the Vercel adapter (it changed between versions), (2) the current `keystatic.config.ts` field API, (3) known compatibility issues between the current Keystatic version and Astro 4. If you encounter a bug you cannot resolve by reading the code, search online for known issues, GitHub issues, or community workarounds before giving up.
+
 ---
 
 ### Architecture note — two CLAUDE.md overrides

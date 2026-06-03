@@ -4,6 +4,8 @@ The blog foundation is already built. Add a "Related articles"
 section at the bottom of each article page.
 Everything is computed at build time — no client-side JS needed.
 
+CRITICAL INSTRUCTION: Before writing any code, use your web search tools to check for current best practices and common scoring algorithms for tag-based related article recommendations in static site generators. Verify how other Astro blogs implement this at build time. If you encounter a bug you cannot resolve by reading the code, search online for known issues and solutions before giving up.
+
 ---
 
 ### Logic

@@ -4,6 +4,8 @@ The blog foundation is already built. The frontmatter schema
 already includes `series?: string` and `part?: number`.
 Add full series support: navigation, index page, and card badges.
 
+CRITICAL INSTRUCTION: Before writing any code, use your web search tools to look up current Astro content collection patterns for grouping and filtering entries by a shared field. Check for the most efficient and widely used approaches. If you encounter a bug you cannot resolve by reading the code, search online for known issues and solutions before giving up.
+
 ---
 
 ### 1. SeriesNav component

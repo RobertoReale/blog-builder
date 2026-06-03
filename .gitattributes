@@ -1,0 +1,21 @@
+# Normalize line endings: all text files stored as LF in git
+* text=auto
+
+# Shell scripts must always be LF (they fail with CRLF on Linux/macOS)
+*.sh text eol=lf
+
+# PowerShell scripts work fine with LF; keep consistent
+*.ps1 text eol=lf
+
+# Markdown and text configs: LF
+*.md text eol=lf
+*.txt text eol=lf
+
+# Binary files: no normalization
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary

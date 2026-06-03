@@ -50,16 +50,20 @@ Core idea: **each prompt runs in a separate Claude Code session**, so the contex
 
 ---
 
-## 2. Customize before running
+## 2. Configure your blog
 
-Open `CLAUDE.md` and fill in the sections marked **USER ACTION REQUIRED**:
+Run the interactive setup script — it fills in `CLAUDE.md` for you:
 
-- **SITE CONFIG**: your blog title, description, URL, and author name.
-- **DESIGN SYSTEM**: your CSS color palette (replace the placeholder hex values).
-- **TYPOGRAPHY**: your preferred Google Fonts.
-- **CUSTOM MDX COMPONENTS**: any components beyond the built-in Callout / ImageWithCaption / Sources.
+    Linux/macOS:  chmod +x setup.sh run.sh && ./setup.sh
+    Windows:      .\setup.ps1
 
-These placeholders will be used literally by Claude — fill them in before running the pipeline.
+The script asks for:
+- **Site info**: blog title, description, URL, author name.
+- **Color palette**: 5 presets (Blue/Neutral, Forest, Sunset, Ink, Mono) or custom hex values.
+- **Font pairing**: 5 Google Font presets or your own.
+- **GitHub** (optional): creates a repo and sets it as the git remote. Requires [GitHub CLI](https://cli.github.com).
+
+> If you prefer to configure manually, open `CLAUDE.md` and fill in the sections marked **USER ACTION REQUIRED**.
 
 ---
 

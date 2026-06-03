@@ -15,6 +15,7 @@ Each step is independently verified (`npm run build` + unit tests) before the ne
 ```
 blog-builder/
   CLAUDE.md                        The project rules — read by Claude at every step
+  setup.sh / setup.ps1             Interactive setup: configure CLAUDE.md, create GitHub repo
   prompt_blog_00_foundation.txt    Step 0: layout, dark mode, MDX setup
   prompt_blog_01_testing.txt       Step 1: Vitest + Playwright test suite
   prompt_blog_02_seo.txt           Step 2: RSS, sitemap, robots.txt, JSON-LD
@@ -22,41 +23,38 @@ blog-builder/
   prompt_blog_04_search.txt        Step 4: Pagefind static search
   prompt_blog_05_series.txt        Step 5: article series grouping
   prompt_blog_06_related.txt       Step 6: related articles recommendation
-  run.sh                           Pipeline script (Linux/macOS)
-  run.ps1                          Pipeline script (Windows)
+  run.sh / run.ps1                 Pipeline script (Linux/macOS and Windows)
   SETUP.md                         Detailed setup and usage guide
 ```
-
-## Customization
-
-This repository is a **general framework**. Before running the pipeline, open `CLAUDE.md` and fill in the sections marked `USER ACTION REQUIRED`:
-
-1. **SITE CONFIG** — blog title, description, author.
-2. **DESIGN SYSTEM** — CSS color variables for your brand palette.
-3. **TYPOGRAPHY** — your preferred Google Fonts.
-4. **CUSTOM MDX COMPONENTS** — any components beyond the built-in ones.
 
 ## How to Use
 
 Follow **[`SETUP.md`](SETUP.md)** for full instructions. Quick start:
 
 1. Install prerequisites: Node.js LTS, Git, Claude Code (paid plan required).
-2. Open a terminal in this folder.
-3. Run the pipeline:
+2. Open a terminal in this folder and run the **interactive setup**:
 
    **Linux / macOS:**
    ```bash
-   chmod +x run.sh
-   ./run.sh
+   chmod +x setup.sh run.sh
+   ./setup.sh
    ```
 
    **Windows (PowerShell):**
    ```powershell
    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-   .\run.ps1
+   .\setup.ps1
    ```
 
+   The setup script asks for your blog title, description, URL, author name, color palette (5 presets or custom), and font pairing (5 presets or custom). It writes your choices into `CLAUDE.md`. Optionally it creates a GitHub repository for you (requires [GitHub CLI](https://cli.github.com)).
+
+3. Run the pipeline:
+
+   **Linux / macOS:** `./run.sh`  
+   **Windows:** `.\run.ps1`
+
 4. Watch Claude Code iteratively build the blog, verify each step, commit a checkpoint, and move to the next.
+5. If you set up a GitHub repo in step 2, push when done: `git push -u origin master`
 
 ## Deployment
 

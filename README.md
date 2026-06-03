@@ -24,7 +24,7 @@ The build is broken down into small, verifiable steps. The automation scripts (`
 - **`run.sh` & `run.ps1`**: The automation pipeline scripts for Linux/macOS and Windows respectively. They run Claude Code for each prompt and enforce the build tests.
 - **`SETUP.md`**: Detailed instructions on prerequisites and how to launch the build.
 
-## 🎨 Customization (Pre-requisites)
+## Customization (Pre-requisites)
 
 This repository is a **general framework**. Before running the pipeline, you MUST customize it to fit your brand and style.
 

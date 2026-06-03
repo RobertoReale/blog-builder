@@ -61,7 +61,6 @@ Follow **[`SETUP.md`](SETUP.md)** for full instructions. Quick start:
 The output is a fast static Astro site. You can host it anywhere, but it's optimized for **Vercel** or **GitHub Pages**.
 
 - **Vercel**: connect your GitHub repository to a new Vercel project. No framework adapter needed — Vercel detects the `build` script automatically.
-- Before publishing, update `src/config.ts` (title, URL) and `public/robots.txt`.
 
 See step 6 in [`SETUP.md`](SETUP.md) for the full pre-launch checklist.
 

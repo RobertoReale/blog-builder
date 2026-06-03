@@ -33,8 +33,6 @@ blog-builder/
 
 Running the full pipeline executes **8 separate Claude Code sessions**, each implementing a distinct feature. This is meaningful agentic work — expect hundreds of tool calls across all steps.
 
-**Rough estimate: ~500k–1.5M tokens total** depending on how much iteration Claude needs to fix build errors.
-
 - **Claude Code subscribers (Max plan)**: the pipeline fits comfortably within typical monthly usage.
 - **Claude Code subscribers (Pro plan)**: usage limits may be hit mid-pipeline. If that happens, wait for the limit to reset and resume with `./run.sh -s <step>` (or `.\run.ps1 -StartStep <step>` on Windows).
 - **API users**: check [Anthropic pricing](https://www.anthropic.com/pricing) for your model tier. Sonnet is recommended over Opus for cost-efficiency — the prompts are explicit enough that the smaller model performs well.

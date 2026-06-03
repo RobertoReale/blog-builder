@@ -88,6 +88,11 @@ Resume from step N after fixing an error:
     Linux/macOS:  ./run.sh -s 3
     Windows:      .\run.ps1 -StartStep 3
 
+Run only a subset of steps (useful for testing a single feature in isolation):
+
+    Linux/macOS:  ./run.sh -s 3 -e 5
+    Windows:      .\run.ps1 -StartStep 3 -EndStep 5
+
 Logs for each step are saved to `logs/step_N.json` (output + call cost).
 
 After every successful step, the script commits a git checkpoint (`Step N: <name>`), so any step can be rolled back with `git reset --hard HEAD~1` if needed.

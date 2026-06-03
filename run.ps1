@@ -5,13 +5,15 @@
   If something breaks, it STOPS: it never builds on top of a broken state.
 
   USAGE:
-    .\run.ps1                 # runs all steps, stopping at the first error
-    .\run.ps1 -Pause          # also pauses after each step so you can inspect the output
-    .\run.ps1 -StartStep 3    # resumes from step 3 (after you fixed an error)
+    .\run.ps1                              # runs all steps, stopping at the first error
+    .\run.ps1 -Pause                       # also pauses after each step to inspect output
+    .\run.ps1 -StartStep 3                 # resumes from step 3 (after you fixed an error)
+    .\run.ps1 -StartStep 3 -EndStep 5      # runs only steps 3, 4, and 5
 #>
 
 param(
   [int]$StartStep = 0,
+  [int]$EndStep = -1,
   [switch]$Pause
 )
 
@@ -45,13 +47,13 @@ $stepNames = @(
 # --- Preliminary checks ----------------------------------------------------
 function Assert-Command($name, $hint) {
   if (-not (Get-Command $name -ErrorAction SilentlyContinue)) {
-    Write-Host "ERRORE: '$name' non trovato. $hint" -ForegroundColor Red
+    Write-Host "ERROR: '$name' not found. $hint" -ForegroundColor Red
     exit 1
   }
 }
 Assert-Command "claude" "Install Claude Code (see SETUP.md) and reopen the terminal."
-Assert-Command "node"   "Installa Node.js LTS da https://nodejs.org"
-Assert-Command "npm"    "Installa Node.js LTS da https://nodejs.org"
+Assert-Command "node"   "Install Node.js LTS from https://nodejs.org"
+Assert-Command "npm"    "Install Node.js LTS from https://nodejs.org"
 
 if (-not (Test-Path "CLAUDE.md")) {
   Write-Host "ERROR: CLAUDE.md not found. Run this script from the folder that contains it." -ForegroundColor Red
@@ -61,15 +63,19 @@ if (-not (Test-Path "CLAUDE.md")) {
 New-Item -ItemType Directory -Force -Path "logs" | Out-Null
 
 # --- Verification gate (anti-drift mechanism) ------------------------------
-function Test-Project {
+function Test-Project([bool]$InstallNeeded = $true) {
   if (-not (Test-Path "package.json")) {
     Write-Host "  (package.json not present yet — skipping verification)" -ForegroundColor DarkGray
     return $true
   }
 
-  Write-Host "  -> npm install" -ForegroundColor Cyan
-  npm install --no-audit --no-fund 2>&1 | Out-Host
-  if ($LASTEXITCODE -ne 0) { return $false }
+  if ($InstallNeeded) {
+    Write-Host "  -> npm install" -ForegroundColor Cyan
+    npm install --no-audit --no-fund 2>&1 | Out-Host
+    if ($LASTEXITCODE -ne 0) { return $false }
+  } else {
+    Write-Host "  -> npm install (skipped — package.json unchanged)" -ForegroundColor DarkGray
+  }
 
   Write-Host "  -> npm run build" -ForegroundColor Cyan
   npm run build 2>&1 | Out-Host
@@ -99,7 +105,9 @@ unrequested features. When done, run 'npm run build' (and 'npm run test:unit' if
 fix any errors until they pass. Do not go beyond the task you received.
 "@
 
-for ($i = $StartStep; $i -lt $prompts.Count; $i++) {
+$stopAt = if ($EndStep -ge 0 -and $EndStep -lt $prompts.Count) { $EndStep } else { $prompts.Count - 1 }
+
+for ($i = $StartStep; $i -le $stopAt; $i++) {
   $file = $prompts[$i]
   Write-Host ""
   Write-Host "===================================================" -ForegroundColor White
@@ -110,6 +118,9 @@ for ($i = $StartStep; $i -lt $prompts.Count; $i++) {
     Write-Host "ERROR: prompt file missing: $file" -ForegroundColor Red
     break
   }
+
+  # Capture package.json state before Claude runs to detect dependency changes
+  $pkgBefore = if (Test-Path "package.json") { Get-Content "package.json" -Raw } else { $null }
 
   # Separate NEW session: context is only CLAUDE.md + files already on disk.
   # The actual prompt is passed via stdin (avoids quoting issues with long texts).
@@ -126,9 +137,13 @@ for ($i = $StartStep; $i -lt $prompts.Count; $i++) {
     break
   }
 
+  # Skip npm install if package.json is unchanged and node_modules already exists
+  $pkgAfter = if (Test-Path "package.json") { Get-Content "package.json" -Raw } else { $null }
+  $installNeeded = (-not (Test-Path "node_modules")) -or ($pkgBefore -ne $pkgAfter)
+
   Write-Host ""
   Write-Host "  Independent verification of step $i..." -ForegroundColor Cyan
-  if (-not (Test-Project)) {
+  if (-not (Test-Project -InstallNeeded $installNeeded)) {
     Write-Host ""
     Write-Host "BUILD/TEST FAILED at step $i ($file)." -ForegroundColor Red
     Write-Host "Stopping here intentionally, to prevent building on a broken state." -ForegroundColor Red
@@ -148,11 +163,16 @@ for ($i = $StartStep; $i -lt $prompts.Count; $i++) {
   Write-Host ""
   Write-Host "  STEP $i OK — build (and unit tests) passed." -ForegroundColor Green
 
-  if ($i -eq $prompts.Count - 1) {
+  if ($i -eq $stopAt) {
     Write-Host ""
-    Write-Host "DONE. All steps completed and verified." -ForegroundColor Green
-    Write-Host "Start the blog with:  npm run dev   (then open http://localhost:4321)" -ForegroundColor Green
-    Write-Host "Full E2E tests (optional):  npm run test:e2e" -ForegroundColor Green
+    if ($stopAt -eq $prompts.Count - 1) {
+      Write-Host "DONE. All steps completed and verified." -ForegroundColor Green
+      Write-Host "Start the blog with:  npm run dev   (then open http://localhost:4321)" -ForegroundColor Green
+      Write-Host "Full E2E tests (optional):  npm run test:e2e" -ForegroundColor Green
+    } else {
+      Write-Host "DONE. Steps $StartStep-$stopAt completed and verified." -ForegroundColor Green
+      Write-Host "Resume with:  .\run.ps1 -StartStep $($stopAt + 1)" -ForegroundColor Cyan
+    }
     break
   }
 

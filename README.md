@@ -356,6 +356,11 @@ See [GitHub issue discussion](https://github.com/withastro/astro/issues) for det
 
 **Fix**: Run `npm run build` (not just `npm run build:astro`). The full build script runs Pagefind after the Astro build.
 
+### Vercel deploy fails with "invalid runtime: nodejs18.x"
+
+**Cause**: Vercel no longer allows deploying new Serverless Functions on Node 18, but the Astro adapter falls back to Node 18 if it detects an unsupported Node version (like Node 24).
+**Fix**: Ensure your `package.json` contains `"engines": { "node": "20.x" }`. This forces Vercel to use Node 20, which is fully supported. The `blog-builder` pipeline handles this automatically in Step 0.
+
 ### Port 4321 is already in use
 
 Another process is using that port. Either kill it or use a different port:
@@ -406,9 +411,11 @@ architecture**:
 
 > Each prompt runs in a fresh Claude Code session with a clean context window.
 > Claude reads `CLAUDE.md` (the project rules) + the feature instructions,
-> then reads the existing code on disk. After each step, the script runs
-> `npm run build` and `npm run test:unit` to verify correctness.
-> If the build breaks, the pipeline stops immediately.
+> then reads the existing code on disk. Before writing any code, Claude is 
+> instructed to use its **web search tools** to verify the latest best practices 
+> and breaking changes. After each step, the script runs `npm run build` and 
+> `npm run test:unit` to verify correctness. If the build breaks, the pipeline 
+> stops immediately.
 
 | Step | Prompt | What it builds |
 |---|---|---|

@@ -2,6 +2,8 @@ You are building a personal blog from scratch.
 This is the FOUNDATION build — focus on correctness and completeness.
 Do not add anything beyond what is specified here. No extra features.
 
+CRITICAL INSTRUCTION: Before you begin writing code, please use your web search tools to check for the latest Astro 4 best practices, breaking changes, or updated implementation patterns. Ensure your implementation relies on the most up-to-date documentation.
+
 ## GOAL
 A fully working blog where:
 - All pages render without errors
@@ -16,6 +18,7 @@ A fully working blog where:
   npm create astro@4 . -- --yes --template minimal --typescript strict --no-git --no-install
   ```
   This runs in the current directory (`.`) without prompts. Pin `"astro": "^4.0.0"` in package.json.
+  IMPORTANT: You MUST add `"engines": { "node": "20.x" }` to `package.json` to ensure Vercel uses Node 20 for serverless functions, preventing Node 24/18 compatibility errors.
 - @astrojs/tailwind
 - @astrojs/mdx
 - TypeScript (strict mode)

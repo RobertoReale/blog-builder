@@ -10,18 +10,21 @@
 #   ./run.sh -p                     # also pauses after each step to inspect output
 #   ./run.sh -s 3                   # resumes from step 3 (after you fixed an error)
 #   ./run.sh -s 3 -e 5              # runs only steps 3, 4, and 5
+#   ./run.sh -d                     # preview which steps would run, without executing
 
-set -e # Exit on any unhandled error
+set -e
 
 START_STEP=0
 END_STEP=-1
 PAUSE=false
+DRY_RUN=false
 
-while getopts ":ps:e:" opt; do
+while getopts ":ps:e:d" opt; do
   case $opt in
     s) START_STEP="$OPTARG" ;;
     e) END_STEP="$OPTARG" ;;
     p) PAUSE=true ;;
+    d) DRY_RUN=true ;;
     \?) echo "Invalid option -$OPTARG" >&2; exit 1 ;;
   esac
 done
@@ -96,7 +99,30 @@ test_project() {
   return 0
 }
 
-# --- Main loop ---
+# --- Token usage parser (uses node, which is a required dependency) ---
+get_step_usage() {
+  local log_file="$1"
+  [ -f "$log_file" ] || return
+  node -e "
+    const fs = require('fs');
+    const lines = fs.readFileSync(process.argv[1], 'utf8').split('\n');
+    for (let i = lines.length - 1; i >= 0; i--) {
+      try {
+        const d = JSON.parse(lines[i]);
+        if (d.type === 'result' && d.usage) {
+          process.stdout.write((d.usage.input_tokens||0) + ' ' + (d.usage.output_tokens||0));
+          break;
+        }
+      } catch(e) {}
+    }
+  " "$log_file" 2>/dev/null
+}
+
+fmt_num() {
+  printf "%'d" "$1" 2>/dev/null || echo "$1"
+}
+
+# --- Compute range ---
 INSTRUCTION="You are working in a project folder that contains CLAUDE.md: read it FIRST and follow every rule in it. Your standard input contains the instructions for the current task: execute them EXACTLY, without adding unrequested features. When done, run 'npm run build' (and 'npm run test:unit' if that script exists) and fix any errors until they pass. Do not go beyond the task you received."
 
 LAST_STEP=$(( ${#PROMPTS[@]} - 1 ))
@@ -106,6 +132,31 @@ else
   STOP_AT="$LAST_STEP"
 fi
 
+# --- Dry run ---------------------------------------------------------------
+if [ "$DRY_RUN" = true ]; then
+  echo ""
+  echo -e "\033[0;36mDRY RUN — steps that would be executed:\033[0m"
+  echo ""
+  for (( j=START_STEP; j<=STOP_AT; j++ )); do
+    printf "  Step %-2d  %-20s  (%s)\n" "$j" "${STEP_NAMES[$j]}" "${PROMPTS[$j]}"
+  done
+  echo ""
+  echo -e "\033[0;36m  Total: $(( STOP_AT - START_STEP + 1 )) step(s)\033[0m"
+  echo ""
+  exit 0
+fi
+
+# --- Startup banner --------------------------------------------------------
+STEP_COUNT=$(( STOP_AT - START_STEP + 1 ))
+echo ""
+echo -e "\033[1;37mBlog Builder Pipeline — steps $START_STEP-$STOP_AT  ($STEP_COUNT step(s))\033[0m"
+echo -e "\033[1;33mTo pause: CTRL+C   |   To resume: ./run.sh -s N\033[0m"
+echo ""
+
+TOTAL_INPUT=0
+TOTAL_OUTPUT=0
+
+# --- Main loop -------------------------------------------------------------
 for (( i=START_STEP; i<=STOP_AT; i++ )); do
   FILE="${PROMPTS[$i]}"
   echo ""
@@ -175,6 +226,20 @@ for (( i=START_STEP; i<=STOP_AT; i++ )); do
 
   echo ""
   echo -e "\033[0;32m  STEP $i OK — build (and unit tests) passed.\033[0m"
+
+  # Token usage counter
+  usage=$(get_step_usage "logs/step_$i.json")
+  if [ -n "$usage" ]; then
+    step_in=$(echo "$usage" | cut -d' ' -f1)
+    step_out=$(echo "$usage" | cut -d' ' -f2)
+    TOTAL_INPUT=$(( TOTAL_INPUT + step_in ))
+    TOTAL_OUTPUT=$(( TOTAL_OUTPUT + step_out ))
+    si=$(fmt_num $step_in)
+    so=$(fmt_num $step_out)
+    ti=$(fmt_num $TOTAL_INPUT)
+    to=$(fmt_num $TOTAL_OUTPUT)
+    echo -e "\033[1;30m  Tokens this step: ${si} in / ${so} out   |   Total so far: ${ti} in / ${to} out\033[0m"
+  fi
 
   if [ $i -eq $STOP_AT ]; then
     echo ""

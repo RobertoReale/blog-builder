@@ -73,6 +73,11 @@ Allow script execution (Windows only, once per terminal session):
 
     Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
+Preview which steps would run without executing anything:
+
+    Linux/macOS:  ./run.sh -d
+    Windows:      .\run.ps1 -DryRun
+
 Normal execution (stops automatically at the first error):
 
     Linux/macOS:  ./run.sh

@@ -9,15 +9,17 @@
     .\run.ps1 -Pause                       # also pauses after each step to inspect output
     .\run.ps1 -StartStep 3                 # resumes from step 3 (after you fixed an error)
     .\run.ps1 -StartStep 3 -EndStep 5      # runs only steps 3, 4, and 5
+    .\run.ps1 -DryRun                      # preview which steps would run, without executing
 #>
 
 param(
   [int]$StartStep = 0,
   [int]$EndStep = -1,
-  [switch]$Pause
+  [switch]$Pause,
+  [switch]$DryRun
 )
 
-$ErrorActionPreference = "Continue" # Changed from Stop to prevent 2>&1 from crashing on external stderr
+$ErrorActionPreference = "Continue"
 
 # Step order. Step 0 (foundation) creates the project; the others extend it.
 $prompts = @(
@@ -90,6 +92,25 @@ function Test-Project([bool]$InstallNeeded = $true) {
   return $true
 }
 
+# --- Token usage parser (reads the stream-json log written by this run) ----
+function Get-StepUsage($logFile) {
+  try {
+    $resultLine = Get-Content $logFile -ErrorAction Stop |
+      Where-Object { $_ -match '"type"\s*:\s*"result"' } |
+      Select-Object -Last 1
+    if ($resultLine) {
+      $r = $resultLine | ConvertFrom-Json
+      if ($r.usage) {
+        return @{
+          Input  = [int]($r.usage.input_tokens  -as [int])
+          Output = [int]($r.usage.output_tokens -as [int])
+        }
+      }
+    }
+  } catch {}
+  return $null
+}
+
 # --- Git init (if needed) -------------------------------------------------
 if (-not (Test-Path ".git")) {
   git init | Out-Null
@@ -97,7 +118,7 @@ if (-not (Test-Path ".git")) {
   $null = git commit -m "Initial commit (pre-pipeline)" --quiet 2>&1
 }
 
-# --- Main loop -------------------------------------------------------------
+# --- Compute range ---------------------------------------------------------
 $instruction = @"
 You are working in a project folder that contains CLAUDE.md: read it FIRST and follow every rule in it.
 Your standard input contains the instructions for the current task: execute them EXACTLY, without adding
@@ -107,6 +128,31 @@ fix any errors until they pass. Do not go beyond the task you received.
 
 $stopAt = if ($EndStep -ge 0 -and $EndStep -lt $prompts.Count) { $EndStep } else { $prompts.Count - 1 }
 
+# --- Dry run ---------------------------------------------------------------
+if ($DryRun) {
+  Write-Host ""
+  Write-Host "DRY RUN — steps that would be executed:" -ForegroundColor Cyan
+  Write-Host ""
+  for ($j = $StartStep; $j -le $stopAt; $j++) {
+    Write-Host ("  Step {0,-2}  {1,-20}  ({2})" -f $j, $stepNames[$j], $prompts[$j]) -ForegroundColor White
+  }
+  Write-Host ""
+  Write-Host ("  Total: {0} step(s)" -f ($stopAt - $StartStep + 1)) -ForegroundColor Cyan
+  Write-Host ""
+  exit 0
+}
+
+# --- Startup banner --------------------------------------------------------
+$stepCount = $stopAt - $StartStep + 1
+Write-Host ""
+Write-Host "Blog Builder Pipeline — steps $StartStep-$stopAt  ($stepCount step$(if ($stepCount -ne 1) {'s'}))" -ForegroundColor White
+Write-Host "To pause: CTRL+C   |   To resume: .\run.ps1 -StartStep N" -ForegroundColor Yellow
+Write-Host ""
+
+$totalInput  = 0
+$totalOutput = 0
+
+# --- Main loop -------------------------------------------------------------
 for ($i = $StartStep; $i -le $stopAt; $i++) {
   $file = $prompts[$i]
   Write-Host ""
@@ -162,6 +208,18 @@ for ($i = $StartStep; $i -le $stopAt; $i++) {
 
   Write-Host ""
   Write-Host "  STEP $i OK — build (and unit tests) passed." -ForegroundColor Green
+
+  # Token usage counter
+  $usage = Get-StepUsage "logs\step_$i.json"
+  if ($usage) {
+    $totalInput  += $usage.Input
+    $totalOutput += $usage.Output
+    $si = "{0:N0}" -f $usage.Input
+    $so = "{0:N0}" -f $usage.Output
+    $ti = "{0:N0}" -f $totalInput
+    $to = "{0:N0}" -f $totalOutput
+    Write-Host "  Tokens this step: $si in / $so out   |   Total so far: $ti in / $to out" -ForegroundColor DarkGray
+  }
 
   if ($i -eq $stopAt) {
     Write-Host ""

@@ -6,7 +6,7 @@ A framework to build a complete, production-ready personal blog using Astro 4, T
 
 Instead of generating an entire codebase in one massive prompt (which causes context overflow, hallucinations, and broken code), this project uses a **sequenced prompt architecture**.
 
-> **The Context Window Philosophy**: The build is split into 7 distinct sequential steps. Each prompt runs in a fresh Claude Code session, so the context window never fills up. The LLM only receives the project rules (`CLAUDE.md`) and the specific feature instructions, while reading the existing code on disk. This prevents the AI from forgetting previous instructions or hallucinating features.
+> **The Context Window Philosophy**: The build is split into 9 distinct sequential steps. Each prompt runs in a fresh Claude Code session, so the context window never fills up. The LLM only receives the project rules (`CLAUDE.md`) and the specific feature instructions, while reading the existing code on disk. This prevents the AI from forgetting previous instructions or hallucinating features.
 
 Each step is independently verified (`npm run build` + unit tests) before the next one starts. If the build breaks, the pipeline stops immediately — it never builds on top of a broken state. After every successful step, a git commit is created automatically as a rollback point.
 
@@ -31,10 +31,17 @@ blog-builder/
 
 ## Token Usage and Cost
 
-Running the full pipeline executes **8 separate Claude Code sessions**, each implementing a distinct feature. This is meaningful agentic work — expect hundreds of tool calls across all steps.
+Running the full pipeline executes **9 separate Claude Code sessions**, each implementing a distinct feature. This is meaningful agentic work — expect hundreds of tool calls across all steps.
+
+**Rough estimate: ~500k–1.5M tokens total** depending on how much iteration Claude needs to fix build errors.
+
+The pipeline prints a running token counter after each step so you can monitor consumption in real time:
+```
+  Tokens this step: 52,410 in / 4,830 out   |   Total so far: 148,200 in / 13,500 out
+```
 
 - **Claude Code subscribers (Max plan)**: the pipeline fits comfortably within typical monthly usage.
-- **Claude Code subscribers (Pro plan)**: usage limits may be hit mid-pipeline. If that happens, wait for the limit to reset and resume with `./run.sh -s <step>` (or `.\run.ps1 -StartStep <step>` on Windows).
+- **Claude Code subscribers (Pro plan)**: usage limits may be hit mid-pipeline. Press CTRL+C to stop, wait for the limit to reset, then resume with `./run.sh -s <step>` (or `.\run.ps1 -StartStep <step>` on Windows).
 - **API users**: check [Anthropic pricing](https://www.anthropic.com/pricing) for your model tier. Sonnet is recommended over Opus for cost-efficiency — the prompts are explicit enough that the smaller model performs well.
 
 The pipeline is designed to be resumable: every completed step is committed to git, so you never lose progress if you stop and restart.
@@ -65,7 +72,12 @@ Follow **[`SETUP.md`](SETUP.md)** for full instructions. Quick start:
    **Linux / macOS:** `./run.sh`  
    **Windows:** `.\run.ps1`
 
-4. Watch Claude Code iteratively build the blog, verify each step, commit a checkpoint, and move to the next. The final step (Step 8) runs the full E2E suite and fixes any integration failures.
+   To preview which steps will run before committing (dry run):
+
+   **Linux / macOS:** `./run.sh -d`  
+   **Windows:** `.\run.ps1 -DryRun`
+
+4. Watch Claude Code iteratively build the blog, verify each step, commit a checkpoint, and move to the next. A token counter is printed after each step. The final step (Step 8) runs the full E2E suite and fixes any integration failures.
 5. If you set up a GitHub repo in step 2, push when done: `git push -u origin HEAD`
 
 ## Deployment

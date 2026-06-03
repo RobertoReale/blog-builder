@@ -407,6 +407,11 @@ Check:
 3. Ensure `KEYSTATIC_SECRET` is set and is at least 32 bytes of random hex.
 4. Trigger a fresh Vercel deploy after adding/changing env variables.
 
+### Keystatic: Red error "Unhandled type mdxjsEsm" when opening example articles
+
+**Cause**: The AI-generated example articles contain explicit component imports (`import QA from ...`) at the top. Keystatic's visual editor currently does not support parsing explicit ESM imports for Astro components, so it crashes when trying to open these specific files.
+**Fix**: Because they crash on load, you cannot delete them directly from the Keystatic UI. Instead, delete the `.mdx` files directly from `src/content/articles/` via VS Code and commit/push the deletion. When you create *new* articles via Keystatic, they won't contain these explicit imports and the editor will work perfectly.
+
 ### Long-term compatibility
 
 The blog is designed to be stable over time. Here is what you need to know about each dependency:

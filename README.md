@@ -432,6 +432,20 @@ architecture**:
 > `npm run build` and `npm run test:unit` to verify correctness. If the build
 > breaks, the pipeline stops immediately.
 
+### Design principles
+
+**Context isolation per feature.** Each feature runs in a completely separate Claude Code session. This isn't just about fitting within the context window — it also prevents the reasoning from earlier steps from biasing later ones. Every session sees exactly two things: the project rules (`CLAUDE.md`) and the current code on disk. Nothing else leaks through.
+
+**`CLAUDE.md` as cross-session memory.** Claude Code has no memory between sessions. Rather than repeating architectural decisions in every prompt, a single file encodes all of them: color variables, TypeScript constraints, component interfaces, page render order. The setup script writes the user's actual values into it once; every subsequent session inherits them automatically without any extra configuration.
+
+**Build-gated commits.** The pipeline only creates a git commit after `npm run build` succeeds. This borrows a principle from CI/CD: AI-generated code must never compound on a broken state. Each commit is a verified snapshot. Rolling back to a known-good state is always one `git reset --hard HEAD~1` away.
+
+**Prompts as versioned specifications.** The prompt files are not ad-hoc questions — they are precise, reproducible specifications with explicit constraints and a checklist at the end. The same prompts on the same codebase produce the same result. They can be re-run, modified, and versioned like any other source file.
+
+**Web search baked into every prompt.** Each prompt instructs Claude to search the web for current documentation and known issues *before* writing any code — and to search again if it hits a bug it can't solve from the code alone. Package APIs change, adapters add breaking releases, community patterns evolve. A prompt that relies only on Claude's training data has a shelf life; a prompt that fetches current docs doesn't.
+
+---
+
 | Step | Prompt | What it builds |
 |---|---|---|
 | 0 | `prompt_blog_00_foundation.txt` | Layout, dark mode, MDX, example article |

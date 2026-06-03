@@ -1,13 +1,13 @@
 <#
-  run.ps1 — Esegue i prompt del blog in sequenza con Claude Code (modalita headless),
-  uno step alla volta, ognuno in una SESSIONE NUOVA (cosi la context window non si riempie),
-  e dopo ogni step verifica in modo INDIPENDENTE che la build (e i test unit) passino.
-  Se qualcosa si rompe, SI FERMA: non costruisce mai sopra uno stato rotto.
+  run.ps1 — Runs the blog prompts in sequence via Claude Code (headless mode),
+  one step at a time, each in a NEW SESSION (so the context window never fills up),
+  and after each step independently verifies that the build (and unit tests) pass.
+  If something breaks, it STOPS: it never builds on top of a broken state.
 
-  USO:
-    .\run.ps1                 # esegue tutti gli step, fermandosi al primo errore
-    .\run.ps1 -Pause          # in piu, fa una pausa dopo ogni step per farti controllare
-    .\run.ps1 -StartStep 3    # riprende dallo step 3 (dopo che hai sistemato un errore)
+  USAGE:
+    .\run.ps1                 # runs all steps, stopping at the first error
+    .\run.ps1 -Pause          # also pauses after each step so you can inspect the output
+    .\run.ps1 -StartStep 3    # resumes from step 3 (after you fixed an error)
 #>
 
 param(
@@ -17,7 +17,7 @@ param(
 
 $ErrorActionPreference = "Continue" # Changed from Stop to prevent 2>&1 from crashing on external stderr
 
-# Ordine degli step. Lo step 0 (foundation) crea il progetto; gli altri lo estendono.
+# Step order. Step 0 (foundation) creates the project; the others extend it.
 $prompts = @(
   "prompt_blog_00_foundation.txt",  # 0  Foundation
   "prompt_blog_01_testing.txt",     # 1  Testing (Vitest + Playwright)
@@ -42,28 +42,28 @@ $stepNames = @(
   "E2E integration check"
 )
 
-# --- Controlli preliminari -------------------------------------------------
+# --- Preliminary checks ----------------------------------------------------
 function Assert-Command($name, $hint) {
   if (-not (Get-Command $name -ErrorAction SilentlyContinue)) {
     Write-Host "ERRORE: '$name' non trovato. $hint" -ForegroundColor Red
     exit 1
   }
 }
-Assert-Command "claude" "Installa Claude Code (vedi SETUP.md) e riapri il terminale."
+Assert-Command "claude" "Install Claude Code (see SETUP.md) and reopen the terminal."
 Assert-Command "node"   "Installa Node.js LTS da https://nodejs.org"
 Assert-Command "npm"    "Installa Node.js LTS da https://nodejs.org"
 
 if (-not (Test-Path "CLAUDE.md")) {
-  Write-Host "ERRORE: CLAUDE.md non e in questa cartella. Esegui lo script dalla cartella che lo contiene." -ForegroundColor Red
+  Write-Host "ERROR: CLAUDE.md not found. Run this script from the folder that contains it." -ForegroundColor Red
   exit 1
 }
 
 New-Item -ItemType Directory -Force -Path "logs" | Out-Null
 
-# --- Cancello di verifica (il meccanismo anti-deriva) ----------------------
+# --- Verification gate (anti-drift mechanism) ------------------------------
 function Test-Project {
   if (-not (Test-Path "package.json")) {
-    Write-Host "  (package.json non ancora presente — salto la verifica)" -ForegroundColor DarkGray
+    Write-Host "  (package.json not present yet — skipping verification)" -ForegroundColor DarkGray
     return $true
   }
 
@@ -84,19 +84,19 @@ function Test-Project {
   return $true
 }
 
-# --- Git init (se necessario) ---------------------------------------------
+# --- Git init (if needed) -------------------------------------------------
 if (-not (Test-Path ".git")) {
   git init | Out-Null
   git add -A | Out-Null
   $null = git commit -m "Initial commit (pre-pipeline)" --quiet 2>&1
 }
 
-# --- Loop principale -------------------------------------------------------
+# --- Main loop -------------------------------------------------------------
 $instruction = @"
-Sei in una cartella di progetto che contiene CLAUDE.md: leggilo PRIMA di tutto e rispetta ogni sua regola.
-Sul tuo standard input ricevi le istruzioni del task corrente: eseguile ESATTAMENTE, senza aggiungere
-funzionalita non richieste. Quando hai finito, esegui 'npm run build' (e 'npm run test:unit' se lo script
-esiste) e correggi gli eventuali errori finche non passano. Non procedere oltre il task ricevuto.
+You are working in a project folder that contains CLAUDE.md: read it FIRST and follow every rule in it.
+Your standard input contains the instructions for the current task: execute them EXACTLY, without adding
+unrequested features. When done, run 'npm run build' (and 'npm run test:unit' if that script exists) and
+fix any errors until they pass. Do not go beyond the task you received.
 "@
 
 for ($i = $StartStep; $i -lt $prompts.Count; $i++) {
@@ -107,12 +107,12 @@ for ($i = $StartStep; $i -lt $prompts.Count; $i++) {
   Write-Host "===================================================" -ForegroundColor White
 
   if (-not (Test-Path $file)) {
-    Write-Host "ERRORE: file prompt mancante: $file" -ForegroundColor Red
+    Write-Host "ERROR: prompt file missing: $file" -ForegroundColor Red
     break
   }
 
-  # Sessione NUOVA e separata: il contesto e solo CLAUDE.md + i file gia su disco.
-  # Il prompt vero passa via stdin (niente problemi di quoting con testi lunghi).
+  # Separate NEW session: context is only CLAUDE.md + files already on disk.
+  # The actual prompt is passed via stdin (avoids quoting issues with long texts).
   Get-Content $file -Raw | claude -p $instruction `
     --permission-mode acceptEdits `
     --allowedTools "Bash,Read,Edit,Write,Glob,Grep,MultiEdit" `
@@ -121,22 +121,22 @@ for ($i = $StartStep; $i -lt $prompts.Count; $i++) {
 
   if ($claudeExit -ne 0) {
     Write-Host ""
-    Write-Host "Claude ha terminato con errore allo step $i. Mi fermo." -ForegroundColor Red
-    Write-Host "Guarda logs\step_$i.json, sistema, poi riprendi con:  .\run.ps1 -StartStep $i" -ForegroundColor Yellow
+    Write-Host "Claude terminated with an error at step $i. Stopping." -ForegroundColor Red
+    Write-Host "Check logs\step_$i.json, fix the issue, then resume with:  .\run.ps1 -StartStep $i" -ForegroundColor Yellow
     break
   }
 
   Write-Host ""
-  Write-Host "  Verifica indipendente dello step $i..." -ForegroundColor Cyan
+  Write-Host "  Independent verification of step $i..." -ForegroundColor Cyan
   if (-not (Test-Project)) {
     Write-Host ""
-    Write-Host "BUILD/TEST FALLITI allo step $i ($file)." -ForegroundColor Red
-    Write-Host "Mi fermo qui apposta, per non costruire sopra uno stato rotto." -ForegroundColor Red
+    Write-Host "BUILD/TEST FAILED at step $i ($file)." -ForegroundColor Red
+    Write-Host "Stopping here intentionally, to prevent building on a broken state." -ForegroundColor Red
     Write-Host ""
-    Write-Host "COSA FARE ORA:" -ForegroundColor Yellow
-    Write-Host "  1) Apri questa cartella in VS Code." -ForegroundColor Yellow
-    Write-Host "  2) Lancia 'claude' (interattivo) e descrivi/incolla l'errore di build." -ForegroundColor Yellow
-    Write-Host "  3) Quando 'npm run build' passa di nuovo, riprendi con:" -ForegroundColor Yellow
+    Write-Host "WHAT TO DO NOW:" -ForegroundColor Yellow
+    Write-Host "  1) Open this folder in VS Code." -ForegroundColor Yellow
+    Write-Host "  2) Run 'claude' (interactive) and describe/paste the build error." -ForegroundColor Yellow
+    Write-Host "  3) When 'npm run build' passes again, resume with:" -ForegroundColor Yellow
     Write-Host "       .\run.ps1 -StartStep $i" -ForegroundColor Yellow
     break
   }
@@ -146,17 +146,17 @@ for ($i = $StartStep; $i -lt $prompts.Count; $i++) {
   $null = git commit -m "Step ${i}: $($stepNames[$i])" --quiet 2>&1
 
   Write-Host ""
-  Write-Host "  STEP $i OK — build (e test unit) passati." -ForegroundColor Green
+  Write-Host "  STEP $i OK — build (and unit tests) passed." -ForegroundColor Green
 
   if ($i -eq $prompts.Count - 1) {
     Write-Host ""
-    Write-Host "FATTO. Tutti gli step completati e verificati." -ForegroundColor Green
-    Write-Host "Avvia il blog con:  npm run dev   (poi apri http://localhost:4321)" -ForegroundColor Green
-    Write-Host "Test E2E completi (facoltativo):  npm run test:e2e" -ForegroundColor Green
+    Write-Host "DONE. All steps completed and verified." -ForegroundColor Green
+    Write-Host "Start the blog with:  npm run dev   (then open http://localhost:4321)" -ForegroundColor Green
+    Write-Host "Full E2E tests (optional):  npm run test:e2e" -ForegroundColor Green
     break
   }
 
   if ($Pause) {
-    Read-Host "Premi INVIO per passare allo step successivo (CTRL+C per fermarti)"
+    Read-Host "Press ENTER to proceed to the next step (CTRL+C to stop)"
   }
 }

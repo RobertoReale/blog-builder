@@ -91,7 +91,7 @@ test_project() {
 }
 
 # --- Main loop ---
-INSTRUCTION="Sei in una cartella di progetto che contiene CLAUDE.md: leggilo PRIMA di tutto e rispetta ogni sua regola. Sul tuo standard input ricevi le istruzioni del task corrente: eseguile ESATTAMENTE, senza aggiungere funzionalita non richieste. Quando hai finito, esegui 'npm run build' (e 'npm run test:unit' se lo script esiste) e correggi gli eventuali errori finche non passano. Non procedere oltre il task ricevuto."
+INSTRUCTION="You are working in a project folder that contains CLAUDE.md: read it FIRST and follow every rule in it. Your standard input contains the instructions for the current task: execute them EXACTLY, without adding unrequested features. When done, run 'npm run build' (and 'npm run test:unit' if that script exists) and fix any errors until they pass. Do not go beyond the task you received."
 
 for (( i=START_STEP; i<${#PROMPTS[@]}; i++ )); do
   FILE="${PROMPTS[$i]}"

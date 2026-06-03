@@ -1,4 +1,4 @@
-# AI Blog Builder
+# Blog Builder
 
 A powerful, iterative framework to build a complete, production-ready personal blog using Astro 4, Tailwind CSS, and MDX, entirely generated through sequenced LLM prompts via Claude Code.
 
@@ -6,7 +6,9 @@ A powerful, iterative framework to build a complete, production-ready personal b
 
 Instead of generating an entire codebase in one massive prompt (which often leads to context overflow, hallucinations, and broken code), this project uses a **sequenced prompt architecture**.
 
-The build is broken down into small, verifiable steps. A PowerShell script (`run.ps1`) executes these steps sequentially using **Claude Code**. After each prompt, the script runs a build check (`npm run build`) and automated tests. If the build breaks, the pipeline stops, preventing the AI from building on top of a broken state.
+> **The Context Window Philosophy**: By splitting the generation into 7 distinct sequential steps, the LLM context window never fills up. Each prompt runs in a fresh session. The LLM only receives the project rules (`CLAUDE.md`) and the specific feature instructions, while reading the existing code on disk. This prevents the AI from forgetting previous instructions or hallucinating features, ensuring a highly stable and deterministic build.
+
+The build is broken down into small, verifiable steps. The automation scripts (`run.sh` for Linux/macOS, `run.ps1` for Windows) execute these steps sequentially using **Claude Code**. After each prompt, the script runs a build check (`npm run build`) and automated tests. If the build breaks, the pipeline stops immediately, preventing the AI from building on top of a broken state.
 
 ## Project Structure
 
@@ -19,7 +21,7 @@ The build is broken down into small, verifiable steps. A PowerShell script (`run
   - `04_search`: Pagefind static search integration.
   - `05_series`: Article series grouping.
   - `06_related`: Related articles recommendation.
-- **`run.ps1`**: The automation pipeline. It runs Claude Code for each prompt and enforces the build tests.
+- **`run.sh` & `run.ps1`**: The automation pipeline scripts for Linux/macOS and Windows respectively. They run Claude Code for each prompt and enforce the build tests.
 - **`SETUP.md`**: Detailed instructions on prerequisites and how to launch the build.
 
 ## 🎨 Customization (Pre-requisites)
@@ -34,11 +36,20 @@ This repository is a **general framework**. Before running the pipeline, you MUS
 
 ## How to use
 1. Follow the instructions in **[`SETUP.md`](SETUP.md)** to install the prerequisites (Node.js LTS, Git, and Claude Code).
-2. Open PowerShell in this folder.
+2. Open your terminal in this folder.
 3. Run the pipeline:
+
+   **Linux / macOS:**
+   ```bash
+   chmod +x run.sh
+   ./run.sh
+   ```
+
+   **Windows (PowerShell):**
    ```powershell
    .\run.ps1
    ```
+
 4. Watch as Claude Code iteratively builds your blog, checks the code, and passes to the next step!
 
 ## Why this approach?

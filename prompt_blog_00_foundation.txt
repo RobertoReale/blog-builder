@@ -24,17 +24,19 @@ A fully working blog where:
   you need custom headers or redirects (not required for the foundation).
 
 ## SITE CONFIG
-Create src/config.ts:
+Create src/config.ts using the values from CLAUDE.md.
+Look for the "Site values" block near the top of CLAUDE.md (inserted by setup):
 ```ts
 export const SITE = {
-  title: "Blog Title",
-  description: "Short one-line blog description.",
-  url: "https://yourdomain.com",
-  author: "Your Name",
+  title: "...",        // read from CLAUDE.md — Site values → title
+  description: "...", // read from CLAUDE.md — Site values → description
+  url: "...",         // read from CLAUDE.md — Site values → url
+  author: "...",      // read from CLAUDE.md — Site values → author
 }
 ```
 Use SITE wherever site-level data is needed (meta tags, nav, footer).
-These are placeholders — the user will fill them in.
+If the "Site values" block is absent from CLAUDE.md (setup was not run),
+use the generic placeholders above as fallbacks.
 
 ## DESIGN SYSTEM
 Implement via CSS custom properties in src/styles/global.css.
@@ -101,6 +103,8 @@ Define in src/content/config.ts using Astro content collections + zod:
     label: z.string(),
     href: z.string(),
   })).optional().default([]),
+  origin: z.string().optional(),
+  originPosition: z.enum(['top', 'bottom']).optional().default('bottom'),
   status: z.enum(['draft', 'published']),
   series: z.string().optional(),
   part: z.number().optional(),

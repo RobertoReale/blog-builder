@@ -101,17 +101,32 @@ Use Pagefind's JS API (not the default UI widget) to keep full design control:
   initSearch()
   
   function renderResults(items, container) {
+    container.innerHTML = ''
     if (!items.length) {
-      container.innerHTML = '<p class="muted">No results.</p>'
+      const msg = document.createElement('p')
+      msg.className = 'muted'
+      msg.textContent = 'No results.'
+      container.appendChild(msg)
       return
     }
-    container.innerHTML = items.map(item => `
-      <a href="${item.url}" class="search-result">
-        <h2>${item.meta?.title || 'Untitled'}</h2>
-        <p>${item.meta?.description || item.excerpt || ''}</p>
-        <span class="muted">${item.meta?.date || ''}</span>
-      </a>
-    `).join('')
+    for (const item of items) {
+      const a = document.createElement('a')
+      a.href = item.url           // URL comes from Pagefind's own built index
+      a.className = 'search-result'
+
+      const h2 = document.createElement('h2')
+      h2.textContent = item.meta?.title || 'Untitled'
+
+      const p = document.createElement('p')
+      p.textContent = item.meta?.description || item.excerpt || ''
+
+      const span = document.createElement('span')
+      span.className = 'muted'
+      span.textContent = item.meta?.date || ''
+
+      a.append(h2, p, span)
+      container.appendChild(a)
+    }
   }
 </script>
 ```

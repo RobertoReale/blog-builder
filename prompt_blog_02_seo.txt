@@ -41,15 +41,22 @@ Exclude: drafts, /rss.xml
 
 ### 3. robots.txt
 
-Create public/robots.txt:
-```
-User-agent: *
-Allow: /
-Sitemap: https://yourdomain.com/sitemap-index.xml
+Create src/pages/robots.txt.ts (dynamic, so SITE.url is used correctly):
+
+```ts
+import type { APIRoute } from 'astro'
+import { SITE } from '../config'
+
+export const GET: APIRoute = () => {
+  return new Response(
+    `User-agent: *\nAllow: /\nSitemap: ${SITE.url}/sitemap-index.xml\n`,
+    { headers: { 'Content-Type': 'text/plain' } }
+  )
+}
 ```
 
-Use SITE.url for the Sitemap line — generate this file dynamically
-if needed, or use a static file with a clear TODO comment for the URL.
+This generates /robots.txt at build time with the correct site URL from config.ts.
+Do NOT create a static public/robots.txt — it would hard-code the wrong URL.
 
 ---
 

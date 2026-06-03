@@ -240,7 +240,7 @@ When Vercel first deploys your project it assigns an auto-generated URL like `bl
 2. Click **Edit** next to the auto-generated URL
 3. Choose something readable, e.g. `your-name.vercel.app` or `my-blog.vercel.app`
 
-> **After renaming**: update `src/config.ts` with the new URL, then commit and push. If you've set up Keystatic, also update the **Homepage URL** and **Authorization callback URL** in your GitHub OAuth App (`github.com/settings/developers`).
+> **After renaming**: update `src/config.ts` with the new URL, then commit and push. If you've set up Keystatic, also update the **Homepage URL** and **Callback URL** in your GitHub App (`github.com/settings/developers`).
 
 **Custom domain** (e.g. `www.yourname.com`): on the same Domains page, click **Add**. Vercel handles SSL automatically.
 
@@ -288,14 +288,17 @@ name: 'your-repo-name',          // ← replace
 
 Commit and push.
 
-**Step B — Create a GitHub OAuth App**
+**Step B — Create a GitHub App**
 
-Go to [github.com/settings/developers](https://github.com/settings/developers) → **OAuth Apps** → **New OAuth App**:
-- **Application name**: `Blog Admin`
+Go to [github.com/settings/developers](https://github.com/settings/developers) → **GitHub Apps** → **New GitHub App**:
+- **GitHub App name**: `Blog Admin`
 - **Homepage URL**: `https://yourdomain.com`
-- **Authorization callback URL**: `https://yourdomain.com/api/keystatic/github/oauth/callback`
+- **Callback URL**: `https://yourdomain.com/api/keystatic/github/oauth/callback`
+- **Webhook**: Uncheck "Active" (Keystatic does not use webhooks)
+- **Permissions**: Under `Repository permissions`, set `Contents` to **Read and write**
+- **User authorization**: Check "Request user authorization (OAuth) during installation"
 
-Copy the **Client ID** and generate a **Client Secret**.
+After saving, copy the **Client ID** and generate a new **Client Secret**. Finally, click **Install App** in the left sidebar to install it on your blog repository.
 
 **Step C — Add environment variables in Vercel**
 
@@ -400,7 +403,7 @@ Check:
 ### Keystatic: "Not authenticated" or OAuth error
 
 1. Verify the `KEYSTATIC_GITHUB_CLIENT_ID` and `KEYSTATIC_GITHUB_CLIENT_SECRET` are set correctly in Vercel.
-2. Verify the callback URL in the GitHub OAuth App is exactly `https://yourdomain.com/api/keystatic/github/oauth/callback`.
+2. Verify the callback URL in the GitHub App is exactly `https://yourdomain.com/api/keystatic/github/oauth/callback`.
 3. Ensure `KEYSTATIC_SECRET` is set and is at least 32 bytes of random hex.
 4. Trigger a fresh Vercel deploy after adding/changing env variables.
 

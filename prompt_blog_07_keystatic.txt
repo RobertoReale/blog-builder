@@ -233,8 +233,8 @@ Create `.env.example` at the project root. Do NOT create or modify `.env` —
 it may already exist with secrets; if absent, the user creates it themselves.
 
 ```
-# Keystatic CMS — GitHub OAuth App credentials
-# Create at: https://github.com/settings/developers → OAuth Apps → New OAuth App
+# Keystatic CMS — GitHub App credentials
+# Create at: https://github.com/settings/developers → GitHub Apps → New GitHub App
 #   Homepage URL:   https://your-deployed-site.com
 #   Callback URL:   https://your-deployed-site.com/api/keystatic/github/oauth/callback
 KEYSTATIC_GITHUB_CLIENT_ID=
@@ -313,7 +313,7 @@ The build may produce output in `.vercel/output/` instead of `dist/` — this is
 
 ### What this step does NOT include
 
-- Creating the GitHub OAuth app (manual step for the user after deployment)
+- Creating the GitHub App (manual step for the user after deployment)
 - Replacing `GITHUB_OWNER` / `GITHUB_REPO` placeholders (manual step for the user)
 - Image upload configuration (cover images remain a plain text path field)
 - Custom editor extensions or Keystatic UI theming

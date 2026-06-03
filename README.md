@@ -15,6 +15,7 @@ A framework to build a complete, production-ready personal blog using Astro 4, T
 7. [Search](#7-search)
 8. [Troubleshooting](#8-troubleshooting)
 9. [How the Pipeline Works](#9-how-the-pipeline-works)
+10. [What Could This Blog Do Better?](#10-what-could-this-blog-do-better-optional)
 
 ---
 
@@ -485,6 +486,7 @@ architecture**:
 | 7 | `prompt_blog_07_keystatic.txt` | Keystatic CMS (browser editor, GitHub mode) |
 | 8 | `prompt_blog_08_e2e_check.txt` | E2E integration check, fix any cross-feature failures |
 | 9 | `prompt_blog_09_ui_review.txt` | UI/UX & design audit — accessibility, consistency, polish, configuration completeness |
+| — | `prompt_blog_10_future_features.txt` | **Optional** — web-researched report of missing features and future improvements (no code changes) |
 
 After every successful step, a git commit is created as a rollback point.
 
@@ -508,6 +510,35 @@ All architectural decisions are documented in `CLAUDE.md`. Claude Code reads thi
 - Page render order
 
 Edit `CLAUDE.md` if you want to add new architectural rules or change defaults before running additional prompts.
+
+---
+
+---
+
+## 10. What Could This Blog Do Better? (Optional)
+
+Once the pipeline is complete and your blog is live, you can run one final
+optional prompt to get an honest, web-researched assessment of what your blog
+might be missing compared to the best personal blogs on the web today.
+
+**When to use it:**
+
+> "My blog is built and deployed. What features should I consider adding in the future?"
+
+**How to run it:**
+
+Open a new Claude Code session in your blog folder and paste the contents of
+`prompt_blog_10_future_features.txt`.
+
+Claude will:
+1. Search the web for what makes a great personal blog in the current year
+2. Compare the results against everything already built (read from `CLAUDE.md`)
+3. Produce a structured report organized into three tiers: quick wins, larger
+   investments, and things worth knowing about but probably not for this blog
+
+This prompt produces a report only — it makes no changes to your code.
+Use the findings as a backlog: pick one item, write a focused prompt for it
+(in the style of the existing pipeline prompts), and run it as a new step.
 
 ---
 

@@ -1,0 +1,100 @@
+## OPTIONAL — What Could This Blog Do Better?
+
+This is a discovery prompt, not a build step.
+Do not modify any code. Do not run any builds.
+Your only output is a structured report.
+
+CRITICAL INSTRUCTION: Before writing anything, use your web search tools to
+research what makes a personal blog excellent. Search for:
+1. "best personal blog features" — what do top personal blogs offer?
+2. "Astro blog missing features" — what do developers commonly add after launch?
+3. "personal blog SEO improvements beyond sitemap" — what SEO gaps are common?
+4. "indie web personal blog features" — what does the IndieWeb community value?
+5. "blog reader experience features" — what keeps readers coming back?
+
+Search without year filters so results reflect the current state of the web,
+not a snapshot. Cross-reference with what is already built (read CLAUDE.md's
+FEATURES STATUS section). Do not suggest anything already implemented.
+
+---
+
+## GOAL
+
+Produce an honest, specific assessment of what this blog is missing compared
+to the best personal blogs on the web today. Be direct: if something is
+genuinely absent and would improve the blog, say so clearly. If something is
+a fad or adds complexity without real benefit, say so too.
+
+Organize the output into three tiers:
+
+**Tier 1 — High impact, low effort**
+Quick wins that would meaningfully improve the experience for readers or the
+author, and can likely be added with a single focused prompt.
+
+**Tier 2 — High impact, higher effort**
+Features that require more work but substantially raise the quality of the
+blog — worth doing, just not in one evening.
+
+**Tier 3 — Worth knowing about, but probably not for this blog**
+Features common on larger blogs that introduce complexity, external
+dependencies, or maintenance burden that may not suit a simple personal blog.
+
+---
+
+## FORMAT
+
+For each suggested feature, write:
+
+**Feature name**
+What it is and why it matters for this specific type of blog (personal,
+long-form, static Astro + Vercel). Include a rough implementation note —
+what technology or approach would you use? Would it stay static, or require
+a serverless function? Is there an Astro integration that handles it?
+
+Keep each entry concise: 3–5 sentences. No code snippets needed.
+
+---
+
+## WHAT IS ALREADY BUILT
+
+Before writing the report, read CLAUDE.md's FEATURES STATUS section.
+Do not suggest any feature marked [x] as complete.
+
+The features already implemented are:
+- Foundation: pages, MDX, dark mode, example article
+- Testing: Vitest unit tests, Playwright E2E
+- SEO: RSS, sitemap, robots.txt, canonical URLs, 404, JSON-LD
+- Reading UX: progress bar, TOC, back-to-top, share button
+- Search: Pagefind full-text search
+- Article series: SeriesNav component, /series/[series] pages
+- Related articles: tag-based recommendation
+- Keystatic CMS: browser editor, GitHub mode for remote editing
+- UI/UX audit: accessibility, dark mode completeness, responsive design
+
+---
+
+## AREAS TO EVALUATE
+
+Cover at minimum these areas in your web research and report:
+
+- **Discovery & reach** (how do new readers find the blog?)
+- **Reader retention** (how do readers come back without a newsletter?)
+- **Content structure** (is there anything missing for long-form writing?)
+- **Author presence** (what makes a personal blog feel personal and trustworthy?)
+- **Performance** (what metrics matter for a static blog, and are there gaps?)
+- **Internationalization** (the blog already has a `language` field — is anything missing?)
+- **Open web / IndieWeb** (webmentions, h-card, ActivityPub — what's realistic?)
+- **Monetization** (only if it can be done without analytics or auth)
+- **Content longevity** (how does the blog age gracefully over years?)
+
+You do not need to cover every possible feature in each area — focus on what
+is genuinely missing and genuinely useful for a personal blog of this type.
+
+---
+
+## CLOSING NOTE
+
+End the report with a single paragraph: your honest overall assessment.
+Is this blog missing something fundamental, or is it already well-equipped
+for a personal writing project? What is the single most important next step
+if the author has one hour to improve it?

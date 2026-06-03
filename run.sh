@@ -249,8 +249,29 @@ for (( i=START_STEP; i<=STOP_AT; i++ )); do
     echo ""
     if [ $STOP_AT -eq $LAST_STEP ]; then
       echo -e "\033[0;32mDONE. All steps completed and verified.\033[0m"
-      echo -e "\033[0;32mStart the blog with:  npm run dev   (then open http://localhost:4321)\033[0m"
-      echo -e "\033[0;32mFull E2E tests (optional):  npm run test:e2e\033[0m"
+      if [ -f "keystatic.config.ts" ]; then
+        echo ""
+        echo -e "\033[1;37mLocal preview options:\033[0m"
+        echo -e "  Option A (recommended): npm run dev"
+        echo -e "\033[1;30m    If pages are blank or show 500, try Option B.\033[0m"
+        echo -e "  Option B (always works): npm run dev:build"
+        echo -e "\033[1;30m    Builds the full site and serves it at http://localhost:4321\033[0m"
+        echo -e "\033[1;30m    (search works here too)\033[0m"
+        echo ""
+        echo -e "Full E2E tests (optional):  npm run test:e2e"
+        echo ""
+        echo -e "\033[0;36mBefore going live — open README.md for:\033[0m"
+        echo -e "  - How to write and publish articles"
+        echo -e "  - How to set up the Keystatic CMS on Vercel"
+        echo -e "  - How to customize colors, fonts, and content"
+      else
+        echo -e "\033[0;32mStart the blog with:  npm run dev   (then open http://localhost:4321)\033[0m"
+        echo -e "\033[0;32mFull E2E tests (optional):  npm run test:e2e\033[0m"
+        echo ""
+        echo -e "\033[0;36mBefore going live — open README.md for:\033[0m"
+        echo -e "  - How to write and publish articles"
+        echo -e "  - How to customize and deploy the blog"
+      fi
     else
       echo -e "\033[0;32mDONE. Steps $START_STEP-$STOP_AT completed and verified.\033[0m"
       echo -e "\033[0;36mResume with:  ./run.sh -s $(( STOP_AT + 1 ))\033[0m"

@@ -223,8 +223,7 @@ Edit `src/pages/about.astro` and `src/pages/now.astro` — they contain placehol
 
 Your blog is live. Every `git push` triggers an automatic redeploy.
 
-> Before going live: update `src/config.ts` with your real URL, and replace
-> `yourdomain.com` in `public/robots.txt` (if it exists).
+> Before going live: update `src/config.ts` with your real URL — the robots.txt is generated dynamically from that file.
 
 ### With Keystatic (Step 7: hybrid)
 

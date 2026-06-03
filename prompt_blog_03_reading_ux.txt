@@ -146,7 +146,7 @@ Active heading highlight (optional but recommended):
 - When one enters the viewport: add active class to its TOC link
 - Active link: var(--color-accent), no other decoration
 
-Step 3 — Add TOC to article layout
+Step 2 — Add TOC to article layout
 In src/pages/article/[slug].astro, render <TOC /> in the same position
 as before: after the article header, before the article body.
 

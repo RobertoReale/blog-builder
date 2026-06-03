@@ -269,7 +269,7 @@ Write-Host ""
 Write-Host "Next steps:" -ForegroundColor White
 Write-Host ""
 Write-Host "  1. Generate the blog:"
-Write-Host "       .\run.ps1        (runs all 7 steps)" -ForegroundColor White
+Write-Host "       .\run.ps1        (runs all 9 steps, 0-8)" -ForegroundColor White
 Write-Host "       .\run.ps1 -Pause (pauses after each step)" -ForegroundColor White
 Write-Host ""
 if ($githubRemote) {

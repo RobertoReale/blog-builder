@@ -178,7 +178,7 @@ See the [Troubleshooting section in README.md](README.md#8-troubleshooting) for 
 
 ## 6. Before publishing to GitHub / Vercel
 
-- Fill in `src/config.ts` (title, url, author) and replace `yourdomain.com` in `public/robots.txt`.
+- Fill in `src/config.ts` (title, url, author) — the robots.txt is generated dynamically from that file, so no separate edit is needed.
 - Add a `.gitignore` with at least:
 
       node_modules/

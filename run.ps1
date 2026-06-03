@@ -25,7 +25,8 @@ $prompts = @(
   "prompt_blog_03_reading_ux.txt",  # 3  Feature 02 - Reading UX
   "prompt_blog_04_search.txt",      # 4  Feature 03 - Search (Pagefind)
   "prompt_blog_05_series.txt",      # 5  Feature 04 - Series
-  "prompt_blog_06_related.txt"      # 6  Feature 05 - Related
+  "prompt_blog_06_related.txt",     # 6  Feature 05 - Related
+  "prompt_blog_07_keystatic.txt"    # 7  Feature 06 - Keystatic CMS
 )
 
 $stepNames = @(
@@ -35,7 +36,8 @@ $stepNames = @(
   "Reading UX",
   "Search",
   "Series",
-  "Related articles"
+  "Related articles",
+  "Keystatic CMS"
 )
 
 # --- Controlli preliminari -------------------------------------------------

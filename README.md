@@ -23,6 +23,7 @@ blog-builder/
   prompt_blog_04_search.txt        Step 4: Pagefind static search
   prompt_blog_05_series.txt        Step 5: article series grouping
   prompt_blog_06_related.txt       Step 6: related articles recommendation
+  prompt_blog_07_keystatic.txt     Step 7: Keystatic CMS (browser editor, GitHub mode)
   run.sh / run.ps1                 Pipeline script (Linux/macOS and Windows)
   SETUP.md                         Detailed setup and usage guide
 ```
@@ -63,6 +64,38 @@ The output is a fast static Astro site. You can host it anywhere, but it's optim
 - **Vercel**: connect your GitHub repository to a new Vercel project. No framework adapter needed — Vercel detects the `build` script automatically.
 
 See step 6 in [`SETUP.md`](SETUP.md) for the full pre-launch checklist.
+
+## Keystatic CMS (Step 7 — Optional)
+
+Step 7 adds a browser-based admin interface at `yourdomain.com/keystatic` so you can write and publish articles without touching `.mdx` files. Keystatic commits directly to GitHub; Vercel picks up the push and rebuilds automatically.
+
+This step switches the Astro output mode from `static` to `hybrid` and adds the `@astrojs/vercel` adapter — required because the admin UI and its OAuth callback routes must run as serverless functions. All existing blog pages stay statically pre-rendered and are unaffected.
+
+### Setup after running Step 7
+
+Before the admin UI is usable in production, complete these manual steps:
+
+1. **Replace the repo placeholders** in `keystatic.config.ts`:
+   ```ts
+   repo: { owner: 'your-github-username', name: 'your-repo-name' }
+   ```
+
+2. **Create a GitHub OAuth App** at <https://github.com/settings/developers> → *OAuth Apps* → *New OAuth App*:
+   - Homepage URL: `https://your-deployed-site.com`
+   - Authorization callback URL: `https://your-deployed-site.com/api/keystatic/github/oauth/callback`
+
+3. **Set environment variables** in Vercel (Project → Settings → Environment Variables):
+   | Variable | Value |
+   |---|---|
+   | `KEYSTATIC_GITHUB_CLIENT_ID` | Client ID from the OAuth app |
+   | `KEYSTATIC_GITHUB_CLIENT_SECRET` | Client secret from the OAuth app |
+   | `KEYSTATIC_SECRET` | Random 32-byte hex string — run `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
+
+4. Redeploy. Visit `yourdomain.com/keystatic`, authenticate with GitHub, and start writing.
+
+> The admin is gated by GitHub authentication — only users with write access to the repository can log in.
+
+---
 
 ## Why This Approach?
 

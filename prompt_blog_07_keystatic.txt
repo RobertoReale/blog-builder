@@ -1,0 +1,264 @@
+## FEATURE 06 — Keystatic CMS (GitHub mode)
+
+The blog foundation and all previous features are already built.
+Add Keystatic CMS so articles can be created and published directly from the browser
+at `/keystatic`, without editing `.mdx` files manually.
+
+When the user writes an article and clicks "Create" or "Save", Keystatic commits the
+`.mdx` file to GitHub. Vercel detects the push and rebuilds the blog automatically.
+
+---
+
+### Architecture note — two CLAUDE.md overrides
+
+Keystatic GitHub mode requires server-side routes (OAuth callbacks, GitHub API proxy).
+This step intentionally overrides two constraints from CLAUDE.md that were correct for
+a fully static blog but must change for Keystatic:
+
+1. `output: 'static'` → must become `output: 'hybrid'`
+2. "No @astrojs/vercel adapter" → must be installed (Vercel needs it to run the SSR routes)
+
+These overrides are deliberate. All existing blog pages remain statically pre-rendered in
+hybrid mode — their behavior, performance, and deployment are completely unchanged.
+Only the `/keystatic` admin UI and `/api/keystatic/*` backend routes run as serverless
+functions. Every `export const prerender = true` is implicit for all existing pages in
+hybrid mode — do NOT add that annotation to existing files.
+
+---
+
+### Step 1 — Install packages
+
+```bash
+npm install @keystatic/core @keystatic/astro @astrojs/vercel
+```
+
+No dev-only flag — all three are runtime or build-time dependencies.
+
+---
+
+### Step 2 — Update astro.config.mjs
+
+Add the Vercel adapter and Keystatic integration. Preserve ALL existing integrations
+(tailwind, mdx) and any existing config options (site URL, etc.).
+
+```js
+import { defineConfig } from 'astro/config'
+import tailwind from '@astrojs/tailwind'
+import mdx from '@astrojs/mdx'
+import vercel from '@astrojs/vercel'
+import keystatic from '@keystatic/astro'
+
+export default defineConfig({
+  output: 'hybrid',
+  adapter: vercel(),
+  integrations: [
+    tailwind(),
+    mdx(),
+    keystatic(),
+    // keep any other integrations already present
+  ],
+  // keep existing site, build, or other options unchanged
+})
+```
+
+If any other integrations (e.g. pagefind-related plugins) are already present, keep them.
+
+---
+
+### Step 3 — Create keystatic.config.ts
+
+Create `keystatic.config.ts` at the project root (same level as `astro.config.mjs`).
+This schema mirrors `src/content/config.ts` field by field.
+
+```ts
+import { config, collection, fields } from '@keystatic/core'
+
+export default config({
+  storage: {
+    kind: 'github',
+    repo: {
+      owner: 'GITHUB_OWNER', // PLACEHOLDER — user must replace with their GitHub username/org
+      name: 'GITHUB_REPO',   // PLACEHOLDER — user must replace with their repository name
+    },
+  },
+  ui: {
+    brand: { name: 'Blog Admin' },
+  },
+  collections: {
+    articles: collection({
+      label: 'Articles',
+      slugField: 'title',
+      path: 'src/content/articles/*',
+      format: { contentField: 'content' },
+      schema: {
+        title: fields.slug({
+          name: { label: 'Title' },
+        }),
+        date: fields.date({
+          label: 'Date',
+          validation: { isRequired: true },
+        }),
+        description: fields.text({
+          label: 'Description',
+          multiline: true,
+          validation: { isRequired: true },
+        }),
+        tags: fields.array(
+          fields.text({ label: 'Tag' }),
+          { label: 'Tags', itemLabel: props => props.value },
+        ),
+        status: fields.select({
+          label: 'Status',
+          options: [
+            { label: 'Draft', value: 'draft' },
+            { label: 'Published', value: 'published' },
+          ],
+          defaultValue: 'draft',
+        }),
+        language: fields.select({
+          label: 'Language',
+          options: [
+            { label: 'English', value: 'en' },
+            { label: 'Italian', value: 'it' },
+          ],
+          defaultValue: 'en',
+        }),
+        series: fields.text({
+          label: 'Series',
+          validation: { isRequired: false },
+        }),
+        part: fields.number({
+          label: 'Part (in series)',
+          validation: { isRequired: false },
+        }),
+        coverImage: fields.text({
+          label: 'Cover image path (relative to project root)',
+          validation: { isRequired: false },
+        }),
+        origin: fields.text({
+          label: 'Origin note',
+          multiline: true,
+          validation: { isRequired: false },
+        }),
+        originPosition: fields.select({
+          label: 'Origin position',
+          options: [
+            { label: 'Top', value: 'top' },
+            { label: 'Bottom', value: 'bottom' },
+          ],
+          defaultValue: 'bottom',
+        }),
+        sources: fields.array(
+          fields.object({
+            label: fields.text({ label: 'Label' }),
+            href: fields.text({ label: 'URL' }),
+          }),
+          {
+            label: 'Sources',
+            itemLabel: props => props.fields.label.value,
+          },
+        ),
+        content: fields.mdx({ label: 'Content' }),
+      },
+    }),
+  },
+})
+```
+
+---
+
+### Step 4 — Create .env.example
+
+Create `.env.example` at the project root. Do NOT create or modify `.env` —
+it may already exist with secrets; if absent, the user creates it themselves.
+
+```
+# Keystatic CMS — GitHub OAuth App credentials
+# Create at: https://github.com/settings/developers → OAuth Apps → New OAuth App
+#   Homepage URL:   https://your-deployed-site.com
+#   Callback URL:   https://your-deployed-site.com/api/keystatic/github/oauth/callback
+KEYSTATIC_GITHUB_CLIENT_ID=
+KEYSTATIC_GITHUB_CLIENT_SECRET=
+
+# Random secret for session signing
+# Generate with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+KEYSTATIC_SECRET=
+```
+
+Check `.gitignore`: if `.env` is not already listed, add it on its own line.
+Do NOT add `.env.example` to `.gitignore`.
+
+---
+
+### Step 5 — Fix Pagefind output path (conditional)
+
+This step applies ONLY if Pagefind (Feature 03) has already been implemented.
+
+With `@astrojs/vercel`, the build output moves from `dist/` to `.vercel/output/static/`.
+If `package.json` contains a build script that references `--site dist`, update it:
+
+Before: `astro build && pagefind --site dist`
+After:  `astro build && pagefind --site .vercel/output/static`
+
+Check `package.json` scripts and apply this replacement only if Pagefind is present.
+If Pagefind is not installed, skip this step entirely.
+
+---
+
+### Step 6 — Do not touch existing pages or components
+
+Do NOT modify any of the following:
+- src/pages/index.astro
+- src/pages/articles.astro
+- src/pages/article/[slug].astro
+- src/pages/tag/[tag].astro
+- src/pages/about.astro
+- src/pages/now.astro
+- src/layouts/BaseLayout.astro
+- src/layouts/ArticleLayout.astro
+- src/content/config.ts
+- src/config.ts
+- Any component in src/components/
+- Any utility in src/utils/
+- Any test file in tests/
+
+Keystatic adds its own routes automatically via the integration — no Astro page
+files need to be created for `/keystatic` or `/api/keystatic`.
+
+---
+
+### Step 7 — Verify TypeScript compiles cleanly
+
+Keystatic types are strict. Common pitfalls to avoid:
+
+- `fields.number()` with `validation: { isRequired: false }` produces `number | null`
+  in the output type. This is fine — the field is optional by design.
+- `fields.text()` with `validation: { isRequired: false }` produces `string | null`.
+  These match the Zod schema's `.optional()` fields (both accept absence of value).
+- Do not use TypeScript `as` casts or `any` types anywhere in keystatic.config.ts.
+
+Run `npm run build` and fix all TypeScript errors before marking this step done.
+The build may produce output in `.vercel/output/` instead of `dist/` — this is correct.
+
+---
+
+### What this step does NOT include
+
+- Creating the GitHub OAuth app (manual step for the user after deployment)
+- Replacing `GITHUB_OWNER` / `GITHUB_REPO` placeholders (manual step for the user)
+- Image upload configuration (cover images remain a plain text path field)
+- Custom editor extensions or Keystatic UI theming
+- Any new Astro pages (the integration injects the routes automatically)
+
+---
+
+### Checklist before finishing
+
+- [ ] `npm install` succeeds (no blocking peer-dependency errors)
+- [ ] `astro.config.mjs` has `output: 'hybrid'`, `adapter: vercel()`, and `keystatic()` in integrations
+- [ ] `keystatic.config.ts` exists at project root with the full schema above
+- [ ] `.env.example` exists with the three required variable names
+- [ ] `.env` is listed in `.gitignore`
+- [ ] Pagefind output path updated if Pagefind was already installed (Step 5)
+- [ ] No modifications to existing pages, layouts, components, or utilities
+- [ ] `npm run build` succeeds with zero TypeScript errors

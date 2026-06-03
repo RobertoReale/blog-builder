@@ -150,4 +150,4 @@ To test with a real article: create `src/content/articles/test.mdx` with `status
       run.ps1
       prompt_blog_*.txt
 
-- **Vercel**: connect the repo, select the project. No framework adapter needed — the site is statically generated and the `build` script includes Pagefind indexing automatically.
+- **Vercel**: connect the repo, select the project. If you ran Step 7 (Keystatic CMS), the `@astrojs/vercel` adapter is already installed and Vercel will detect it automatically. For blogs without Keystatic (Steps 0–6 only), no adapter is needed — the site is fully statically generated.

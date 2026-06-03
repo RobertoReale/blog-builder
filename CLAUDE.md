@@ -254,3 +254,4 @@ Update this section manually as features are completed.
 - [ ] Feature 03 — Search (Pagefind)
 - [ ] Feature 04 — Article series (SeriesNav, /series/[series])
 - [ ] Feature 05 — Related articles
+- [ ] Feature 06 — Keystatic CMS (browser editor, GitHub mode, hybrid output)

@@ -34,6 +34,7 @@ PROMPTS=(
   "prompt_blog_04_search.txt"
   "prompt_blog_05_series.txt"
   "prompt_blog_06_related.txt"
+  "prompt_blog_07_keystatic.txt"
 )
 
 STEP_NAMES=(
@@ -44,6 +45,7 @@ STEP_NAMES=(
   "Search"
   "Series"
   "Related articles"
+  "Keystatic CMS"
 )
 
 # --- Preliminary checks ---

@@ -127,17 +127,52 @@ If you want to undo the partial work from a failed step entirely, roll back to t
 
 ---
 
-## 5. At the end
+## 5. After the build completes
 
-Start the dev server:
+### Start the blog
 
-    npm run dev
+**Without Keystatic (steps 0–6):**
+```bash
+npm run dev
+# open http://localhost:4321
+```
 
-Open [http://localhost:4321](http://localhost:4321). For the full E2E test suite (optional, launches a browser):
+**With Keystatic (step 7 included) — try in order:**
+```bash
+# Option A: standard dev server
+npm run dev
+# open http://localhost:4321
 
-    npm run test:e2e
+# Option B: build-based preview (always works; search is also indexed)
+npm run dev:build
+# open http://localhost:4321
+```
 
-To test with a real article: create `src/content/articles/test.mdx` with `status: published` following the schema in `CLAUDE.md`.
+If `npm run dev` shows blank pages or 500 errors after Step 7, use `npm run dev:build`.
+See the [Troubleshooting section in README.md](README.md#8-troubleshooting) for the cause and fix.
+
+### What you get
+
+| Feature | How to use |
+|---|---|
+| **Homepage** | Lists all published articles, filterable by tag |
+| **Articles page** | `/articles` — same list, no hero |
+| **Article page** | `/article/[slug]` — TOC, reading time, tags, series nav, related |
+| **Search** | `/search` — type to search (or press `/` anywhere on the site) |
+| **About / Now** | `/about` and `/now` — edit the placeholder content |
+| **Dark mode** | Toggle in the top-right corner; preference saved in localStorage |
+| **RSS feed** | `/rss.xml` — auto-generated from published articles |
+| **Sitemap** | `/sitemap-index.xml` |
+| **Keystatic CMS** | `yourdomain.com/keystatic` — browser editor (Step 7 only) |
+
+### Next steps
+
+👉 **[README.md](README.md)** — the complete guide covering:
+- Writing and publishing articles (frontmatter, MDX components)
+- Customizing colors, fonts, navigation
+- Deploying to Vercel
+- Setting up the Keystatic CMS
+- Troubleshooting common issues
 
 ---
 

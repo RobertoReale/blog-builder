@@ -225,8 +225,31 @@ for ($i = $StartStep; $i -le $stopAt; $i++) {
     Write-Host ""
     if ($stopAt -eq $prompts.Count - 1) {
       Write-Host "DONE. All steps completed and verified." -ForegroundColor Green
-      Write-Host "Start the blog with:  npm run dev   (then open http://localhost:4321)" -ForegroundColor Green
-      Write-Host "Full E2E tests (optional):  npm run test:e2e" -ForegroundColor Green
+      # Detect whether Keystatic (step 7) was part of this run
+      $keystatic = (Test-Path "keystatic.config.ts")
+      if ($keystatic) {
+        Write-Host ""
+        Write-Host "Local preview options:" -ForegroundColor White
+        Write-Host "  Option A (recommended): npm run dev" -ForegroundColor White
+        Write-Host "    If pages are blank or show 500, try Option B." -ForegroundColor DarkGray
+        Write-Host "  Option B (always works): npm run dev:build" -ForegroundColor White
+        Write-Host "    Builds the full site and serves it at http://localhost:4321" -ForegroundColor DarkGray
+        Write-Host "    (search works here too)" -ForegroundColor DarkGray
+        Write-Host ""
+        Write-Host "Full E2E tests (optional):  npm run test:e2e" -ForegroundColor White
+        Write-Host ""
+        Write-Host "Before going live — open README.md for:" -ForegroundColor Cyan
+        Write-Host "  - How to write and publish articles" -ForegroundColor White
+        Write-Host "  - How to set up the Keystatic CMS on Vercel" -ForegroundColor White
+        Write-Host "  - How to customize colors, fonts, and content" -ForegroundColor White
+      } else {
+        Write-Host "Start the blog with:  npm run dev   (then open http://localhost:4321)" -ForegroundColor Green
+        Write-Host "Full E2E tests (optional):  npm run test:e2e" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "Before going live — open README.md for:" -ForegroundColor Cyan
+        Write-Host "  - How to write and publish articles" -ForegroundColor White
+        Write-Host "  - How to customize and deploy the blog" -ForegroundColor White
+      }
     } else {
       Write-Host "DONE. Steps $StartStep-$stopAt completed and verified." -ForegroundColor Green
       Write-Host "Resume with:  .\run.ps1 -StartStep $($stopAt + 1)" -ForegroundColor Cyan

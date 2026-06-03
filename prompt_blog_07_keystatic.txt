@@ -34,6 +34,31 @@ npm install @keystatic/core @keystatic/astro @astrojs/vercel
 
 No dev-only flag — all three are runtime or build-time dependencies.
 
+> **Node.js compatibility note**: `@astrojs/vercel` bundles its own esbuild
+> version for bundling serverless functions. With Node.js 24 this can cause
+> the dev server to fail to render pages (error: `Expected "}" but found ":"`)
+> because the bundled esbuild has trouble parsing certain Astro template patterns
+> in hybrid mode. The **production build** (`npm run build`) is not affected.
+> See Step 3 for the Vite configuration that fixes this, and Step 1.5 for the
+> fallback dev script.
+
+---
+
+### Step 1.5 — Add a fallback dev script to package.json
+
+If `npm run dev` fails after this step (which can happen on Node.js 24+ due to
+the esbuild issue described above), users need an alternative. Add a `dev:build`
+script to `package.json` that builds the site and serves the output statically:
+
+Locate the `"scripts"` section in `package.json` and add:
+```json
+"dev:build": "npm run build && npx serve@latest .vercel/output/static -p 4321"
+```
+
+This lets users preview the blog locally even when `npm run dev` has issues.
+Note: `dev:build` runs the full production build (slower, ~20s) but is 100%
+reliable. Search also works here because `npm run build` runs Pagefind.
+
 ---
 
 ### Step 2 — Update astro.config.mjs
@@ -51,6 +76,14 @@ import keystatic from '@keystatic/astro'
 export default defineConfig({
   output: 'hybrid',
   adapter: vercel(),
+  vite: {
+    // Required for compatibility with Node.js 22–24 + the Vercel adapter.
+    // Without this, esbuild may fail to parse CSS custom properties inside
+    // Astro template strings during dev server rendering.
+    esbuild: {
+      target: 'es2022',
+    },
+  },
   integrations: [
     tailwind(),
     mdx(),
@@ -214,6 +247,10 @@ Do NOT modify any of the following:
 - src/pages/tag/[tag].astro
 - src/pages/about.astro
 - src/pages/now.astro
+- src/pages/search.astro
+- src/pages/series/ (if present)
+- src/pages/rss.xml.ts (if present)
+- src/pages/robots.txt.ts (if present)
 - src/layouts/BaseLayout.astro
 - src/layouts/ArticleLayout.astro
 - src/content/config.ts
@@ -224,6 +261,11 @@ Do NOT modify any of the following:
 
 Keystatic adds its own routes automatically via the integration — no Astro page
 files need to be created for `/keystatic` or `/api/keystatic`.
+
+IMPORTANT: In `output: 'hybrid'` mode, all existing pages are already treated
+as pre-rendered by default. Do NOT add `export const prerender = true` to any
+existing page — this annotation is implicit and adding it is redundant.
+Only server-rendered (dynamic) pages need `export const prerender = false`.
 
 ---
 
@@ -255,10 +297,13 @@ The build may produce output in `.vercel/output/` instead of `dist/` — this is
 ### Checklist before finishing
 
 - [ ] `npm install` succeeds (no blocking peer-dependency errors)
-- [ ] `astro.config.mjs` has `output: 'hybrid'`, `adapter: vercel()`, and `keystatic()` in integrations
+- [ ] `astro.config.mjs` has `output: 'hybrid'`, `adapter: vercel()`, `keystatic()` in integrations, and `vite.esbuild.target: 'es2022'`
 - [ ] `keystatic.config.ts` exists at project root with the full schema above
 - [ ] `.env.example` exists with the three required variable names
 - [ ] `.env` is listed in `.gitignore`
 - [ ] Pagefind output path updated if Pagefind was already installed (Step 5)
+- [ ] `"dev:build"` script added to `package.json`
 - [ ] No modifications to existing pages, layouts, components, or utilities
+- [ ] No `export const prerender = true` added to any existing page
 - [ ] `npm run build` succeeds with zero TypeScript errors
+- [ ] `npm run dev` starts without crashing (pages may show errors on Node 24+ — that is addressed by the Vite esbuild target above; if errors persist, use `npm run dev:build` as the documented fallback)

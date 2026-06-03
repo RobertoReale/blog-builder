@@ -270,6 +270,7 @@ if ($githubRemote) {
   Write-Host "       git push -u origin HEAD" -ForegroundColor White
   Write-Host ""
 }
-Write-Host "  Once generated, preview with:  npm run dev"
-Write-Host "  Then open:  http://localhost:4321"
+Write-Host "  Once generated, open README.md for usage instructions."
+Write-Host "  Quick preview:  npm run dev  (then open http://localhost:4321)"
+Write-Host "  If pages are blank after Step 7 (Keystatic), use:  npm run dev:build"
 Write-Host ""

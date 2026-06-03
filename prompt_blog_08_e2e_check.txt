@@ -1,17 +1,71 @@
 ## FINAL STEP — E2E Integration Check
 
-All 8 features are already built and individually verified. Your only job in this
+All 8 features are already built and individually verified. Your job in this
 step is to run the full E2E test suite and fix any failures you find.
+
+---
 
 ### Instructions
 
-1. Run: `npm run test:e2e`
-2. If all tests pass, you are done. Do not change anything.
-3. If any tests fail, read the failure output carefully, find the root cause in
+1. First, run `npm run build` to confirm the production build is still clean.
+   If it fails, fix the build error before proceeding to E2E tests.
+
+2. Run: `npm run test:e2e`
+
+3. If all tests pass, you are done. Do not change anything.
+
+4. If any tests fail, read the failure output carefully, find the root cause in
    the existing code, and fix it. Do not add new features or change behaviour
    that is not directly related to the failing test.
-4. After each fix, run `npm run test:e2e` again to confirm it passes.
-5. When all E2E tests pass, run `npm run build` as a final sanity check.
+
+5. After each fix, run `npm run test:e2e` again to confirm it passes.
+
+6. When all E2E tests pass, run `npm run build` as a final sanity check.
+
+---
+
+### Known issue: dev server with Node.js 24 + Vercel adapter
+
+If the E2E tests fail because the dev server (started automatically by
+Playwright via `npm run dev`) fails to serve pages (blank page or 500 error),
+this is the known Node.js 24 + @astrojs/vercel compatibility issue.
+
+To fix this, check `astro.config.mjs`. If the `vite.esbuild.target` setting
+is missing, add it now:
+
+```js
+export default defineConfig({
+  // ... existing config ...
+  vite: {
+    esbuild: {
+      target: 'es2022',
+    },
+  },
+  // ...
+})
+```
+
+After adding this, run `npm run dev`, visit http://localhost:4321, and confirm
+pages render. Then re-run `npm run test:e2e`.
+
+If `npm run dev` still has issues after the Vite fix, update `playwright.config.ts`
+to use a build-based server instead of the dev server:
+
+```ts
+webServer: {
+  command: 'npm run build && npx serve@latest .vercel/output/static -p 4321',
+  url: 'http://localhost:4321',
+  reuseExistingServer: false,
+  timeout: 120 * 1000, // build can take ~30s
+},
+```
+
+Also ensure `package.json` has the `dev:build` script for users:
+```json
+"dev:build": "npm run build && npx serve@latest .vercel/output/static -p 4321"
+```
+
+---
 
 ### Rules
 
@@ -20,3 +74,13 @@ step is to run the full E2E test suite and fix any failures you find.
 - If a test was written incorrectly (tests the wrong thing), flag it with a
   comment but do not alter test logic without being certain it is wrong.
 - No `any` types. No hardcoded colors. All existing CLAUDE.md rules apply.
+
+---
+
+### Checklist before finishing
+
+- [ ] `npm run build` passes with zero errors
+- [ ] `npm run test:unit` passes
+- [ ] `npm run test:e2e` passes all tests
+- [ ] `vite.esbuild.target: 'es2022'` is set in `astro.config.mjs` (if Keystatic was installed)
+- [ ] `dev:build` script exists in `package.json` (if Keystatic was installed)

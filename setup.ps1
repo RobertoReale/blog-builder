@@ -35,7 +35,14 @@ if (-not (Test-Path "CLAUDE.md")) {
 Write-Section "1/3 — Site info"
 $blogTitle = Read-Host "Blog title"
 $blogDesc  = Read-Host "Description (one sentence)"
-$blogUrl   = Read-Host "URL (e.g. https://yourdomain.com)"
+Write-Host ""
+Write-Host "  URL tip: if you're deploying to Vercel and haven't deployed yet, Vercel" -ForegroundColor DarkGray
+Write-Host "  will assign an ugly auto-generated link (e.g. blog-6jcd.vercel.app)." -ForegroundColor DarkGray
+Write-Host "  You can rename it for free in Settings -> Domains after the first deploy." -ForegroundColor DarkGray
+Write-Host "  -> Enter a placeholder now (e.g. https://my-blog.vercel.app) and update" -ForegroundColor DarkGray
+Write-Host "     src/config.ts after you know your real URL. See README.md section 5." -ForegroundColor DarkGray
+Write-Host ""
+$blogUrl   = Read-Host "URL (e.g. https://yourdomain.vercel.app)"
 $blogAuthor = Read-Host "Author name"
 
 # --- 2. Color palette ---

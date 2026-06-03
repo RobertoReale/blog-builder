@@ -30,7 +30,14 @@ echo -e "${C}=== 1/3 — Site info ===${N}"
 echo ""
 read -p "Blog title: " BLOG_TITLE
 read -p "Description (one sentence): " BLOG_DESC
-read -p "URL (e.g. https://yourdomain.com): " BLOG_URL
+echo ""
+echo -e "  ${C}URL tip${N}: if you're deploying to Vercel and haven't deployed yet, Vercel"
+echo    "  will assign an ugly auto-generated link (e.g. blog-6jcd.vercel.app)."
+echo    "  You can rename it for free in Settings → Domains after the first deploy."
+echo    "  → Enter a placeholder now (e.g. https://my-blog.vercel.app) and update"
+echo -e "    ${W}src/config.ts${N} after you know your real URL. See README.md §5 for details."
+echo ""
+read -p "URL (e.g. https://yourdomain.vercel.app): " BLOG_URL
 read -p "Author name: " BLOG_AUTHOR
 echo ""
 

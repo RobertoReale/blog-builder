@@ -230,6 +230,20 @@ Your blog is live. Every `git push` triggers an automatic redeploy.
 
 Same deployment steps, plus the Keystatic CMS setup in section 6 below.
 
+### Choosing your Vercel URL
+
+When Vercel first deploys your project it assigns an auto-generated URL like `blog-6jcd.vercel.app`. You can rename it for free in 30 seconds:
+
+1. Go to your Vercel project → **Settings** → **Domains**
+2. Click **Edit** next to the auto-generated URL
+3. Choose something readable, e.g. `your-name.vercel.app` or `my-blog.vercel.app`
+
+> **After renaming**: update `src/config.ts` with the new URL, then commit and push. If you've set up Keystatic, also update the **Homepage URL** and **Authorization callback URL** in your GitHub OAuth App (`github.com/settings/developers`).
+
+**Custom domain** (e.g. `www.yourname.com`): on the same Domains page, click **Add**. Vercel handles SSL automatically.
+
+> **Pro tip — know your URL before running the pipeline**: import the repo into Vercel first (Vercel deploys even an empty/broken project and shows the assigned URL immediately), rename the domain in Settings, then enter that URL in `setup.ps1` / `setup.sh`. That way `src/config.ts` is correct from step 0.
+
 ---
 
 ## 6. Using the Keystatic CMS (Step 7 only)
@@ -411,11 +425,12 @@ architecture**:
 
 > Each prompt runs in a fresh Claude Code session with a clean context window.
 > Claude reads `CLAUDE.md` (the project rules) + the feature instructions,
-> then reads the existing code on disk. Before writing any code, Claude is 
-> instructed to use its **web search tools** to verify the latest best practices 
-> and breaking changes. After each step, the script runs `npm run build` and 
-> `npm run test:unit` to verify correctness. If the build breaks, the pipeline 
-> stops immediately.
+> then reads the existing code on disk. Every prompt instructs Claude to use its
+> **web search tools** to verify the latest best practices and breaking changes
+> for the technologies involved in that step — and to search online if it hits
+> a bug it cannot resolve from the code alone. After each step, the script runs
+> `npm run build` and `npm run test:unit` to verify correctness. If the build
+> breaks, the pipeline stops immediately.
 
 | Step | Prompt | What it builds |
 |---|---|---|

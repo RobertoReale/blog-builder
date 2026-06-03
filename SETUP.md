@@ -60,7 +60,7 @@ Run the interactive setup script — it fills in `CLAUDE.md` for you:
 The script asks for:
 - **Site info**: blog title, description, URL, author name.
 - **Color palette**: 5 presets (Blue/Neutral, Forest, Sunset, Ink, Mono) or custom hex values.
-- **Font pairing**: 5 Google Font presets or your own.
+- **Font pairing**: 5 font presets (self-hosted via @fontsource) or your own.
 - **GitHub** (optional): creates a repo and sets it as the git remote. Requires [GitHub CLI](https://cli.github.com).
 
 > If you prefer to configure manually, open `CLAUDE.md` and fill in the sections marked **USER ACTION REQUIRED**.

@@ -2,7 +2,12 @@ You are building a personal blog from scratch.
 This is the FOUNDATION build — focus on correctness and completeness.
 Do not add anything beyond what is specified here. No extra features.
 
-CRITICAL INSTRUCTION: Before you begin writing code, use your web search tools to check for the latest Astro 4 best practices, breaking changes, or updated implementation patterns. Ensure your implementation relies on the most up-to-date documentation. If you encounter a bug you cannot resolve by reading the code, search online for known issues and solutions before giving up.
+CRITICAL INSTRUCTION: Before you begin writing code, use your web search tools to:
+1. Find the current latest stable release of Astro 4.x and use that exact version (not the floor version in this prompt).
+2. Check for any breaking changes in @astrojs/tailwind and @astrojs/mdx since their latest releases.
+3. Verify the current @fontsource API for `lora` and `dm-sans` (confirm package names and import paths).
+4. Check for any known Astro 4 + Tailwind + MDX incompatibilities at the current versions.
+If you encounter a bug you cannot resolve by reading the code, search online for known issues and solutions before giving up.
 
 ## GOAL
 A fully working blog where:
@@ -17,12 +22,12 @@ A fully working blog where:
   ```
   npm create astro@4 . -- --yes --template minimal --typescript strict --no-git --no-install
   ```
-  This runs in the current directory (`.`) without prompts. Pin `"astro": "^4.0.0"` in package.json.
+  This runs in the current directory (`.`) without prompts. Pin `"astro": "^4.15.0"` in package.json.
   IMPORTANT: You MUST add `"engines": { "node": "20.x" }` to `package.json` to ensure Vercel uses Node 20 for serverless functions, preventing Node 24/18 compatibility errors.
 - @astrojs/tailwind
 - @astrojs/mdx
 - TypeScript (strict mode)
-- Google Fonts: Read preferred fonts from CLAUDE.md and load via <link> in BaseLayout head
+- Fonts: Lora (headings) + DM Sans (body/UI) — self-hosted via @fontsource (no external CDN dependency)
 - Output: static (output: 'static' in astro.config.mjs)
 - Deploy target: Vercel — NO adapter needed. Vercel serves static files
   natively. Do NOT install @astrojs/vercel. Add a vercel.json only if
@@ -54,7 +59,19 @@ All colors must reference CSS variables.
 Read the preferred fonts from the `CLAUDE.md` file and apply them to headings and body.
 - Base body size: 18px, line-height: 1.75
 - Max content width: 680px centered
-- Load the chosen fonts from Google Fonts in BaseLayout <head>
+- Fonts are self-hosted via @fontsource — do NOT use a Google Fonts <link> tag.
+  Install the packages:
+  ```
+  npm install @fontsource/lora @fontsource/dm-sans
+  ```
+  Then import the required weights at the top of `src/styles/global.css`:
+  ```css
+  @import '@fontsource/lora/400.css';
+  @import '@fontsource/lora/700.css';
+  @import '@fontsource/dm-sans/400.css';
+  @import '@fontsource/dm-sans/500.css';
+  ```
+  Use `font-family: 'Lora', serif` for headings and `font-family: 'DM Sans', sans-serif` for body.
 
 ## LAYOUT RULES
 - Single centered column

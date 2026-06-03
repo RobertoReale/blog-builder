@@ -105,7 +105,7 @@ Write-Host "  2  Playfair Display + Source Sans 3 — editorial, elegant"
 Write-Host "  3  DM Serif Display + DM Sans      — modern, cohesive"
 Write-Host "  4  Fraunces + Inter                — quirky serif + tech sans"
 Write-Host "  5  Inter + Inter                   — pure sans-serif, minimal"
-Write-Host "  6  Custom                          — enter your own Google Font names"
+Write-Host "  6  Custom                          — enter your own fontsource.org font names"
 Write-Host ""
 $f = Read-Host "Choice [1-6, default 1]"
 if (-not $f) { $f = "1" }
@@ -116,9 +116,9 @@ switch ($f) {
   "4" { $headingFont = "Fraunces";         $headingType = "serif";     $bodyFont = "Inter" }
   "5" { $headingFont = "Inter";            $headingType = "sans-serif"; $bodyFont = "Inter" }
   "6" {
-    $headingFont = Read-Host "Heading font (exact Google Fonts name)"
+    $headingFont = Read-Host "Heading font (exact name as on fontsource.org, e.g. Playfair Display)"
     $headingType = Read-Host "  serif or sans-serif"
-    $bodyFont    = Read-Host "Body/UI font (exact Google Fonts name)"
+    $bodyFont    = Read-Host "Body/UI font (exact name as on fontsource.org, e.g. Source Sans 3)"
   }
   default { $headingFont = "Lora"; $headingType = "serif"; $bodyFont = "DM Sans" }
 }
@@ -141,11 +141,8 @@ if ($content.Contains($siteMarker) -and -not $content.Contains('Site values')) {
   $content = $content.Replace($siteMarker, $siteBlock + $siteMarker)
 }
 
-# 2. Replace color palette (USER ACTION REQUIRED + default CSS block)
-$oldColor = ("> **USER ACTION REQUIRED**: Define your custom color palette here. `n" +
-             "> Replace these generic defaults with your own brand colors before running.`n" +
-             "`n" +
-             "${fence}css`n" +
+# 2. Replace color palette (default CSS block)
+$oldColor = ("${fence}css`n" +
              "/* Light mode (:root) */`n" +
              "--color-bg: #FFFFFF`n" +
              "--color-text: #111827`n" +
@@ -187,24 +184,12 @@ if ($content.Contains($oldColor)) {
   Write-Host "  Note: color block not found — already configured?" -ForegroundColor Yellow
 }
 
-# 3. Replace typography USER ACTION REQUIRED
-$oldTypo = ("> **USER ACTION REQUIRED**: Define your preferred typography here.`n" +
-            "- Headings (h1–h3): [YOUR_HEADING_FONT], serif/sans-serif`n" +
-            "- Body + UI: [YOUR_BODY_FONT], sans-serif")
-$newTypo = ("- Headings (h1–h3): $headingFont, $headingType`n" +
-            "- Body + UI: $bodyFont, sans-serif")
+# 3. Replace typography lines (regex — matches any current font value)
+$content = $content -replace '- Headings \(h1–h3\): .+', "- Headings (h1`u{2013}h3): $headingFont, $headingType"
+$content = $content -replace '- Body \+ UI: .+, sans-serif', "- Body + UI: $bodyFont, sans-serif"
 
-if ($content.Contains($oldTypo)) {
-  $content = $content.Replace($oldTypo, $newTypo)
-} else {
-  Write-Host "  Note: typography block not found — already configured?" -ForegroundColor Yellow
-}
-
-# 4. Update Google Fonts line in STACK section
-$content = $content.Replace(
-  '- Google Fonts: Lora (headings) + DM Sans (body/UI)',
-  "- Google Fonts: $headingFont (headings) + $bodyFont (body/UI)"
-)
+# 4. Update font line in STACK section (regex — matches any current value)
+$content = $content -replace '- Fonts: .+\(headings\) \+ .+\(body/UI\).*', "- Fonts: $headingFont (headings) + $bodyFont (body/UI) — self-hosted via @fontsource"
 
 # Write back (UTF-8 without BOM, LF line endings)
 [System.IO.File]::WriteAllText(

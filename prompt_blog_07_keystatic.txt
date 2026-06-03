@@ -7,7 +7,12 @@ at `/keystatic`, without editing `.mdx` files manually.
 When the user writes an article and clicks "Create" or "Save", Keystatic commits the
 `.mdx` file to GitHub. Vercel detects the push and rebuilds the blog automatically.
 
-CRITICAL INSTRUCTION: Before writing any code, use your web search tools to check the current Keystatic documentation and changelog — `@keystatic/core`, `@keystatic/astro`, and `@astrojs/vercel` evolve quickly and have had breaking API changes. Verify: (1) the correct import path for the Vercel adapter (it changed between versions), (2) the current `keystatic.config.ts` field API, (3) known compatibility issues between the current Keystatic version and Astro 4. If you encounter a bug you cannot resolve by reading the code, search online for known issues, GitHub issues, or community workarounds before giving up.
+CRITICAL INSTRUCTION: Before writing any code, use your web search tools to:
+1. Find the current latest versions of `@keystatic/core`, `@keystatic/astro`, and `@astrojs/vercel`.
+2. Verify the correct import path for the Vercel adapter (it changed between major versions — e.g. `@astrojs/vercel` vs `@astrojs/vercel/serverless`).
+3. Check the current `keystatic.config.ts` field API (the `fields.*` and `collection()` signatures change across minor versions).
+4. Search for known compatibility issues between the current Keystatic version, Astro 4, and the Node.js version running on this machine (`node --version`).
+If you encounter a bug you cannot resolve by reading the code, search for GitHub issues and community workarounds before giving up.
 
 ---
 
@@ -30,14 +35,27 @@ hybrid mode — do NOT add that annotation to existing files.
 
 ### Step 1 — Install packages
 
+**Pre-flight check — Node.js version**
+
+Run `node --version` before installing. The recommended runtime is **Node 20**.
+Node 22 and 24 have a known esbuild incompatibility with `@astrojs/vercel` that
+can break the dev server (error: `Expected "}" but found ":"`). The production
+build (`npm run build`) is not affected. See Step 1.5 and Step 2 for the
+mitigations built into this prompt.
+
 ```bash
 npm install @keystatic/core @keystatic/astro @astrojs/vercel
 ```
 
 No dev-only flag — all three are runtime or build-time dependencies.
 
+If the install fails with peer-dependency errors, retry with:
+```bash
+npm install @keystatic/core @keystatic/astro @astrojs/vercel --legacy-peer-deps
+```
+
 > **Node.js compatibility note**: `@astrojs/vercel` bundles its own esbuild
-> version for bundling serverless functions. With Node.js 24 this can cause
+> version for bundling serverless functions. With Node.js 22 or 24 this can cause
 > the dev server to fail to render pages (error: `Expected "}" but found ":"`)
 > because the bundled esbuild has trouble parsing certain Astro template patterns
 > in hybrid mode. The **production build** (`npm run build`) is not affected.

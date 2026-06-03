@@ -14,7 +14,7 @@ that must be respected in every session, regardless of what task you're doing.
 - @astrojs/tailwind
 - @astrojs/mdx
 - TypeScript (strict mode — no `any` types)
-- Google Fonts: Lora (headings) + DM Sans (body/UI)
+- Fonts: Lora (headings) + DM Sans (body/UI) — self-hosted via @fontsource/lora + @fontsource/dm-sans
 - Deploy: Vercel static — NO @astrojs/vercel adapter needed
 
 ---
@@ -40,9 +40,6 @@ URL, or author name anywhere else.
 Colors are CSS custom properties only. Never hardcode hex values in Tailwind
 classes or inline styles. Always reference variables.
 
-> **USER ACTION REQUIRED**: Define your custom color palette here. 
-> Replace these generic defaults with your own brand colors before running.
-
 ```css
 /* Light mode (:root) */
 --color-bg: #FFFFFF
@@ -62,9 +59,8 @@ classes or inline styles. Always reference variables.
 ```
 
 Typography:
-> **USER ACTION REQUIRED**: Define your preferred typography here.
-- Headings (h1–h3): [YOUR_HEADING_FONT], serif/sans-serif
-- Body + UI: [YOUR_BODY_FONT], sans-serif
+- Headings (h1–h3): Lora, serif
+- Body + UI: DM Sans, sans-serif
 - Base size: 18px, line-height: 1.75
 - Max content width: 680px centered
 
@@ -126,9 +122,6 @@ Only articles with status: 'published' appear in listings.
 ---
 
 ## CUSTOM MDX COMPONENTS
-
-> **USER ACTION REQUIRED**: Define any custom MDX components you want here.
-> Below is a generic example of a Callout component, and the required Sources component.
 
 ### Callout.astro
 Props: type ('info' | 'warning'), title (string)

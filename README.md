@@ -196,11 +196,14 @@ Change any value — the whole design updates automatically. Never hardcode hex 
 
 ### Fonts
 
-Fonts are loaded via Google Fonts in `src/layouts/BaseLayout.astro`. To change them:
+Fonts are self-hosted via [@fontsource](https://fontsource.org) — no Google CDN dependency, no external requests at page load. The default setup uses `@fontsource/lora` (headings) and `@fontsource/dm-sans` (body).
 
-1. Visit [fonts.google.com](https://fonts.google.com) and pick your fonts.
-2. Update the `<link>` tag in `BaseLayout.astro` with the new Google Fonts URL.
-3. Update the font-family references in `src/styles/global.css`.
+To change fonts:
+
+1. Find your font on [fontsource.org](https://fontsource.org) and note the package name.
+2. Install it: `npm install @fontsource/your-font`
+3. Replace the `@import` lines at the top of `src/styles/global.css`.
+4. Update the `font-family` references in the same file.
 
 ### Navigation links
 
@@ -401,6 +404,21 @@ Check:
 3. Ensure `KEYSTATIC_SECRET` is set and is at least 32 bytes of random hex.
 4. Trigger a fresh Vercel deploy after adding/changing env variables.
 
+### Long-term compatibility
+
+The blog is designed to be stable over time. Here is what you need to know about each dependency:
+
+| Dependency | Risk | Notes |
+|---|---|---|
+| **Astro 4** | Low | Static output is pre-built HTML — it runs forever once deployed. Only the build tooling ages. |
+| **Vercel static hosting** | Very low | Static files have no runtime — no serverless functions to break unless you use Keystatic. |
+| **Fonts (@fontsource)** | Very low | Self-hosted in your `node_modules` — no external CDN. Fonts load even if fontsource.org goes down. |
+| **Tailwind CSS** | Low | Used only for spacing/layout, not for colors. Design is isolated in CSS variables. |
+| **Keystatic CMS** | Medium | Requires `@astrojs/vercel` which has known issues on Node.js 22+. Use Node 20 (already enforced via `engines` in `package.json`). If Keystatic causes problems, the blog works perfectly without it — articles can always be written as `.mdx` files directly. |
+| **Pagefind (search)** | Low | Build-time only. Generates a static search index. No runtime dependency. |
+
+**If a future `npm run build` fails** after a dependency update, the fastest fix is to pin the previously working versions in `package.json` and re-run the build. The pipeline prompts instruct Claude to search for current best practices at execution time, so re-running a prompt step will always produce code compatible with the then-current package versions.
+
 ### A pipeline step fails
 
 The script stops and tells you which step failed. To fix:
@@ -443,7 +461,7 @@ architecture**:
 
 **Web search baked into every prompt.** Each prompt instructs Claude to search the web for current documentation and known issues *before* writing any code — and to search again if it hits a bug it can't solve from the code alone. Package APIs change, adapters add breaking releases, community patterns evolve. A prompt that relies only on Claude's training data has a shelf life; a prompt that fetches current docs doesn't.
 
-**Two final quality gates.** After all features are built, Step 8 runs the full Playwright E2E suite and fixes any cross-feature regressions. Step 9 then performs a dedicated UI/UX audit: it verifies that no raw hex colors leaked outside the design system, that every interactive element is accessible (ARIA labels, focus styles, semantic HTML), that dark mode is complete, and that the example article has enough structure for all reading-UX features to render correctly. It also cross-checks `src/config.ts`, the Google Fonts link, and the CSS color variables against the values the user entered at setup time — catching the common case where Step 0 generated placeholder defaults instead of the real values. These two steps catch the classes of bugs that unit tests miss: visual regressions, accessibility gaps, configuration drift, and design inconsistencies.
+**Two final quality gates.** After all features are built, Step 8 runs the full Playwright E2E suite and fixes any cross-feature regressions. Step 9 then performs a dedicated UI/UX audit: it verifies that no raw hex colors leaked outside the design system, that every interactive element is accessible (ARIA labels, focus styles, semantic HTML), that dark mode is complete, and that the example article has enough structure for all reading-UX features to render correctly. It also cross-checks `src/config.ts`, the fontsource imports, and the CSS color variables against the values the user entered at setup time — catching the common case where Step 0 generated placeholder defaults instead of the real values. These two steps catch the classes of bugs that unit tests miss: visual regressions, accessibility gaps, configuration drift, and design inconsistencies.
 
 ---
 

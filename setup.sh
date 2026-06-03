@@ -231,7 +231,7 @@ if [[ "$gh_ans" =~ ^[Yy]$ ]]; then
     if [ ! -d ".git" ]; then
       git init
       git add -A
-      git commit -m "Initial setup: blog configuration" --quiet
+      git commit -m "Initial setup: blog configuration" --quiet || true
     fi
 
     # Remove blog-builder origin (if any), create new repo
@@ -259,7 +259,7 @@ echo -e "       ${W}./run.sh -p${N}     (pauses after each step)"
 echo ""
 if [ -n "$GITHUB_REMOTE" ]; then
 echo -e "  2. After the pipeline finishes, push to GitHub:"
-echo -e "       ${W}git push -u origin master${N}"
+echo -e "       ${W}git push -u origin HEAD${N}"
 echo ""
 fi
 echo -e "  Once generated, preview with:  npm run dev"

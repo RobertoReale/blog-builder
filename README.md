@@ -54,7 +54,7 @@ Follow **[`SETUP.md`](SETUP.md)** for full instructions. Quick start:
    **Windows:** `.\run.ps1`
 
 4. Watch Claude Code iteratively build the blog, verify each step, commit a checkpoint, and move to the next.
-5. If you set up a GitHub repo in step 2, push when done: `git push -u origin master`
+5. If you set up a GitHub repo in step 2, push when done: `git push -u origin HEAD`
 
 ## Deployment
 

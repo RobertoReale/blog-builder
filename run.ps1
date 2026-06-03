@@ -15,7 +15,7 @@ param(
   [switch]$Pause
 )
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue" # Changed from Stop to prevent 2>&1 from crashing on external stderr
 
 # Ordine degli step. Lo step 0 (foundation) crea il progetto; gli altri lo estendono.
 $prompts = @(
@@ -131,8 +131,9 @@ for ($i = $StartStep; $i -lt $prompts.Count; $i++) {
   }
 
   # Git checkpoint: commit generated code so each step is a rollback point
-  git add -A 2>&1 | Out-Null
-  git commit -m "Step ${i}: $($stepNames[$i])" --quiet 2>&1 | Out-Null
+  git add -A
+  git commit -m "Step ${i}: $($stepNames[$i])" --quiet
+  $LASTEXITCODE = 0 # Ignore commit failures (e.g., if nothing changed)
 
   Write-Host ""
   Write-Host "  STEP $i OK — build (e test unit) passati." -ForegroundColor Green

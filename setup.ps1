@@ -7,7 +7,7 @@
     .\setup.ps1
 #>
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue" # Changed from Stop to prevent external commands from terminating the script
 
 function Write-Header($text) {
   Write-Host ""
@@ -237,8 +237,8 @@ if ($ghAns -match '^[Yy]$') {
     # Ensure git repo exists
     if (-not (Test-Path ".git")) {
       git init | Out-Null
-      git add -A 2>&1 | Out-Null
-      git commit -m "Initial setup: blog configuration" --quiet 2>&1 | Out-Null
+      git add -A
+      git commit -m "Initial setup: blog configuration" --quiet
     }
 
     # Remove blog-builder origin (if any), create new repo
@@ -267,7 +267,7 @@ Write-Host "       .\run.ps1 -Pause (pauses after each step)" -ForegroundColor W
 Write-Host ""
 if ($githubRemote) {
   Write-Host "  2. After the pipeline finishes, push to GitHub:"
-  Write-Host "       git push -u origin master" -ForegroundColor White
+  Write-Host "       git push -u origin HEAD" -ForegroundColor White
   Write-Host ""
 }
 Write-Host "  Once generated, preview with:  npm run dev"

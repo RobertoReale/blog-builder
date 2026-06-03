@@ -108,7 +108,7 @@ for (( i=START_STEP; i<${#PROMPTS[@]}; i++ )); do
   claude -p "$INSTRUCTION" \
     --permission-mode acceptEdits \
     --allowedTools "Bash,Read,Edit,Write,Glob,Grep" \
-    --output-format json < "$FILE" 2>&1 | tee "logs/step_$i.json"
+    --output-format stream-json < "$FILE" 2>&1 | tee "logs/step_$i.json"
   CLAUDE_EXIT=${PIPESTATUS[0]}
   set -e
 

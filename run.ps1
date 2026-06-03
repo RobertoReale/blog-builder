@@ -114,7 +114,7 @@ for ($i = $StartStep; $i -lt $prompts.Count; $i++) {
   Get-Content $file -Raw | claude -p $instruction `
     --permission-mode acceptEdits `
     --allowedTools "Bash,Read,Edit,Write,Glob,Grep,MultiEdit" `
-    --output-format json 2>&1 | Tee-Object -FilePath "logs\step_$i.json"
+    --output-format stream-json 2>&1 | Tee-Object -FilePath "logs\step_$i.json"
   $claudeExit = $LASTEXITCODE
 
   if ($claudeExit -ne 0) {

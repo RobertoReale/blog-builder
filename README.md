@@ -24,6 +24,7 @@ blog-builder/
   prompt_blog_05_series.txt        Step 5: article series grouping
   prompt_blog_06_related.txt       Step 6: related articles recommendation
   prompt_blog_07_keystatic.txt     Step 7: Keystatic CMS (browser editor, GitHub mode)
+  prompt_blog_08_e2e_check.txt    Step 8: E2E integration check (fix any cross-feature failures)
   run.sh / run.ps1                 Pipeline script (Linux/macOS and Windows)
   SETUP.md                         Detailed setup and usage guide
 ```
@@ -66,7 +67,7 @@ Follow **[`SETUP.md`](SETUP.md)** for full instructions. Quick start:
    **Linux / macOS:** `./run.sh`  
    **Windows:** `.\run.ps1`
 
-4. Watch Claude Code iteratively build the blog, verify each step, commit a checkpoint, and move to the next.
+4. Watch Claude Code iteratively build the blog, verify each step, commit a checkpoint, and move to the next. The final step (Step 8) runs the full E2E suite and fixes any integration failures.
 5. If you set up a GitHub repo in step 2, push when done: `git push -u origin HEAD`
 
 ## Deployment

@@ -1,0 +1,22 @@
+## FINAL STEP — E2E Integration Check
+
+All 8 features are already built and individually verified. Your only job in this
+step is to run the full E2E test suite and fix any failures you find.
+
+### Instructions
+
+1. Run: `npm run test:e2e`
+2. If all tests pass, you are done. Do not change anything.
+3. If any tests fail, read the failure output carefully, find the root cause in
+   the existing code, and fix it. Do not add new features or change behaviour
+   that is not directly related to the failing test.
+4. After each fix, run `npm run test:e2e` again to confirm it passes.
+5. When all E2E tests pass, run `npm run build` as a final sanity check.
+
+### Rules
+
+- Fix only what is broken. Do not refactor, do not add features.
+- Do not modify test files to make tests pass — fix the source code instead.
+- If a test was written incorrectly (tests the wrong thing), flag it with a
+  comment but do not alter test logic without being certain it is wrong.
+- No `any` types. No hardcoded colors. All existing CLAUDE.md rules apply.

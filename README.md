@@ -52,6 +52,15 @@ This repository is a **general framework**. Before running the pipeline, you MUS
 
 4. Watch as Claude Code iteratively builds your blog, checks the code, and passes to the next step!
 
+## 🚀 Deployment
+
+The final output is a fast, static Astro site. You can host it anywhere for free, but it's heavily optimized for **Vercel** or **GitHub Pages**.
+
+- **Vercel**: Just connect your GitHub repository to a new Vercel project. No framework adapter is needed (it's statically generated). Vercel will automatically detect the `build` script and publish it.
+- Before publishing, remember to update `src/config.ts` (title, URL) and `public/robots.txt`!
+
+For detailed pre-launch steps (like configuring `.gitignore`), check step 6 in **[`SETUP.md`](SETUP.md)**.
+
 ## Why this approach?
 
 - **Zero Drift**: By verifying the compilation (`npm run build`) after each step, we ensure the project is always in a working state.

@@ -22,8 +22,17 @@ The build is broken down into small, verifiable steps. A PowerShell script (`run
 - **`run.ps1`**: The automation pipeline. It runs Claude Code for each prompt and enforces the build tests.
 - **`SETUP.md`**: Detailed instructions on prerequisites and how to launch the build.
 
-## How to use
+## 🎨 Customization (Pre-requisites)
 
+This repository is a **general framework**. Before running the pipeline, you MUST customize it to fit your brand and style.
+
+`CLAUDE.md` is your control panel. Open it and edit the following sections:
+1. **SITE CONFIG**: Set your blog's title, description, and author.
+2. **DESIGN SYSTEM**: Change the CSS variables to match your preferred color palette.
+3. **TYPOGRAPHY**: Specify your preferred Google Fonts.
+4. **CUSTOM MDX COMPONENTS**: Add any custom components you want the AI to build.
+
+## How to use
 1. Follow the instructions in **[`SETUP.md`](SETUP.md)** to install the prerequisites (Node.js LTS, Git, and Claude Code).
 2. Open PowerShell in this folder.
 3. Run the pipeline:

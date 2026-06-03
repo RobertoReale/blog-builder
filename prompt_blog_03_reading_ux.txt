@@ -74,59 +74,53 @@ Fallback if clipboard API unavailable:
 ### 4. Table of Contents
 
 Where: article pages only
-Position: above the article body (after header + Origin if 'top')
-Render only if article has 3 or more QA blocks.
-If fewer than 3 QA blocks: render nothing.
+Position: above the article body (after header)
+Render only if article has 2 or more headings (h2 or h3).
+If fewer than 2 headings: render nothing.
 
-IMPORTANT: This blog uses <QA question="..."> components, NOT markdown
-headings. There are no h2/h3 elements to parse. The TOC must be built
-from QA questions — not from DOM headings.
+IMPORTANT: The TOC must be built from standard markdown headings (h2, h3) present in the rendered HTML.
 
-Step 1 — Update QA.astro (required for TOC to work)
-Add two attributes to the QA outer wrapper element:
-- id="qa-{slugifiedQuestion}" where slugifiedQuestion is the question
-  prop passed through a slugify function (lowercase, spaces→hyphens,
-  strip special chars)
-- data-qa-question="{question}" (the raw question text as-is)
-
-Add a simple inline slugify to QA.astro (or import from utils/slugify.ts
-if Feature 04 has already been implemented):
-```ts
-const slug = question.toLowerCase().trim()
-  .replace(/[^\w\s-]/g, '')
-  .replace(/[\s_]+/g, '-')
-  .replace(/-+/g, '-')
-```
-
-Step 2 — Create TOC.astro (src/components/ui/TOC.astro)
+Step 1 — Create TOC.astro (src/components/ui/TOC.astro)
 - Renders an empty container div with id="toc-container"
 - A client-side script runs after DOM ready and:
-  1. Queries all [data-qa-question] elements
-  2. If count < 3: hides the container (do not render)
-  3. If count >= 3: builds and injects the TOC HTML
+  1. Queries all `h2, h3` elements within the article body
+  2. If count < 2: hides the container (do not render)
+  3. If count >= 2: builds and injects the TOC HTML
 
 Client-side script:
 ```js
 document.addEventListener('DOMContentLoaded', () => {
-  const questions = [...document.querySelectorAll('[data-qa-question]')]
-  const container = document.getElementById('toc-container')
-  if (!container || questions.length < 3) {
-    if (container) container.style.display = 'none'
-    return
+  const articleBody = document.querySelector('article');
+  if (!articleBody) return;
+  const headings = [...articleBody.querySelectorAll('h2, h3')];
+  const container = document.getElementById('toc-container');
+  if (!container || headings.length < 2) {
+    if (container) container.style.display = 'none';
+    return;
   }
-  const items = questions.map(el => ({
-    text: el.getAttribute('data-qa-question'),
-    id: el.id
-  }))
+  
+  // Ensure headings have IDs
+  headings.forEach(h => {
+    if (!h.id) {
+      h.id = h.textContent.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_]+/g, '-').replace(/-+/g, '-');
+    }
+  });
+
+  const items = headings.map(el => ({
+    text: el.textContent,
+    id: el.id,
+    level: el.tagName.toLowerCase()
+  }));
+  
   container.innerHTML = `
     <p class="toc-label">Contents</p>
     <ul class="toc-list">
       ${items.map(item => `
-        <li><a href="#${item.id}">${item.text}</a></li>
+        <li class="toc-${item.level}"><a href="#${item.id}">${item.text}</a></li>
       `).join('')}
     </ul>
-  `
-})
+  `;
+});
 ```
 
 UI design:
@@ -140,8 +134,8 @@ UI design:
   HTML element is the simplest approach — no extra JS)
   Desktop: always expanded
 
-Active question highlight (optional but recommended):
-- Use IntersectionObserver to watch [data-qa-question] elements
+Active heading highlight (optional but recommended):
+- Use IntersectionObserver to watch headings
 - When one enters the viewport: add active class to its TOC link
 - Active link: var(--color-accent), no other decoration
 
@@ -155,9 +149,8 @@ as before: after the article header, before the article body.
 - [ ] Progress bar visible and moves correctly on article pages
 - [ ] Back to top button appears after 400px scroll on all pages
 - [ ] Share button copies URL and shows "Copied!" feedback
-- [ ] QA.astro has id and data-qa-question on each wrapper
-- [ ] TOC appears on example article (which has 3+ QA blocks)
+- [ ] TOC appears on example article (which has headings)
 - [ ] TOC collapses on mobile via details/summary
-- [ ] TOC does not appear on pages/articles with < 3 QA blocks
+- [ ] TOC does not appear on pages/articles with < 2 headings
 - [ ] `npm run build` succeeds
 - [ ] None of these features break if JS is disabled

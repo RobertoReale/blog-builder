@@ -49,11 +49,8 @@ time, tags) and before everything else in the body region.
 Canonical order of elements after the header (so Features 02 and 04 don't
 fight over the same slot):
   1. SeriesNav            (this feature, if the article is in a series)
-  2. Origin block         (only if originPosition === 'top')
-  3. TOC                  (Feature 02, if 3+ QA blocks)
-  4. Article body (MDX)
-The "before the Origin block regardless of originPosition" rule only concerns a
-top Origin; a bottom Origin stays at the bottom near Sources, untouched.
+  2. TOC                  (Feature 02, if headings exist)
+  3. Article body (MDX)
 
 ---
 
@@ -143,7 +140,7 @@ part: 1
 Create a second minimal article to test the series navigation:
 src/content/articles/example-critical-thinking-2.mdx
 - Same series, part: 2, status: 'published'
-- Minimal content (2-3 QA blocks)
+- Minimal content (2-3 standard markdown headings)
 - This lets you verify the SeriesNav shows both parts correctly
 
 ---

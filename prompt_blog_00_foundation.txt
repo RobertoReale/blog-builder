@@ -15,7 +15,7 @@ A fully working blog where:
 - @astrojs/tailwind
 - @astrojs/mdx
 - TypeScript (strict mode)
-- Google Fonts: Lora + DM Sans (via <link> in BaseLayout head)
+- Google Fonts: Read preferred fonts from CLAUDE.md and load via <link> in BaseLayout head
 - Output: static (output: 'static' in astro.config.mjs)
 - Deploy target: Vercel — NO adapter needed. Vercel serves static files
   natively. Do NOT install @astrojs/vercel. Add a vercel.json only if
@@ -36,34 +36,16 @@ These are placeholders — the user will fill them in.
 
 ## DESIGN SYSTEM
 Implement via CSS custom properties in src/styles/global.css.
-
-:root (light mode, default)
---color-bg: #FFFFFF
---color-text: #1A1A1A
---color-muted: #6B6B6B
---color-accent: #2D5016
---color-border: #E8E8E8
---color-origin-bg: #F7F7F5
-
-[data-theme="dark"]
---color-bg: #0F0F0F
---color-text: #E8E8E8
---color-muted: #888888
---color-accent: #7AB648
---color-border: #2A2A2A
---color-origin-bg: #1A1A1A
-
+Read the exact color variables and values from the `CLAUDE.md` file. Do not invent your own colors.
 Do NOT hardcode colors in Tailwind classes.
 Use Tailwind only for spacing, layout, and sizing.
 All colors must reference CSS variables.
 
 ## TYPOGRAPHY
-- Headings (h1–h3): Lora, serif
-- Body + UI elements: DM Sans, sans-serif
+Read the preferred fonts from the `CLAUDE.md` file and apply them to headings and body.
 - Base body size: 18px, line-height: 1.75
 - Max content width: 680px centered
-- Load from Google Fonts in BaseLayout <head>:
-  Lora:wght@400;600;700 and DM+Sans:wght@400;500;600
+- Load the chosen fonts from Google Fonts in BaseLayout <head>
 
 ## LAYOUT RULES
 - Single centered column
@@ -112,8 +94,6 @@ Define in src/content/config.ts using Astro content collections + zod:
   date: z.date(),
   tags: z.array(z.string()),
   description: z.string(),
-  origin: z.string().optional(),
-  originPosition: z.enum(['top', 'bottom']).optional().default('bottom'),
   coverImage: z.string().optional(),
   sources: z.array(z.object({
     label: z.string(),
@@ -131,27 +111,13 @@ Drafts are accessible by direct URL only (filter in getCollection calls).
 
 ## CUSTOM MDX COMPONENTS
 
-### QA.astro
-Props: question (string)
-Slot: default (answer content — full MDX)
+Implement the custom MDX components specified in `CLAUDE.md`. If generic examples like `Callout` are present, implement them. 
 
-Styles:
-- question: Lora, 1.15× body size, var(--color-accent), 
-  border-left 3px solid var(--color-accent), padding-left 16px
-- answer: DM Sans, normal body text, margin-top 12px
-- Outer wrapper: margin-bottom 48px
-
-### Origin.astro
-Slot: default (origin content)
-
-Styles:
-- Background: var(--color-origin-bg)
-- Border-left: 3px solid var(--color-accent)
-- Padding: 20px 24px
-- Small label "How I got here" above content:
-  uppercase, 11px, var(--color-muted), with inline lightbulb SVG (16px)
-- Text: italic, DM Sans
-- Margin: 32px 0
+### Callout.astro
+Props: type ('info' | 'warning'), title (string)
+- Outer wrapper with a distinct background based on type (use surface color).
+- Left border with accent color.
+- Renders the title in bold, followed by the default slot content.
 
 ### ImageWithCaption.astro
 Props: src (string), alt (string), caption (string), size ('full' | 'half') default 'full'
@@ -182,7 +148,7 @@ Do NOT use "No props" pattern — always pass sources as an explicit prop.
 ## PAGES
 
 ### / (Homepage) — src/pages/index.astro
-- Hero: blog name (Lora h1) + one-line description (DM Sans, muted)
+- Hero: blog name (h1) + one-line description (muted)
 - Tag filter pills (TagFilter component — client-side, no page reload)
   - Clicking a tag shows only articles with that tag
   - "All" pill resets the filter
@@ -191,23 +157,21 @@ Do NOT use "No props" pattern — always pass sources as an explicit prop.
   - Published articles only, sorted by date descending
 
 ### /articles — src/pages/articles.astro
-- H1: "Articles" (Lora)
+- H1: "Articles"
 - Same tag filter + article list as homepage
 - No hero section
 
 ### /article/[slug] — src/pages/article/[slug].astro
 - getStaticPaths from content collection (published only)
-- Header: title (Lora h1), date (formatted), reading time, tags
-- If originPosition === 'top': render <Origin> here, after header
-- MDX body (render with components map: QA, Origin, ImageWithCaption, Sources)
-- If originPosition === 'bottom' (default): render <Origin> before Sources
+- Header: title (h1), date (formatted), reading time, tags
+- MDX body (render with components map: Callout, ImageWithCaption, Sources)
 - <Sources sources={entry.data.sources} /> at the bottom
   Note: inside MDX files this is written as <Sources sources={frontmatter.sources} />
 - Open Graph meta tags in <head>
 
 ### /tag/[tag] — src/pages/tag/[tag].astro
 - getStaticPaths: collect all unique tags from published articles
-- H1: "#tagname" (Lora)
+- H1: "#tagname"
 - Article list filtered by tag, sorted by date descending
 
 ### /about — src/pages/about.astro
@@ -262,7 +226,7 @@ Props: title, description, date, slug, tags, readingTime, series?, part?
 
 ### TagPill.astro
 Props: tag (string), href?: string, active?: boolean
-- Rounded pill, small DM Sans
+- Rounded pill, small text
 - Default: var(--color-border) bg, var(--color-muted) text
 - Active: var(--color-accent) bg, white text
 - Links to /tag/[tag] if href provided
@@ -297,8 +261,7 @@ Else: omit og:image (no default placeholder needed for now).
 src/
   components/
     mdx/
-      QA.astro
-      Origin.astro
+      Callout.astro
       ImageWithCaption.astro
       Sources.astro
     ui/
@@ -337,19 +300,14 @@ tsconfig.json
 File: src/content/articles/example-critical-thinking.mdx
 
 Requirements:
-- Full frontmatter: all fields populated including origin (1-2 sentences),
-  originPosition: 'bottom', status: 'published', 3–4 tags,
+- Full frontmatter: all fields populated including status: 'published', 3–4 tags,
   at least 3 sources with real (plausible) labels and URLs,
   series and part left empty (omitted)
-- At least 3 <QA> blocks following first principles logic:
-  Q1: What is critical thinking, really?
-  Q2: Where does it come from / why did it develop?
-  Q3: What common misconceptions exist about it?
-  + at least 1 more question
+- At least 3 standard markdown headings (`##`)
+- At least 1 `<Callout>` block demonstrating the custom component
 - 1 <ImageWithCaption> with size="half" and a descriptive caption
-- <Origin> block rendered at bottom
 - <Sources sources={frontmatter.sources} /> at the end (explicit prop — required)
-- Real, non-lorem-ipsum content — short but meaningful answers
+- Real, non-lorem-ipsum content — short but meaningful paragraphs
 
 ## CONSTRAINTS
 - TypeScript strict mode — no `any` types

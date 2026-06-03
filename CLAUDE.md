@@ -40,27 +40,31 @@ URL, or author name anywhere else.
 Colors are CSS custom properties only. Never hardcode hex values in Tailwind
 classes or inline styles. Always reference variables.
 
+> **USER ACTION REQUIRED**: Define your custom color palette here. 
+> Replace these generic defaults with your own brand colors before running.
+
 ```css
 /* Light mode (:root) */
 --color-bg: #FFFFFF
---color-text: #1A1A1A
---color-muted: #6B6B6B
---color-accent: #2D5016
---color-border: #E8E8E8
---color-origin-bg: #F7F7F5
+--color-text: #111827
+--color-muted: #6B7280
+--color-accent: #2563EB
+--color-border: #E5E7EB
+--color-surface: #F9FAFB
 
 /* Dark mode ([data-theme="dark"] on <html>) */
---color-bg: #0F0F0F
---color-text: #E8E8E8
---color-muted: #888888
---color-accent: #7AB648
---color-border: #2A2A2A
---color-origin-bg: #1A1A1A
+--color-bg: #111827
+--color-text: #F3F4F6
+--color-muted: #9CA3AF
+--color-accent: #3B82F6
+--color-border: #374151
+--color-surface: #1F2937
 ```
 
 Typography:
-- Headings (h1–h3): Lora, serif
-- Body + UI: DM Sans, sans-serif
+> **USER ACTION REQUIRED**: Define your preferred typography here.
+- Headings (h1–h3): [YOUR_HEADING_FONT], serif/sans-serif
+- Body + UI: [YOUR_BODY_FONT], sans-serif
 - Base size: 18px, line-height: 1.75
 - Max content width: 680px centered
 
@@ -123,17 +127,14 @@ Only articles with status: 'published' appear in listings.
 
 ## CUSTOM MDX COMPONENTS
 
-### QA.astro
-Props: question (string)
-- Outer wrapper has: id="qa-{slugifiedQuestion}" and data-qa-question="{question}"
-- question styled: Lora, accent color, border-left 3px solid accent
-- Answer: DM Sans body text below question
+> **USER ACTION REQUIRED**: Define any custom MDX components you want here.
+> Below is a generic example of a Callout component, and the required Sources component.
 
-### Origin.astro
-Slot: default content
-- Background: var(--color-origin-bg)
-- Border-left: 3px solid var(--color-accent)
-- Label "How I got here", italic text, lightbulb SVG icon
+### Callout.astro
+Props: type ('info' | 'warning'), title (string)
+- Outer wrapper with a distinct background based on type (use surface color).
+- Left border with accent color.
+- Renders the title in bold, followed by the default slot content.
 
 ### ImageWithCaption.astro
 Props: src, alt, caption, size ('full' | 'half', default 'full')
@@ -153,7 +154,7 @@ Props: sources (Array<{ label: string; href: string }>)
 ```
 src/
   components/
-    mdx/          QA.astro, Origin.astro, ImageWithCaption.astro, Sources.astro
+    mdx/          Callout.astro, ImageWithCaption.astro, Sources.astro
     ui/           ThemeToggle.astro, ArticleCard.astro, TagPill.astro,
                   TagFilter.astro, BackToTop.astro, SeriesNav.astro,
                   RelatedArticles.astro, TOC.astro
@@ -186,14 +187,12 @@ map and return all props in one object; never overwrite another feature's props.
 Render order on an article page:
 1. Header (title, date, reading time, tags, share button)
 2. SeriesNav        (if the article is in a series)
-3. Origin block     (only if originPosition === 'top')
-4. TOC              (if the article has 3+ QA blocks)
-5. Article body (MDX)
-6. Origin block     (only if originPosition === 'bottom')
-7. Sources
-8. ─── separator ───
-9. Related articles (if any)
-10. Footer
+3. TOC              (if the article has headings)
+4. Article body (MDX)
+5. Sources
+6. ─── separator ───
+7. Related articles (if any)
+8. Footer
 
 The reading progress bar (Feature 02) is fixed at the top of the viewport and
 sits outside this flow.

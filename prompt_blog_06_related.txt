@@ -67,11 +67,10 @@ In src/pages/article/[slug].astro or ArticleLayout.astro:
 
 Order at bottom of article:
 1. Article body (MDX content)
-2. Origin block (if originPosition === 'bottom')
-3. Sources
-4. ─────── separator ───────
-5. Related Articles (if any exist)
-6. Footer
+2. Sources
+3. ─────── separator ───────
+4. Related Articles (if any exist)
+5. Footer
 
 ---
 

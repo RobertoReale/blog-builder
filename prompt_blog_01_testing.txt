@@ -177,8 +177,8 @@ test('homepage loads with h1 and article cards', async ({ page }) => {
 test('example article page renders', async ({ page }) => {
   await page.goto('/article/example-critical-thinking')
   await expect(page.locator('h1').first()).toBeVisible()
-  // at least one QA block should render
-  await expect(page.locator('[data-qa-question]').first()).toBeVisible()
+  // article should contain headings and content
+  await expect(page.locator('article h2').first()).toBeVisible()
 })
 
 test('/articles page loads', async ({ page }) => {
@@ -235,8 +235,7 @@ NOTE on the 404 test: src/pages/404.astro is created in Feature 01 (SEO), NOT
 in the foundation. If you run this suite immediately after the foundation, the
 Astro dev server's built-in fallback happens to contain "404" so the test may
 pass by accident — but it only reliably passes once Feature 01 is implemented.
-Treat a failure here before Feature 01 as expected, like the [data-qa-question]
-line below.
+Treat a failure here before Feature 01 as expected.
 
 IMPORTANT — data attributes needed in components:
 For the E2E tests above to work, add these data attributes to the
@@ -247,9 +246,6 @@ relevant components in the foundation:
 - TagPill.astro (in TagFilter): add `data-tag-pill` and
   `data-tag="{tag}"` to the pill button/element
 
-If [data-qa-question] isn't already on QA.astro
-(it's added in Feature 02), that test line can be skipped for now —
-remove it or comment it out until Feature 02 is implemented.
 
 ---
 

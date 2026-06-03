@@ -1,0 +1,351 @@
+## FINAL STEP — UI, UX & Design Quality Review
+
+All features are built and E2E-tested. This is the final quality gate.
+Read CLAUDE.md first — it is the authoritative source for the design system.
+
+Your goal: audit every page and component for visual consistency,
+accessibility, and UX polish. Fix every issue you find.
+Do not add new features — only fix what is already there.
+
+CRITICAL INSTRUCTION: Before fixing anything, use your web search tools to
+look up current Astro accessibility patterns, WCAG 2.1 AA requirements for
+personal blogs, and any known dark-mode or CSS variable pitfalls in Astro 4.
+If you encounter a bug you cannot resolve from the code alone, search online
+before giving up.
+
+---
+
+### 1. Design System Consistency
+
+Grep all .astro, .css, and .ts files for raw hex color values:
+
+  Pattern: #[0-9a-fA-F]{3,6}\b
+
+The ONLY file allowed to contain hex values is src/styles/global.css.
+Every hex found elsewhere must be replaced with the appropriate CSS variable:
+
+  --color-bg       → page background
+  --color-surface  → card/callout/code-block background
+  --color-text     → primary text
+  --color-muted    → secondary text, dates, metadata, captions
+  --color-accent   → links, active states, focus rings, progress bar
+  --color-border   → dividers, card outlines, TOC left border
+
+Fix every violation you find.
+
+---
+
+### 2. Typography & Layout
+
+Open src/styles/global.css and verify:
+- Base font size is 18px (body or html rule)
+- Line height is 1.75
+- Max content width on article prose is 680px, centered
+- Heading font (from CLAUDE.md STACK → Google Fonts) applied to h1, h2, h3
+- Body font applied to body and UI elements
+- h1, h2, h3 sizes form a clear visual hierarchy (h1 largest)
+
+Open src/layouts/ArticleLayout.astro (or wherever the article body is rendered):
+- The article <main> or prose container must have a max-width of ~680px
+- Content must be horizontally centered
+
+Fix any typography or layout inconsistency found.
+
+---
+
+### 3. Dark Mode Completeness
+
+Verify the FOUC-prevention script is present in src/layouts/BaseLayout.astro
+inside the <head>, before any stylesheets:
+
+```html
+<script is:inline>
+  const theme = localStorage.getItem('theme') ||
+    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  document.documentElement.setAttribute('data-theme', theme);
+</script>
+```
+
+If missing, add it.
+
+Check src/styles/global.css:
+- A [data-theme="dark"] block exists with all six color variables redefined
+- No color value appears in only one theme (light/dark must both define every
+  interactive state — hover, active, focus)
+
+Check every component for hardcoded colors that would not adapt to dark mode
+(see Section 1 above). Dark mode fails silently — text can become invisible
+(e.g., color: black on a dark background) and the only way to catch it is to
+read the source.
+
+---
+
+### 4. Accessibility (WCAG 2.1 AA)
+
+Audit every component file in src/components/:
+
+**Images:**
+- Every <img> tag must have a non-empty alt attribute
+- Decorative images (purely visual, no information) should use alt=""
+- The ImageWithCaption.astro component must pass alt through to <img>
+
+**Icon-only buttons:**
+- ThemeToggle.astro: aria-label="Toggle dark mode"
+- BackToTop.astro: aria-label="Back to top" (or equivalent)
+- ShareButton / share button in the article header: aria-label or visible text
+
+**Links:**
+- Navigation links must have descriptive text (not bare URLs or icons without labels)
+- "Read more" links (if any) must include the article title for context:
+  e.g., aria-label="Read more: Article Title"
+
+**Focus styles:**
+- Search src/styles/global.css for `outline: none` or `outline: 0`
+- If found and not replaced with a custom focus ring, add one:
+  ```css
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  ```
+
+**Semantic HTML:**
+- BaseLayout.astro must use <header>, <main>, <footer> as landmarks
+- Article pages must wrap the article body in <article>
+- Navigation must be in a <nav> element
+
+**Heading hierarchy (check each page template):**
+- Each page renders exactly one <h1>
+- Heading levels are never skipped (h1 → h2 → h3, never h1 → h3)
+- The article title in ArticleLayout.astro is an <h1>
+- TOC links reference h2/h3 headings — verify no h4/h5/h6 headings are missed
+  (this is acceptable; TOC only needs h2/h3)
+
+**Search input:**
+- src/pages/search.astro: the search input has an aria-label or an associated <label>
+
+Fix every accessibility issue found.
+
+---
+
+### 5. Responsive Design
+
+Check the following in each layout and component:
+
+**Article page:**
+- TOC (src/components/ui/TOC.astro) uses a <details>/<summary> element on mobile
+  so it collapses. On desktop it should always be expanded (CSS media query or
+  the details element is left open by default).
+- Article body max-width (680px) has horizontal padding on small screens
+  so text doesn't touch screen edges (e.g., padding: 0 1rem on mobile)
+
+**Navigation (BaseLayout.astro):**
+- Nav links do not overflow on narrow screens
+- Logo/title is not truncated
+
+**BackToTop button:**
+- Must be at least 40×40px (adequate touch target on mobile)
+- Must not overlap the article text on mobile (positioned far enough right/bottom)
+
+**General:**
+- No element has a fixed width wider than 100vw
+- Images inside articles are max-width: 100%
+
+Fix any responsive issues found.
+
+---
+
+### 6. Interactive States & Hover Feedback
+
+Every clickable element must have a visible hover state. Audit:
+
+- **Navigation links**: color change on hover
+- **Article card titles/links**: underline or color change on hover
+- **Tag pills** (ArticleCard.astro, TagPill.astro): background or border change
+- **ThemeToggle**: opacity or color change on hover
+- **BackToTop button**: border color changes to var(--color-accent) on hover
+- **Share button**: border or text color changes on hover
+- **TOC links**: color change to var(--color-text) + underline on hover;
+  active heading link uses var(--color-accent)
+
+If any hover state is missing, add it using CSS variables only (never hex).
+
+---
+
+### 7. Page-by-Page Audit
+
+Read the source of each page template and verify the following:
+
+**Homepage (src/pages/index.astro):**
+- ArticleCard components are rendered for each published article
+- Tag filter pills exist (TagFilter or similar component)
+- If no published articles exist, a graceful empty state is shown
+
+**Articles page (src/pages/articles.astro):**
+- Same article list as homepage, without the hero/intro text
+
+**Article page (src/pages/article/[slug].astro):**
+Verify the render order matches the CLAUDE.md specification exactly:
+  1. Header (title, date, reading time, tags, share button)
+  2. SeriesNav (if article is in a series)
+  3. TOC (if article has ≥ 2 headings)
+  4. Article body (MDX)
+  5. Sources
+  6. --- separator ---
+  7. Related articles (if any)
+  8. Footer
+
+If the order is wrong, fix it.
+
+**Search page (src/pages/search.astro):**
+- Search input is present and has an accessible label
+- Keyboard shortcut "/" triggers focus on the search input when pressed
+  anywhere on the page (not while already in an input field)
+
+**About page (src/pages/about.astro) and Now page (src/pages/now.astro):**
+- Both pages exist and render without errors
+- Both have meaningful placeholder content (not completely empty)
+- Any TODO markers are clear and descriptive
+
+**404 page (src/pages/404.astro):**
+- Exists
+- Has a friendly message and a link back to the homepage
+
+**RSS feed (src/pages/rss.xml.ts):**
+- File exists
+- Uses the SITE constants from src/config.ts (not hardcoded values)
+
+**Tag pages (src/pages/tag/[tag].astro):**
+- Renders a filtered article list for the given tag
+- Tag name is shown in the page heading
+
+**Series pages (src/pages/series/[series].astro):**
+- Renders articles in the series, ordered by part number
+- Series name is shown in the heading
+
+---
+
+### 8. Example Article Quality
+
+Open the example article in src/content/articles/ (the one created in Step 0).
+
+Verify:
+- status: published (so it appears in the listing and triggers TOC rendering)
+- date is a past date (not far in the future)
+- The article body has at least 2 h2 or h3 headings (so the TOC renders)
+- The body has meaningful text (not placeholder Lorem ipsum)
+- There is no `coverImage:` line with an empty value (would cause Zod error)
+- The title is descriptive (not "Example" or "Test")
+
+If any of the above are wrong, fix them.
+
+---
+
+### 9. Configuration Completeness
+
+The user entered their blog title, URL, author name, description, color
+palette, and fonts at the beginning (via setup.ps1 / setup.sh). Those values
+were written into CLAUDE.md and Step 0 used them to create the blog. This
+check verifies nothing was left as a generic placeholder.
+
+**Step A — Read the authoritative values from CLAUDE.md.**
+
+Open CLAUDE.md and note the values under "Site values":
+- title
+- description
+- url
+- author
+
+Also note the fonts listed under "Google Fonts:" in the STACK section,
+and the hex values in the CSS color block.
+
+**Step B — Verify src/config.ts matches.**
+
+Open src/config.ts and check that the four SITE fields match CLAUDE.md exactly.
+
+If any field still contains a generic placeholder, replace it with the value
+from CLAUDE.md:
+
+Placeholder patterns that must NOT appear in src/config.ts:
+- title: "My Blog" / "Your Blog" / "Blog" / "Astro Blog"
+- url: "https://example.com" / "http://localhost" / "https://yourdomain.com"
+- author: "Your Name" / "Author" / "John Doe"
+- description: "" / "A personal blog" / "My personal blog"
+
+**Step C — Verify fonts in BaseLayout.astro.**
+
+Open src/layouts/BaseLayout.astro and find the Google Fonts <link> tag.
+The URL must include the exact font family names from CLAUDE.md's STACK section.
+
+Example: if CLAUDE.md says "Playfair Display (headings) + Source Sans 3 (body/UI)",
+then the Google Fonts URL must contain "Playfair+Display" and "Source+Sans+3".
+
+If the link still references the default fonts (Lora, DM Sans) but CLAUDE.md
+specifies different fonts, update the link URL and the font-family rules in
+src/styles/global.css to match.
+
+**Step D — Verify CSS color variables in global.css.**
+
+Open src/styles/global.css. The hex values in the :root block must match
+the colors from CLAUDE.md exactly.
+
+If you find the unmodified default palette:
+  --color-bg: #FFFFFF; --color-text: #111827; --color-accent: #2563EB; etc.
+
+but CLAUDE.md specifies different values, replace the global.css values with
+the correct ones from CLAUDE.md.
+
+**Step E — Grep for hardcoded author/title strings in page files.**
+
+Run: grep -r "Your Name\|Your Blog\|example\.com\|yourdomain\|Author Name\|John Doe" src/
+
+Any match outside of comments must be replaced with the appropriate SITE
+constant imported from src/config.ts:
+  import { SITE } from '../config';
+  // then use SITE.title, SITE.author, SITE.url, SITE.description
+
+Fix every placeholder found.
+
+---
+
+### 10. Build & Final Verification
+
+After all fixes:
+
+1. Run: npm run build
+   Must succeed. Fix any errors until it passes.
+
+2. Run: npm run test:unit
+   Must pass. Fix any broken unit tests.
+
+3. If npm run test:e2e exists in package.json, run it as well.
+   Fix any Playwright failures that were introduced by your changes.
+
+---
+
+### Checklist before finishing
+
+- [ ] No hardcoded hex colors outside src/styles/global.css
+- [ ] All CSS variables used correctly throughout every component
+- [ ] Base font 18px, line-height 1.75, max-width 680px in global.css
+- [ ] Heading font and body font applied correctly
+- [ ] Dark mode block in global.css is complete
+- [ ] FOUC-prevention script present in BaseLayout.astro <head>
+- [ ] All <img> tags have alt attributes
+- [ ] ThemeToggle, BackToTop, and share button all have aria-label
+- [ ] Focus styles visible (outline not removed without replacement)
+- [ ] Semantic landmarks: <header>, <main>, <footer>, <nav>, <article>
+- [ ] One <h1> per page, no skipped heading levels
+- [ ] Search input has accessible label
+- [ ] TOC collapses on mobile via <details>/<summary>
+- [ ] BackToTop is at least 40×40px
+- [ ] All interactive elements have visible hover states
+- [ ] Article render order matches the CLAUDE.md spec
+- [ ] 404 page exists with a homepage link
+- [ ] Example article has ≥ 2 headings, past date, status: published
+- [ ] src/config.ts has the user's real title, URL, author, description
+- [ ] Google Fonts link in BaseLayout.astro loads the correct fonts
+- [ ] CSS color variables in global.css match the user's chosen palette
+- [ ] No hardcoded "Your Name" / "example.com" / "Your Blog" strings in src/
+- [ ] npm run build succeeds
+- [ ] npm run test:unit passes

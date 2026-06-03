@@ -39,6 +39,7 @@ PROMPTS=(
   "prompt_blog_06_related.txt"
   "prompt_blog_07_keystatic.txt"
   "prompt_blog_08_e2e_check.txt"
+  "prompt_blog_09_ui_review.txt"
 )
 
 STEP_NAMES=(
@@ -51,6 +52,7 @@ STEP_NAMES=(
   "Related articles"
   "Keystatic CMS"
   "E2E integration check"
+  "UI & design review"
 )
 
 # --- Preliminary checks ---

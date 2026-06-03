@@ -261,7 +261,7 @@ echo ""
 echo -e "Next steps:"
 echo ""
 echo -e "  1. Generate the blog:"
-echo -e "       ${W}./run.sh${N}        (runs all 9 steps, 0–8)"
+echo -e "       ${W}./run.sh${N}        (runs all 10 steps, 0–9)"
 echo -e "       ${W}./run.sh -p${N}     (pauses after each step)"
 echo ""
 if [ -n "$GITHUB_REMOTE" ]; then

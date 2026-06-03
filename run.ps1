@@ -31,7 +31,8 @@ $prompts = @(
   "prompt_blog_05_series.txt",      # 5  Feature 04 - Series
   "prompt_blog_06_related.txt",     # 6  Feature 05 - Related
   "prompt_blog_07_keystatic.txt",   # 7  Feature 06 - Keystatic CMS
-  "prompt_blog_08_e2e_check.txt"    # 8  E2E integration check
+  "prompt_blog_08_e2e_check.txt",   # 8  E2E integration check
+  "prompt_blog_09_ui_review.txt"    # 9  UI, UX & design quality review
 )
 
 $stepNames = @(
@@ -43,7 +44,8 @@ $stepNames = @(
   "Series",
   "Related articles",
   "Keystatic CMS",
-  "E2E integration check"
+  "E2E integration check",
+  "UI & design review"
 )
 
 # --- Preliminary checks ----------------------------------------------------

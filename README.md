@@ -31,7 +31,7 @@ blog-builder/
 
 Follow **[`SETUP.md`](SETUP.md)** for full instructions. Quick start:
 
-1. Install prerequisites: Node.js LTS, Git, Claude Code (paid plan required).
+1. Install prerequisites: Node.js LTS, Git, Claude Code.
 2. Open a terminal in this folder and run the **interactive setup**:
 
    **Linux / macOS:**

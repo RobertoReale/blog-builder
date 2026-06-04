@@ -164,10 +164,28 @@ export default config({
           multiline: true,
           validation: { isRequired: true },
         }),
-        tags: fields.array(
-          fields.text({ label: 'Tag' }),
-          { label: 'Tags', itemLabel: props => props.value },
-        ),
+        tags: fields.multiselect({
+          label: 'Tags',
+          options: [
+            { label: 'Thinking', value: 'thinking' },
+            { label: 'Philosophy', value: 'philosophy' },
+            { label: 'Epistemology', value: 'epistemology' },
+            { label: 'Logic', value: 'logic' },
+            { label: 'Argumentation', value: 'argumentation' },
+            { label: 'Cognition', value: 'cognition' },
+            { label: 'Writing', value: 'writing' },
+            { label: 'Reading', value: 'reading' },
+            { label: 'Learning', value: 'learning' },
+            { label: 'Mental Models', value: 'mental-models' },
+            { label: 'Decision Making', value: 'decision-making' },
+            { label: 'Creativity', value: 'creativity' },
+            { label: 'Science', value: 'science' },
+            { label: 'Ethics', value: 'ethics' },
+            { label: 'Technology', value: 'technology' },
+            { label: 'Books', value: 'books' },
+          ],
+        }),
+        // NOTE: customize the tag list above to match the topics of this specific blog.
         status: fields.select({
           label: 'Status',
           options: [

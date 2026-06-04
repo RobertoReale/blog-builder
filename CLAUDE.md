@@ -154,7 +154,7 @@ src/
   layouts/        BaseLayout.astro, ArticleLayout.astro
   pages/          index.astro, articles.astro, article/[slug].astro,
                   tag/[tag].astro, about.astro, now.astro, search.astro,
-                  series/[series].astro, 404.astro, rss.xml.ts
+                  series/index.astro, series/[series].astro, 404.astro, rss.xml.ts
   content/
     config.ts
     articles/

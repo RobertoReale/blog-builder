@@ -83,7 +83,7 @@ The filename becomes the URL slug:
 title: "Your Article Title"
 date: 2025-06-03          # YYYY-MM-DD, no quotes needed
 description: "A short summary shown in article lists and search results."
-tags: ["thinking", "writing"]
+tags: ["thinking", "writing"]     # pick from the predefined list in keystatic.config.ts
 status: published          # or: draft (drafts are hidden from lists)
 language: en               # or: it — sets the HTML lang attribute
 series: "My Series Name"   # optional — groups articles into a series
@@ -133,13 +133,15 @@ Place images in `public/images/` and reference them with `/images/filename.jpg`.
 
 #### `<Sources>`
 
-Always add at the end of the article if you have sources in the frontmatter:
+Sources listed in the frontmatter are **automatically rendered** at the bottom of every article page — you don't need to add anything to the MDX body.
+
+If you want to place the source list at a specific position *inside* the article body instead, you can call it explicitly:
 
 ```mdx
 <Sources sources={frontmatter.sources} />
 ```
 
-This automatically renders the numbered source list from the frontmatter. If `sources` is empty, nothing is rendered.
+If `sources` is empty, nothing is rendered either way.
 
 ### Publishing an article
 
@@ -208,7 +210,7 @@ To change fonts:
 
 ### Navigation links
 
-The nav is in `src/layouts/BaseLayout.astro`. It contains links to `/articles`, `/about`, `/search`. Add, remove, or rename links there.
+The nav is in `src/layouts/BaseLayout.astro`. It contains links to `/articles`, `/series`, `/about`, `/search`. The current page is automatically highlighted. Add, remove, or rename links there.
 
 ### About and Now pages
 

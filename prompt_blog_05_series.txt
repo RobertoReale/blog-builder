@@ -83,20 +83,22 @@ In the page component:
 Update ArticleCard.astro to accept optional `series` and `part` props
 (these are already in the schema, just need to pass them through).
 
-If both are present, show a small badge above or below the tags:
-- Text: "Part {N} · {series name}"
-- Style: DM Sans, 12px, var(--color-muted), no background, no border
+If both are present, show a small badge below the tags:
+- Text: "Part {N} · {series name}" where the series name is a link to `/series/[seriesSlug]`
+- Import `slugify` from `../../utils/slugify` to build the URL
+- Style: DM Sans, 12px, var(--color-muted); the series link keeps var(--color-muted)
+  with `text-decoration: underline`
 - Just a subtle line of text, not a pill
 
 ---
 
-### 4. Series index page
+### 4. Series pages
 
-Create src/pages/series/[series].astro
+**4a. Individual series page — src/pages/series/[series].astro**
 
 getStaticPaths:
 - Collect all unique series values from published articles
-- Generate URL-safe slug for each series name (lowercase, replace spaces with hyphens)
+- Generate URL-safe slug for each series name using `slugify`
 - Pass seriesName and seriesSlug as props
 
 Page:
@@ -106,9 +108,26 @@ Page:
 - Use ArticleCard component
 - Each card shows its Part badge
 
-Add series links:
+**4b. Series index page — src/pages/series/index.astro**
+
+Create a listing page for all series:
+- H1: "Series" (Lora)
+- Subtitle: "Multi-part articles grouped by topic." (muted DM Sans)
+- For each series (sorted alphabetically by name), render a row:
+  - `<a href="/series/[seriesSlug]">` wrapping the whole row
+  - Series name: Lora, 1.25rem, var(--color-text)
+  - Article count: DM Sans, 14px, var(--color-muted), e.g. "3 articles"
+  - Separator between rows: 1px solid var(--color-border)
+  - Hover: series name underlines
+- If no series exist, show a graceful empty state
+
+**4c. Add "Series" to the navigation**
+
+In BaseLayout.astro, add a "Series" link pointing to `/series` in the nav bar,
+between "Articles" and "About".
+
+Series links:
 - On article pages, the series name in SeriesNav should link to /series/[seriesSlug]
-- No need for a global series listing page (yet)
 
 ---
 
@@ -150,7 +169,9 @@ src/content/articles/example-critical-thinking-2.mdx
 ### Checklist before finishing
 - [ ] SeriesNav renders on the example article with correct prev/next links
 - [ ] /series/thinking-tools lists both example articles
-- [ ] ArticleCards for series articles show the Part badge
+- [ ] /series lists all series with article counts
+- [ ] "Series" link is in the main nav, pointing to /series
+- [ ] ArticleCards for series articles show the Part badge with a link to the series page
 - [ ] Draft parts in a series show "(coming soon)" without a link
 - [ ] Articles without a series are unaffected
 - [ ] `npm run build` succeeds

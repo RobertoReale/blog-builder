@@ -157,7 +157,25 @@ Fix any responsive issues found.
 
 ### 6. Interactive States & Hover Feedback
 
-Every clickable element must have a visible hover state. Audit:
+**Active navigation state:**
+
+In BaseLayout.astro, the current page's nav link must be visually distinct.
+Use `Astro.url.pathname` to determine the active link and apply `var(--color-text)`
+instead of `var(--color-muted)`. Add these lines in the frontmatter:
+
+```ts
+const pathname = Astro.url.pathname;
+const navColor = (href: string) =>
+  (href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/'))
+    ? 'var(--color-text)'
+    : 'var(--color-muted)';
+```
+
+Then replace the hardcoded `color: var(--color-muted)` on each nav `<a>` with
+`style={`color: ${navColor('/articles')}`}` (and so on for each link).
+The external Portfolio link always stays muted (cannot be active).
+
+Every clickable element must also have a visible hover state. Audit:
 
 - **Navigation links**: color change on hover
 - **Article card titles/links**: underline or color change on hover
@@ -196,6 +214,16 @@ Verify the render order matches the CLAUDE.md specification exactly:
   8. Footer
 
 If the order is wrong, fix it.
+
+Also verify that Sources is rendered **explicitly** from frontmatter data, not only
+available as an MDX component. After the article body (`<Content />`), there must be
+a call like:
+```astro
+<Sources sources={entry.data.sources ?? []} />
+```
+This is separate from passing `Sources` in the MDX components map. The MDX components
+map makes it usable inside article body text; the explicit call renders the frontmatter
+`sources` array automatically for every article. Both are required.
 
 **Search page (src/pages/search.astro):**
 - Search input is present and has an accessible label
@@ -344,7 +372,9 @@ After all fixes:
 - [ ] TOC collapses on mobile via <details>/<summary>
 - [ ] BackToTop is at least 40×40px
 - [ ] All interactive elements have visible hover states
+- [ ] Active nav link uses var(--color-text); inactive links use var(--color-muted)
 - [ ] Article render order matches the CLAUDE.md spec
+- [ ] `<Sources sources={entry.data.sources ?? []} />` is called explicitly after the article body
 - [ ] 404 page exists with a homepage link
 - [ ] Example article has ≥ 3 headings, past date, status: published
 - [ ] src/config.ts has the user's real title, URL, author, description

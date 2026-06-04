@@ -350,33 +350,28 @@ To use keyboard shortcut: press **`/`** anywhere on the blog (not while typing i
 
 ## 8. Troubleshooting
 
-### `npm run dev` shows a blank page or 500 error
+### `npm run dev` shows a blank page, 500 error, or "Expected } but found :"
 
-**Cause**: Node.js 22–24 + `@astrojs/vercel` adapter compatibility issue.
-The adapter bundles its own esbuild version that can fail to parse certain
-Astro template patterns (including inline `<script>` tags with TypeScript
-generics like `querySelectorAll<HTMLElement>`) when running in hybrid mode.
-The production build is not affected.
+**Cause**: Most likely an `@astrojs/react` version mismatch. Major versions of
+`@astrojs/react` track Astro major versions — `@astrojs/react@5` targets Astro 5
+and is incompatible with Astro 4. npm v7+ auto-installs the latest version
+(currently v5) unless explicitly pinned, so a fresh `npm install` can pull in
+the wrong version without any warning.
 
-**Fix A** — Check that `astro.config.mjs` has this Vite setting (added by Step 7):
-```js
-vite: {
-  esbuild: {
-    target: 'es2022',
-  },
-},
+**Fix A** — Check the installed version and downgrade if needed:
+```bash
+npm list @astrojs/react
+# should show 4.x.x — if it shows 5.x, downgrade:
+npm install @astrojs/react@^4
 ```
-If missing, add it and restart the dev server.
+Restart the dev server after downgrading.
 
-**Fix B** — Use the build-based preview instead:
+**Fix B** — Use the build-based preview (always works, search included):
 ```bash
 npm run dev:build
 # open http://localhost:4321
+# takes ~20s to build, then serves the full production output
 ```
-
-**Fix C** (advanced) — Move complex TypeScript out of inline `<script>` tags
-into separate `.ts` files. This bypasses the esbuild parsing pipeline entirely.
-See [GitHub issue discussion](https://github.com/withastro/astro/issues) for details.
 
 ### Search returns no results
 
@@ -438,7 +433,7 @@ The blog is designed to be stable over time. Once deployed, the static HTML outp
 | **Tailwind CSS / @astrojs/tailwind** | Medium | `@astrojs/tailwind` is deprecated in Astro 5+. With pinned Astro 4 it works fine. Future migration to Astro 5+ requires switching to `@tailwindcss/vite` plugin. |
 | **Keystatic CMS** | High | Maintenance has slowed significantly in 2026. Works with Astro 5 but NOT with Astro 6. If Keystatic causes problems, the blog works perfectly without it — articles can always be written as `.mdx` files directly. |
 | **Pagefind (search)** | Very low | Build-time only, actively maintained (v1.5.2 as of April 2026). No runtime dependency. |
-| **Node.js** | Low | The pipeline uses `"engines": { "node": ">=20" }`. Node 22 LTS (EOL April 2027) is recommended. Node 20 reached EOL on April 30, 2026. |
+| **Node.js** | Low | The pipeline detects the current active LTS at build time and sets `"engines": { "node": ">=<LTS>" }` accordingly. Node 22 LTS (EOL April 2027) is the current recommendation. Node 20 reached EOL on April 30, 2026. |
 
 **If a future `npm run build` fails** after a dependency update, the fastest fix is to pin the previously working versions in `package.json` and re-run the build. The pipeline prompts instruct Claude to search for current best practices at execution time, so re-running a prompt step will always produce code compatible with the then-current package versions.
 

@@ -29,6 +29,8 @@ browse the source or visit the [live site](https://blog-roberto-reale.vercel.app
 
 ## 1. How to Build the Blog
 
+> **Future-proofing tip**: Web technologies evolve rapidly. Before running the pipeline, we highly recommend downloading this repository and asking your preferred LLM (like Gemini, Claude, or ChatGPT) to review it: *"Are these setup scripts and prompts still up-to-date with current Astro versions and best practices? Please update them if necessary."* This ensures the blog builder will continue to work perfectly even years from now.
+
 Follow **[SETUP.md](SETUP.md)** for the full build instructions. Quick overview:
 
 1. Install **Node.js 22 LTS** (or newer), **Git**, and **Claude Code**.

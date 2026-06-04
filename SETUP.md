@@ -9,6 +9,8 @@ This folder contains everything needed to generate the blog:
 
 Core idea: **each prompt runs in a separate Claude Code session**, so the context window never fills up. After each step, the script independently verifies that `npm run build` (and unit tests) pass, commits a git checkpoint, then **stops at the first failure** — it never builds on top of a broken state.
 
+> **Future-proofing tip**: Web technologies evolve rapidly. Before proceeding, we recommend asking your preferred LLM (like Gemini, Claude, or ChatGPT) to review this repository: *"Are these scripts and prompts up-to-date with current best practices? Please update them if necessary."* This ensures the builder remains functional for years to come.
+
 ---
 
 ## 1. Prerequisites (one time only)

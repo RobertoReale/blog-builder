@@ -89,6 +89,8 @@ Use Pagefind's JS API (not the default UI widget) to keep full design control:
   async function initSearch() {
     const input = document.getElementById('search-input')
     const results = document.getElementById('search-results')
+    if (!input || !results) return
+    
     let pagefind
     try {
       // Pagefind only exists in the production build (astro build && pagefind).
@@ -100,6 +102,8 @@ Use Pagefind's JS API (not the default UI widget) to keep full design control:
       return
     }
 
+    // Remove existing listener to prevent duplicates across navigations if using is:inline,
+    // or simply add the listener. (Astro module scripts run once, but astro:page-load fires multiple times)
     input.addEventListener('input', async (e) => {
       const query = e.target.value.trim()
       if (!query) { results.innerHTML = ''; return }
@@ -108,7 +112,8 @@ Use Pagefind's JS API (not the default UI widget) to keep full design control:
       renderResults(data, results)
     })
   }
-  initSearch()
+  
+  document.addEventListener('astro:page-load', initSearch)
   
   function renderResults(items, container) {
     container.innerHTML = ''

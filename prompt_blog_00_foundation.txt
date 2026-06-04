@@ -187,11 +187,33 @@ Do NOT use "No props" pattern — always pass sources as an explicit prop.
   - Active pill: accent color background, white text
 - Article list: ArticleCard components
   - Published articles only, sorted by date descending
+  - Pass `language={entry.data.language}` to each ArticleCard
 
-### /articles — src/pages/articles.astro
-- H1: "Articles"
-- Same tag filter + article list as homepage
-- No hero section
+### /articles — src/pages/articles/[...page].astro
+(Rename from articles.astro to articles/[...page].astro so Astro generates paginated
+routes: /articles/ for page 1, /articles/2/ for page 2, etc.)
+
+- Paginated archive of all published articles, 10 per page, sorted by date descending
+- H1: "Articles" on every page
+- No hero section, no TagFilter (tag filtering lives on the homepage)
+- Use Astro's built-in `paginate()` helper in `getStaticPaths`:
+  ```ts
+  import type { GetStaticPathsOptions } from 'astro';
+  export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+    const articles = (await getCollection('articles', (e) => e.data.status === 'published'))
+      .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+    return paginate(articles, { pageSize: 10 });
+  }
+  const { page } = Astro.props;
+  ```
+- Render `page.data` using ArticleCard, passing `language={entry.data.language}` to each
+- Pagination navigation below the article list:
+  - "← Newer" if `page.url.prev` exists (link to prev page)
+  - "Older →" if `page.url.next` exists (link to next page)
+  - Display: DM Sans, 14px, var(--color-muted), hover: var(--color-text)
+  - Row: `display: flex; justify-content: space-between`
+  - Current position: `Page {page.currentPage} of {page.lastPage}` centered,
+    var(--color-muted), 13px (omit if there is only one page)
 
 ### /article/[slug] — src/pages/article/[slug].astro
 - getStaticPaths from content collection (published only)
@@ -205,6 +227,7 @@ Do NOT use "No props" pattern — always pass sources as an explicit prop.
 - getStaticPaths: collect all unique tags from published articles
 - H1: "#tagname"
 - Article list filtered by tag, sorted by date descending
+- Pass `language={entry.data.language}` to each ArticleCard
 
 ### /about — src/pages/about.astro
 - Static page
@@ -249,10 +272,13 @@ machines regardless of their TZ.
 ## UI COMPONENTS
 
 ### ArticleCard.astro
-Props: title, description, date, slug, tags, readingTime, series?, part?
+Props: title, description, date, slug, tags, readingTime, series?, part?, language?: string
 - Title: Lora, links to /article/[slug]
 - Description: DM Sans, muted
 - Bottom row: date (muted, small) + reading time (muted, small) + tag pills
+- If `language` is present and not 'en': show a small language badge at the end
+  of the bottom row — uppercase language code (e.g. "IT"), DM Sans, 11px,
+  var(--color-muted), letter-spacing 0.05em — so readers know the article is not in English
 - No border, no card shadow — just clean vertical spacing
 - Hover: title underline only
 - IMPORTANT: For DOM data attributes, use data-article-categories={tags.join(',')} instead of data-tags to evade adblocker heuristics.
@@ -312,7 +338,8 @@ src/
     ArticleLayout.astro
   pages/
     index.astro
-    articles.astro
+    articles/
+      [...page].astro
     article/
       [slug].astro
     tag/

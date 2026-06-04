@@ -372,9 +372,12 @@ Read the source of each page template and verify the following:
 - ArticleCard components are rendered for each published article
 - Tag filter pills exist (TagFilter or similar component)
 - If no published articles exist, a graceful empty state is shown
+- ArticleCards for non-English articles show a language badge (e.g. "IT")
 
-**Articles page (src/pages/articles.astro):**
-- Same article list as homepage, without the hero/intro text
+**Articles page (src/pages/articles/[...page].astro):**
+- Paginated article list (10 per page), without the hero/intro text and without TagFilter
+- Pagination navigation is present (← Newer / Older →) and links only appear for pages that exist
+- ArticleCards for non-English articles show a language badge (e.g. "IT")
 
 **Article page (src/pages/article/[slug].astro):**
 Verify the render order matches the CLAUDE.md specification exactly:
@@ -567,5 +570,7 @@ After all fixes:
 - [ ] @fontsource @import lines in global.css load the correct fonts (no Google Fonts <link> tag)
 - [ ] CSS color variables in global.css match the user's chosen palette
 - [ ] No hardcoded "Your Name" / "example.com" / "Your Blog" strings in src/
+- [ ] /articles page is paginated (10 per page) with working ← Newer / Older → navigation
+- [ ] ArticleCards show a language badge (e.g. "IT") for non-English articles
 - [ ] npm run build succeeds
 - [ ] npm run test:unit passes

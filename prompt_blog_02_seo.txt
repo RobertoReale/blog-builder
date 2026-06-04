@@ -117,6 +117,122 @@ Only render on article pages, nowhere else.
 
 ---
 
+### 7. Open Graph images
+
+Generate a static 1200×630 PNG for every article at build time so that social
+links (X, LinkedIn, WhatsApp, iMessage) show a proper preview card.
+
+Install the required packages:
+```
+npm install satori @resvg/resvg-js
+```
+
+Create src/pages/og/[slug].png.ts:
+```ts
+import type { APIRoute, GetStaticPaths } from 'astro';
+import { getCollection } from 'astro:content';
+import satori from 'satori';
+import { Resvg } from '@resvg/resvg-js';
+import { readFile } from 'node:fs/promises';
+import { SITE } from '../../config';
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const articles = await getCollection('articles', (e) => e.data.status === 'published');
+  return articles.map((a) => ({
+    params: { slug: a.slug },
+    props: { title: a.data.title, description: a.data.description },
+  }));
+};
+
+export const GET: APIRoute = async ({ props }) => {
+  const { title, description } = props as { title: string; description: string };
+
+  const fontPath = new URL(
+    '../../../node_modules/@fontsource/lora/files/lora-latin-400-normal.woff',
+    import.meta.url,
+  );
+  const fontData = await readFile(fontPath);
+
+  const svg = await satori(
+    {
+      type: 'div',
+      props: {
+        style: {
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-end',
+          padding: '60px',
+          backgroundColor: '#111827',
+          color: '#F3F4F6',
+          fontFamily: 'Lora',
+        },
+        children: [
+          {
+            type: 'p',
+            props: {
+              style: { fontSize: '15px', color: '#9CA3AF', marginBottom: '24px' },
+              children: SITE.author,
+            },
+          },
+          {
+            type: 'h1',
+            props: {
+              style: { fontSize: '48px', lineHeight: 1.2, margin: '0 0 20px' },
+              children: title,
+            },
+          },
+          {
+            type: 'p',
+            props: {
+              style: { fontSize: '20px', color: '#9CA3AF', margin: 0 },
+              children: description,
+            },
+          },
+        ],
+      },
+    },
+    {
+      width: 1200,
+      height: 630,
+      fonts: [{ name: 'Lora', data: fontData, weight: 400, style: 'normal' }],
+    },
+  );
+
+  const resvg = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } });
+  const pngBuffer = resvg.render().asPng();
+
+  return new Response(pngBuffer, {
+    headers: {
+      'Content-Type': 'image/png',
+      'Cache-Control': 'public, max-age=31536000, immutable',
+    },
+  });
+};
+```
+
+IMPORTANT: The hex colors in this file (#111827, #F3F4F6, #9CA3AF) are intentional —
+Satori runs at build time and cannot access CSS custom properties. These values match
+the dark mode palette in CLAUDE.md and must stay as hex here.
+
+After creating the endpoint, update the article head meta tags.
+In src/pages/article/[slug].astro (or wherever the article OG tags live):
+
+- Replace any conditional `og:image` (previously only set when coverImage existed)
+  with an unconditional reference to the generated image:
+  ```html
+  <meta property="og:image" content={`${SITE.url}/og/${slug}.png`} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  ```
+- Update `twitter:card` to always be `summary_large_image` (every article now has a generated image):
+  ```html
+  <meta name="twitter:card" content="summary_large_image" />
+  ```
+
+---
+
 ### Checklist before finishing
 - [ ] `npm run build` succeeds
 - [ ] /rss.xml is accessible and valid XML
@@ -125,3 +241,5 @@ Only render on article pages, nowhere else.
 - [ ] Every page has a canonical <link> in <head>
 - [ ] /404 renders on a bad URL (test locally or check Vercel config)
 - [ ] Article pages have JSON-LD in page source
+- [ ] /og/[slug].png is generated at build time for each published article
+- [ ] Article head contains og:image, og:image:width, og:image:height, and twitter:card: summary_large_image

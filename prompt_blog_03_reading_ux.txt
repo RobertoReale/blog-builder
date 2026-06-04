@@ -54,6 +54,7 @@ Design:
 - Visible when scrollY > 400 (opacity 1, pointer-events auto)
 - Smooth opacity transition: 200ms
 - On click: window.scrollTo({ top: 0, behavior: 'smooth' })
+- IMPORTANT: Do not use an is:inline script. Use a standard <script> and wrap the button initialization in document.addEventListener('astro:page-load', () => { ... }) so it survives ViewTransitions navigations. The window scroll listener can be attached at the top level.
 
 Add the component (BackToTop.astro) to BaseLayout so it appears on every page.
 
@@ -91,7 +92,7 @@ Step 1 — Create TOC.astro (src/components/ui/TOC.astro)
 
 Client-side script:
 ```js
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('astro:page-load', () => {
   const articleBody = document.querySelector('article');
   if (!articleBody) return;
   const headings = [...articleBody.querySelectorAll('h2, h3')];

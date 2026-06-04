@@ -255,6 +255,7 @@ Props: title, description, date, slug, tags, readingTime, series?, part?
 - Bottom row: date (muted, small) + reading time (muted, small) + tag pills
 - No border, no card shadow — just clean vertical spacing
 - Hover: title underline only
+- IMPORTANT: For DOM data attributes, use data-article-categories={tags.join(',')} instead of data-tags to evade adblocker heuristics.
 
 ### TagPill.astro
 Props: tag (string), href?: string, active?: boolean
@@ -269,12 +270,15 @@ Props: tag (string), href?: string, active?: boolean
   hides non-matching cards
 - Uses data attributes on ArticleCard wrappers for filtering
 - No page reload, no framework needed — vanilla JS
+- IMPORTANT: Do not use the words "tag" or "filter" in any DOM class, id, or data-attribute (e.g., use class="category-btn", id="category-navigation", data-category-filter) to prevent adblockers from hiding or breaking the buttons.
+- IMPORTANT: Wrap the client-side script in document.addEventListener('astro:page-load', () => { ... }) so it works with ViewTransitions.
 
 ### ThemeToggle.astro
 - Button with sun/moon SVG (inline, 20px)
 - On click: toggles data-theme on <html>, saves to localStorage
 - No label, just icon
 - aria-label: "Toggle dark mode"
+- IMPORTANT: Wrap the event listener attachment in document.addEventListener('astro:page-load', () => { ... }) so it persists across ViewTransitions navigations.
 
 ## OPEN GRAPH META TAGS
 In ArticleLayout (or article/[slug].astro <head>):

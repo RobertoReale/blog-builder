@@ -217,15 +217,15 @@ test('tag filter shows only matching articles', async ({ page }) => {
   const initialCount = await page.locator('[data-article-card]').count()
   if (initialCount < 2) return // skip if only 1 article (can't test filtering)
   // click the first non-"All" tag pill
-  const tagPill = page.locator('[data-tag-pill]').first()
-  const tag = await tagPill.getAttribute('data-tag')
+  const tagPill = page.locator('.category-btn:not([data-category-filter="all"])').first()
+  const tag = await tagPill.getAttribute('data-category-filter')
   await tagPill.click()
   // every still-visible card must carry the selected tag
   const visible = page.locator('[data-article-card]:visible')
   const count = await visible.count()
   expect(count).toBeGreaterThan(0)
   for (let i = 0; i < count; i++) {
-    const tags = (await visible.nth(i).getAttribute('data-tags'))?.split(',') ?? []
+    const tags = (await visible.nth(i).getAttribute('data-article-categories'))?.split(',') ?? []
     expect(tags).toContain(tag)
   }
 })
@@ -247,9 +247,9 @@ For the E2E tests above to work, add these data attributes to the
 relevant components in the foundation:
 
 - ArticleCard.astro wrapper: add `data-article-card` and
-  `data-tags="{tags.join(',')}"` to the outer element
-- TagPill.astro (in TagFilter): add `data-tag-pill` and
-  `data-tag="{tag}"` to the pill button/element
+  `data-article-categories="{tags.join(',')}"` to the outer element
+- TagFilter.astro buttons: add `class="category-btn"` and
+  `data-category-filter="{tag}"` to the pill button/element
 
 
 ---
@@ -265,8 +265,8 @@ Not required, but good practice to commit the empty folder structure.
 - [ ] `npm run test:e2e` passes all smoke tests
 - [ ] `npm run build` still succeeds
 - [ ] No type errors in test files
-- [ ] data-article-card attribute added to ArticleCard.astro
-- [ ] data-tag-pill and data-tag attributes added to TagPill.astro
+- [ ] data-article-card and data-article-categories added to ArticleCard.astro
+- [ ] category-btn and data-category-filter added to TagFilter.astro
 
 ---
 

@@ -48,6 +48,25 @@ $stepNames = @(
   "UI & design review"
 )
 
+# Conditionally append optional steps based on CLAUDE.md configuration
+$claudeMd = if (Test-Path "CLAUDE.md") { Get-Content "CLAUDE.md" -Raw } else { "" }
+
+# Analytics (step 10)
+if ($claudeMd -match '(?m)## ANALYTICS\s*\n\s*\nProvider:\s+(umami|cloudflare|vercel)\b') {
+  $prompts   += "prompt_blog_10_analytics.txt"
+  $stepNames += "Analytics"
+}
+# Comments (step 11)
+if ($claudeMd -match '(?m)## COMMENTS\s*\n\s*\nProvider:\s+(giscus|utterances)\b') {
+  $prompts   += "prompt_blog_11_comments.txt"
+  $stepNames += "Comments"
+}
+# Newsletter (step 12)
+if ($claudeMd -match '(?m)## NEWSLETTER\s*\n\s*\nProvider:\s+(buttondown|substack|kit)\b') {
+  $prompts   += "prompt_blog_12_newsletter.txt"
+  $stepNames += "Newsletter"
+}
+
 # --- Preliminary checks ----------------------------------------------------
 function Assert-Command($name, $hint) {
   if (-not (Get-Command $name -ErrorAction SilentlyContinue)) {

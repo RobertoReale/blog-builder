@@ -32,7 +32,7 @@ if (-not (Test-Path "CLAUDE.md")) {
 }
 
 # --- 1. Site info ---
-Write-Section "1/3 — Site info"
+Write-Section "1/6 — Site info"
 $blogTitle = Read-Host "Blog title"
 $blogDesc  = Read-Host "Description (one sentence)"
 Write-Host ""
@@ -46,7 +46,7 @@ $blogUrl   = Read-Host "URL (e.g. https://yourdomain.vercel.app)"
 $blogAuthor = Read-Host "Author name"
 
 # --- 2. Color palette ---
-Write-Section "2/3 — Color palette"
+Write-Section "2/6 — Color palette"
 Write-Host "  1  Blue / Neutral  — clean, professional           (default)"
 Write-Host "  2  Forest          — warm greens, earthy tones"
 Write-Host "  3  Sunset          — warm oranges, amber"
@@ -99,7 +99,7 @@ switch ($c) {
 }
 
 # --- 3. Typography ---
-Write-Section "3/3 — Typography"
+Write-Section "3/6 — Typography"
 Write-Host "  1  Lora + DM Sans                  — classic serif + clean sans  (default)"
 Write-Host "  2  Playfair Display + Source Sans 3 — editorial, elegant"
 Write-Host "  3  DM Serif Display + DM Sans      — modern, cohesive"
@@ -123,7 +123,56 @@ switch ($f) {
   default { $headingFont = "Lora"; $headingType = "serif"; $bodyFont = "DM Sans" }
 }
 
-# --- 4. Update CLAUDE.md ---
+# --- 4. Analytics ---
+Write-Section "4/6 — Analytics (optional)"
+Write-Host "  0  None                         — no analytics, skip this step   (default)"
+Write-Host "  1  Umami Cloud                  — privacy-first, 100k events/month free   (recommended)"
+Write-Host "  2  Cloudflare Web Analytics     — unlimited free, requires DNS nameserver change"
+Write-Host "  3  Vercel Analytics             — 2,500 events/month free, minimal setup"
+Write-Host ""
+$a = Read-Host "Choice [0-3, default 0]"
+if (-not $a) { $a = "0" }
+
+switch ($a) {
+  "1" { $analyticsProvider = "umami" }
+  "2" { $analyticsProvider = "cloudflare" }
+  "3" { $analyticsProvider = "vercel" }
+  default { $analyticsProvider = "none" }
+}
+
+# --- 5. Comments ---
+Write-Section "5/6 — Comments (optional)"
+Write-Host "  0  None         — no comments section   (default)"
+Write-Host "  1  Giscus       — GitHub Discussions, privacy-first, free   (recommended)"
+Write-Host "  2  Utterances   — GitHub Issues, simpler, free"
+Write-Host ""
+$cm = Read-Host "Choice [0-2, default 0]"
+if (-not $cm) { $cm = "0" }
+
+switch ($cm) {
+  "1" { $commentsProvider = "giscus" }
+  "2" { $commentsProvider = "utterances" }
+  default { $commentsProvider = "none" }
+}
+
+# --- 6. Newsletter ---
+Write-Section "6/6 — Newsletter (optional)"
+Write-Host "  0  None          — no newsletter form   (default)"
+Write-Host "  1  Buttondown    — privacy-first, 100 subscribers free   (recommended)"
+Write-Host "  2  Substack      — popular, free for free newsletters"
+Write-Host "  3  Kit           — formerly ConvertKit, 10k subscribers free"
+Write-Host ""
+$nl = Read-Host "Choice [0-3, default 0]"
+if (-not $nl) { $nl = "0" }
+
+switch ($nl) {
+  "1" { $newsletterProvider = "buttondown" }
+  "2" { $newsletterProvider = "substack" }
+  "3" { $newsletterProvider = "kit" }
+  default { $newsletterProvider = "none" }
+}
+
+# --- 7. Update CLAUDE.md ---
 Write-Host ""
 Write-Host "Updating CLAUDE.md..." -ForegroundColor Cyan
 
@@ -191,6 +240,17 @@ $content = $content -replace '- Body \+ UI: .+, sans-serif', "- Body + UI: $body
 # 4. Update font line in STACK section (regex — matches any current value)
 $content = $content -replace '- Fonts: .+\(headings\) \+ .+\(body/UI\).*', "- Fonts: $headingFont (headings) + $bodyFont (body/UI) — self-hosted via @fontsource"
 
+# 5. Replace each provider value (section-aware, so ANALYTICS/COMMENTS/NEWSLETTER stay independent)
+$providers = @(
+  @{ section = "## ANALYTICS";  value = $analyticsProvider  },
+  @{ section = "## COMMENTS";   value = $commentsProvider   },
+  @{ section = "## NEWSLETTER"; value = $newsletterProvider }
+)
+foreach ($p in $providers) {
+  $escaped = [regex]::Escape($p.section)
+  $content = $content -replace "(?ms)($escaped\r?\n\r?\n)Provider:\s*\S+", "`${1}Provider: $($p.value)"
+}
+
 # Write back (UTF-8 without BOM, LF line endings)
 [System.IO.File]::WriteAllText(
   (Resolve-Path 'CLAUDE.md').Path,
@@ -253,8 +313,20 @@ Write-Host "=================================================" -ForegroundColor 
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor White
 Write-Host ""
+$optionalSteps = @()
+if ($analyticsProvider -ne "none") { $optionalSteps += "analytics" }
+if ($commentsProvider  -ne "none") { $optionalSteps += "comments" }
+if ($newsletterProvider -ne "none") { $optionalSteps += "newsletter" }
+$baseSteps = 10
+$totalSteps = $baseSteps + $optionalSteps.Count
+$lastStep   = $totalSteps - 1
+$stepNote = if ($optionalSteps.Count -gt 0) {
+  "runs all $totalSteps steps, 0-$lastStep — $($optionalSteps -join ', ') included"
+} else {
+  "runs all $baseSteps steps, 0-$($baseSteps-1)"
+}
 Write-Host "  1. Generate the blog:"
-Write-Host "       .\run.ps1        (runs all 10 steps, 0-9)" -ForegroundColor White
+Write-Host "       .\run.ps1        ($stepNote)" -ForegroundColor White
 Write-Host "       .\run.ps1 -Pause (pauses after each step)" -ForegroundColor White
 Write-Host ""
 if ($githubRemote) {

@@ -4,7 +4,10 @@ The blog foundation is already built. Add a lightweight test suite
 using Vitest (unit tests) and Playwright (E2E smoke tests).
 This is not a feature — it's a safety net for all future development.
 
-CRITICAL INSTRUCTION: Before writing any code, use your web search tools to check for the current best practices for Vitest + Astro and Playwright + Astro integration (configuration, version compatibility, recommended plugins). If you encounter a bug you cannot resolve by reading the code, search online for known issues and solutions before giving up.
+CRITICAL INSTRUCTION: Before writing any code, use your web search tools to:
+1. Check for the current best practices for Vitest + Astro and Playwright + Astro integration (configuration, version compatibility, recommended plugins).
+2. Verify that Vitest and Playwright are still the recommended testing tools for Astro static blogs — if a clearly better alternative has emerged for either, add a `<!-- ALTERNATIVE: <name> — <reason> -->` comment in the relevant config file, but implement what is specified here.
+If you encounter a bug you cannot resolve by reading the code, search online for known issues and solutions before giving up.
 
 ---
 

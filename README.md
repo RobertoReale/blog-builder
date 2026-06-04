@@ -18,9 +18,12 @@ browse the source or visit the [live site](https://blog-roberto-reale.vercel.app
 5. [Deploying to Vercel](#5-deploying-to-vercel)
 6. [Using the Keystatic CMS](#6-using-the-keystatic-cms-step-7-only)
 7. [Search](#7-search)
-8. [Troubleshooting](#8-troubleshooting)
-9. [How the Pipeline Works](#9-how-the-pipeline-works)
-10. [What Could This Blog Do Better?](#10-what-could-this-blog-do-better-optional)
+8. [Analytics (Optional)](#8-analytics-optional)
+9. [Comments (Optional)](#9-comments-optional)
+10. [Newsletter (Optional)](#10-newsletter-optional)
+11. [Troubleshooting](#11-troubleshooting)
+12. [How the Pipeline Works](#12-how-the-pipeline-works)
+13. [What Could This Blog Do Better?](#13-what-could-this-blog-do-better-optional)
 
 ---
 
@@ -88,7 +91,7 @@ The filename becomes the URL slug:
 title: "Your Article Title"
 date: 2025-06-03          # YYYY-MM-DD, no quotes needed
 description: "A short summary shown in article lists and search results."
-tags: ["thinking", "writing"]     # pick from the predefined list in keystatic.config.ts
+tags: ["thinking", "writing"]     # free-form — add any tags you want
 status: published          # or: draft (drafts are hidden from lists)
 language: en               # or: it — sets the HTML lang attribute
 series: "My Series Name"   # optional — groups articles into a series
@@ -348,7 +351,172 @@ To use keyboard shortcut: press **`/`** anywhere on the blog (not while typing i
 
 ---
 
-## 8. Troubleshooting
+## 8. Analytics (Optional)
+
+Analytics is configured during setup (`setup.ps1` / `setup.sh`). If you chose a
+provider, the pipeline automatically runs Step 10 to add the tracking script.
+If you chose "None" during setup, skip this section.
+
+> **Changing your choice after setup**: Edit `CLAUDE.md`, find the `ANALYTICS` section,
+> and change the `Provider:` line to `umami`, `cloudflare`, `vercel`, or `none`.
+> Then run: `.\run.ps1 -StartStep 10` (Windows) or `./run.sh -s 10` (Linux/macOS).
+
+### Choosing a provider
+
+| Provider | Free tier | Privacy | Setup effort |
+|---|---|---|---|
+| **Umami Cloud** *(recommended)* | 100k events/month, 3 sites | Cookie-free, GDPR-compliant | ~10 min — account + copy website ID |
+| **Cloudflare Web Analytics** | Unlimited events | Cookie-free, GDPR-compliant | ~10 min — account + copy token |
+| **Vercel Analytics** | 2,500 events/month | Privacy-focused | ~2 min — enable in Vercel dashboard |
+
+All three are cookie-free and GDPR-compliant by default. Umami is the best choice for
+long-term flexibility: it's open-source, can be self-hosted, and has the most detailed
+metrics (time on page, bounce rate, UTM tracking, custom events).
+
+### Umami Cloud — connecting your account
+
+After the pipeline adds the tracking script, replace the placeholder with your real website ID:
+
+1. Create a free account at [cloud.umami.is](https://cloud.umami.is)
+2. Add your site: **Settings** → **Websites** → **Add Website** → enter your blog URL
+3. Copy the **Website ID** shown after adding the site
+4. Open `src/layouts/BaseLayout.astro` and find:
+   ```html
+   data-website-id="REPLACE_WITH_YOUR_UMAMI_WEBSITE_ID"
+   ```
+5. Replace `REPLACE_WITH_YOUR_UMAMI_WEBSITE_ID` with your real Website ID
+6. Commit and push — Vercel redeploys automatically
+
+Dashboard: [cloud.umami.is](https://cloud.umami.is) → **Websites** → your blog
+
+### Cloudflare Web Analytics — connecting your account
+
+After the pipeline adds the tracking script, replace the placeholder with your real beacon token:
+
+1. Create a free Cloudflare account at [cloudflare.com](https://cloudflare.com)
+2. Go to **Analytics & Logs** → **Web Analytics** → **Add a Site**
+3. Enter your blog domain — Cloudflare shows a script snippet with your token
+4. Copy the token value from `data-cf-beacon='{"token": "..."}'`
+5. Open `src/layouts/BaseLayout.astro` and find:
+   ```html
+   data-cf-beacon='{"token": "REPLACE_WITH_YOUR_CF_BEACON_TOKEN"}'
+   ```
+6. Replace `REPLACE_WITH_YOUR_CF_BEACON_TOKEN` with your real token
+7. Commit and push
+
+> **Note**: you do NOT need to change your DNS nameservers for Web Analytics to work.
+> The DNS change is only needed for Cloudflare's full CDN/proxy suite, which is optional.
+
+Dashboard: Cloudflare → **Analytics & Logs** → **Web Analytics** → your site
+
+### Vercel Analytics — enabling the dashboard
+
+After the pipeline installs `@vercel/analytics` and adds `<Analytics />` to the layout:
+
+1. In your Vercel project dashboard, go to the **Analytics** tab in the top nav
+2. Click **Enable** — that's all. No further configuration needed.
+3. Vercel starts collecting data from the next deploy onward.
+
+Dashboard: Vercel project → **Analytics** tab
+
+> **Free tier**: 2,500 events/month, where each page view is one event.
+> A typical personal blog stays well within this limit.
+
+---
+
+## 9. Comments (Optional)
+
+A comments section lets readers respond directly to your articles using their GitHub account.
+Configured during setup (`setup.ps1` / `setup.sh`). If you chose "None", skip this section.
+
+> **Changing your choice after setup**: Edit `CLAUDE.md`, find the `COMMENTS` section,
+> and change the `Provider:` line to `giscus`, `utterances`, or `none`.
+> Then run: `.\run.ps1 -StartStep 11` (Windows) or `./run.sh -s 11` (Linux/macOS).
+> Note: if analytics was not configured, comments will be step 10, not 11 — check `.\run.ps1 -DryRun`.
+
+### Choosing a provider
+
+| Provider | Backend | Privacy | Features |
+|---|---|---|---|
+| **Giscus** *(recommended)* | GitHub Discussions | No tracking, no ads | Reactions, edit comments, nested replies |
+| **Utterances** | GitHub Issues | No tracking, no ads | Simpler, fewer features |
+
+Both require visitors to have a GitHub account to leave a comment.
+
+### Giscus — connecting your account
+
+After the pipeline adds the widget, replace the placeholders with your real repository details:
+
+1. Enable GitHub Discussions on your blog repository: **Settings** → **Features** → check **Discussions**
+2. Go to [giscus.app](https://giscus.app), enter your repository, configure the options
+3. Giscus generates a `<script>` snippet — copy the attribute values from it
+4. Open `src/components/ui/GiscusComments.astro` and replace:
+   - `REPLACE_WITH_OWNER/REPO` → your GitHub `username/repo`
+   - `REPLACE_WITH_REPO_ID` → from the generated snippet
+   - `REPLACE_WITH_CATEGORY_NAME` → e.g., `General` or `Comments`
+   - `REPLACE_WITH_CATEGORY_ID` → from the generated snippet
+5. Commit and push
+
+> **Access**: readers must have a GitHub account. The discussion threads live in your
+> repository's Discussions tab — you can moderate from there.
+
+### Utterances — connecting your account
+
+After the pipeline adds the widget, replace the placeholder:
+
+1. Install the [Utterances app](https://github.com/apps/utterances) on your repository
+2. Open `src/components/ui/UtterancesComments.astro` and replace `REPLACE_WITH_OWNER/REPO`
+   with your GitHub `username/repo`
+3. Commit and push
+
+---
+
+## 10. Newsletter (Optional)
+
+A newsletter form lets readers subscribe to receive new articles by email.
+Configured during setup. If you chose "None", skip this section.
+
+> **Changing your choice after setup**: Edit `CLAUDE.md`, find the `NEWSLETTER` section,
+> and change the `Provider:` line to `buttondown`, `substack`, `kit`, or `none`.
+> Then run the appropriate step number (check `.\run.ps1 -DryRun` to confirm).
+
+### Choosing a provider
+
+| Provider | Free tier | Privacy | Notes |
+|---|---|---|---|
+| **Buttondown** *(recommended)* | 100 subscribers | Privacy-first, no tracking | Simple, clean, developer-friendly |
+| **Substack** | Unlimited free | Minimal tracking | Popular; takes a cut on paid plans |
+| **Kit** (formerly ConvertKit) | 10,000 subscribers | Some tracking | Feature-rich; strong automation tools |
+
+### Buttondown — connecting your account
+
+After the pipeline adds the signup form, replace the placeholder:
+
+1. Create a free account at [buttondown.email](https://buttondown.email)
+2. Your username is the part after `buttondown.email/` on your public newsletter page
+3. Open `src/components/ui/NewsletterForm.astro` and replace `REPLACE_WITH_YOUR_USERNAME`
+   with your Buttondown username
+4. Commit and push
+
+### Substack — connecting your account
+
+1. Create a Substack publication at [substack.com](https://substack.com)
+2. Your Substack subdomain is `yourname.substack.com`
+3. Open `src/components/ui/NewsletterForm.astro` and replace `REPLACE_WITH_YOUR_SUBSTACK`
+   with your Substack subdomain (just the name, not `.substack.com`)
+4. Commit and push
+
+### Kit — connecting your account
+
+1. Create a free account at [kit.com](https://kit.com)
+2. Create a **Form** in Kit (**Grow** → **Landing Pages & Forms**)
+3. In the form settings, find the Form ID (visible in the embed code URL)
+4. Open `src/components/ui/NewsletterForm.astro` and replace `REPLACE_WITH_YOUR_FORM_ID`
+5. Commit and push
+
+---
+
+## 11. Troubleshooting
 
 ### `npm run dev` shows a blank page, 500 error, or "Expected } but found :"
 
@@ -416,10 +584,10 @@ Check:
 3. Ensure `KEYSTATIC_SECRET` is set and is at least 32 bytes of random hex.
 4. Trigger a fresh Vercel deploy after adding/changing env variables.
 
-### Keystatic: Red error "Unhandled type mdxjsEsm" when opening example articles
+### Keystatic: Red error "Unhandled type mdxjsEsm" when opening an article
 
-**Cause**: The AI-generated example articles contain explicit component imports (`import QA from ...`) at the top. Keystatic's visual editor currently does not support parsing explicit ESM imports for Astro components, so it crashes when trying to open these specific files.
-**Fix**: Because they crash on load, you cannot delete them directly from the Keystatic UI. Instead, delete the `.mdx` files directly from `src/content/articles/` via VS Code and commit/push the deletion. When you create *new* articles via Keystatic, they won't contain these explicit imports and the editor will work perfectly.
+**Cause**: The `.mdx` file contains an explicit ESM import at the top (e.g. `import SomeComponent from '../../components/...'`). Keystatic's visual editor does not support parsing explicit component imports inside `.mdx` files and crashes when trying to open them.
+**Fix**: Because the file crashes on load, you cannot delete it from the Keystatic UI. Instead, delete the `.mdx` file directly from `src/content/articles/` via VS Code and commit/push the deletion. Articles created through Keystatic will not have explicit imports and the editor will work correctly.
 
 ### Long-term compatibility
 
@@ -454,7 +622,7 @@ git reset --hard HEAD~1
 
 ---
 
-## 9. How the Pipeline Works
+## 12. How the Pipeline Works
 
 Instead of generating an entire codebase in one massive prompt (which causes
 context overflow and hallucinations), this project uses a **sequenced prompt
@@ -497,6 +665,9 @@ architecture**:
 | 7 | `prompt_blog_07_keystatic.txt` | Keystatic CMS (browser editor, GitHub mode) |
 | 8 | `prompt_blog_08_e2e_check.txt` | E2E integration check, fix any cross-feature failures |
 | 9 | `prompt_blog_09_ui_review.txt` | UI/UX & design audit — accessibility, mobile responsiveness, consistency, polish, configuration completeness |
+| 10 | `prompt_blog_10_analytics.txt` | **Optional** — analytics tracking; only runs if configured during setup |
+| 11 | `prompt_blog_11_comments.txt` | **Optional** — comments section (Giscus or Utterances); only runs if configured during setup |
+| 12 | `prompt_blog_12_newsletter.txt` | **Optional** — newsletter signup form; only runs if configured during setup |
 | — | `prompt_blog_10_future_features.txt` | **Optional** — web-researched report of missing features and future improvements (no code changes) |
 
 After every successful step, a git commit is created as a rollback point.
@@ -526,7 +697,7 @@ Edit `CLAUDE.md` if you want to add new architectural rules or change defaults b
 
 ---
 
-## 10. What Could This Blog Do Better? (Optional)
+## 13. What Could This Blog Do Better? (Optional)
 
 Once the pipeline is complete and your blog is live, you can run one final
 optional prompt to get an honest, web-researched assessment of what your blog

@@ -3,7 +3,10 @@
 The blog foundation is already built. Add full-text search using Pagefind.
 Pagefind runs entirely at build time — no server required.
 
-CRITICAL INSTRUCTION: Before writing any code, use your web search tools to check the current Pagefind documentation and Astro integration guide — the Pagefind API and configuration options have changed across versions. Also look for the most common integration patterns used by the community. If you encounter a bug you cannot resolve by reading the code, search online for known issues and solutions before giving up.
+CRITICAL INSTRUCTION: Before writing any code, use your web search tools to:
+1. Check the current Pagefind documentation and Astro integration guide — the Pagefind API and configuration options have changed across versions. Also look for the most common integration patterns used by the community.
+2. Verify that Pagefind is still the recommended build-time search solution for Astro static blogs — if a clearly better alternative has emerged (better performance, simpler integration, more active maintenance), add a `<!-- ALTERNATIVE: <name> — <reason> -->` comment in search.astro, but implement Pagefind as specified here.
+If you encounter a bug you cannot resolve by reading the code, search online for known issues and solutions before giving up.
 
 ---
 

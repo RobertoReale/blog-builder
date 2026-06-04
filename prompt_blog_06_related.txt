@@ -4,7 +4,10 @@ The blog foundation is already built. Add a "Related articles"
 section at the bottom of each article page.
 Everything is computed at build time — no client-side JS needed.
 
-CRITICAL INSTRUCTION: Before writing any code, use your web search tools to check for current best practices and common scoring algorithms for tag-based related article recommendations in static site generators. Verify how other Astro blogs implement this at build time. If you encounter a bug you cannot resolve by reading the code, search online for known issues and solutions before giving up.
+CRITICAL INSTRUCTION: Before writing any code, use your web search tools to:
+1. Check for current best practices and common scoring algorithms for tag-based related article recommendations in static site generators. Verify how other Astro blogs implement this at build time.
+2. Verify that a build-time tag-overlap scoring approach (no ML, no external API) is still the standard for static blogs — if a smarter yet still static-compatible approach has become widespread, note it as a `<!-- ALTERNATIVE: ... -->` comment in RelatedArticles.astro, but implement what is specified here.
+If you encounter a bug you cannot resolve by reading the code, search online for known issues and solutions before giving up.
 
 ---
 

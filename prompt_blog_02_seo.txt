@@ -7,7 +7,8 @@ Do not change any existing functionality or design.
 CRITICAL INSTRUCTION: Before writing any code, use your web search tools to:
 1. Verify the current best practices for RSS feeds, JSON-LD structured data, sitemaps, and canonical URLs in Astro 4 — both the official Astro docs and community patterns.
 2. Check the current versions and API of `satori` and `@resvg/resvg-js` — both packages evolve independently and their APIs change between major versions.
-3. Verify the current `@fontsource/lora` file structure for accessing font binary files at build time (the internal `files/` path layout changes between major versions of @fontsource). If the path `node_modules/@fontsource/lora/files/lora-latin-400-normal.woff` no longer exists, find the correct path from the package contents or documentation.
+3. Read the heading font name from CLAUDE.md's STACK section ("Fonts:" line). This is the font to use in the OG image — not necessarily Lora. Convert the name to an @fontsource package (e.g. "Playfair Display" → @fontsource/playfair-display). Then verify the correct internal file path for the 400-weight .woff file inside that package (the path layout `files/<name>-latin-400-normal.woff` is common but changes between major @fontsource versions — check the actual package contents). If the font is Lora, the example path is `node_modules/@fontsource/lora/files/lora-latin-400-normal.woff` — verify this still exists.
+4. Verify that `satori` + `@resvg/resvg-js` is still the recommended approach for OG image generation in Astro static sites — if a built-in Astro feature or a more actively maintained package has emerged, add a `<!-- ALTERNATIVE: <name> — <reason> -->` comment in the OG image generation file, but implement what is specified here.
 If you encounter a bug you cannot resolve by reading the code, search online for known issues and solutions before giving up.
 
 ---
@@ -151,8 +152,13 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const GET: APIRoute = async ({ props }) => {
   const { title, description } = props as { title: string; description: string };
 
+  // Read the heading font and colors from CLAUDE.md before writing this file:
+  // - HEADING_FONT: the font name from CLAUDE.md STACK section (e.g. 'Lora', 'Playfair Display')
+  // - FONT_PACKAGE: @fontsource package name (e.g. 'lora', 'playfair-display')
+  // - FONT_FILE: the .woff file path inside the package (e.g. 'lora-latin-400-normal.woff')
+  // - DARK_BG, DARK_TEXT, DARK_MUTED: hex values from CLAUDE.md dark mode palette
   const fontPath = new URL(
-    '../../../node_modules/@fontsource/lora/files/lora-latin-400-normal.woff',
+    '../../../node_modules/@fontsource/FONT_PACKAGE/files/FONT_FILE',
     import.meta.url,
   );
   const fontData = await readFile(fontPath);
@@ -168,15 +174,15 @@ export const GET: APIRoute = async ({ props }) => {
           flexDirection: 'column',
           justifyContent: 'flex-end',
           padding: '60px',
-          backgroundColor: '#111827',
-          color: '#F3F4F6',
-          fontFamily: 'Lora',
+          backgroundColor: 'DARK_BG',
+          color: 'DARK_TEXT',
+          fontFamily: 'HEADING_FONT',
         },
         children: [
           {
             type: 'p',
             props: {
-              style: { fontSize: '15px', color: '#9CA3AF', marginBottom: '24px' },
+              style: { fontSize: '15px', color: 'DARK_MUTED', marginBottom: '24px' },
               children: SITE.author,
             },
           },
@@ -190,7 +196,7 @@ export const GET: APIRoute = async ({ props }) => {
           {
             type: 'p',
             props: {
-              style: { fontSize: '20px', color: '#9CA3AF', margin: 0 },
+              style: { fontSize: '20px', color: 'DARK_MUTED', margin: 0 },
               children: description,
             },
           },
@@ -200,7 +206,7 @@ export const GET: APIRoute = async ({ props }) => {
     {
       width: 1200,
       height: 630,
-      fonts: [{ name: 'Lora', data: fontData, weight: 400, style: 'normal' }],
+      fonts: [{ name: 'HEADING_FONT', data: fontData, weight: 400, style: 'normal' }],
     },
   );
 
@@ -216,9 +222,16 @@ export const GET: APIRoute = async ({ props }) => {
 };
 ```
 
-IMPORTANT: The hex colors in this file (#111827, #F3F4F6, #9CA3AF) are intentional —
-Satori runs at build time and cannot access CSS custom properties. These values match
-the dark mode palette in CLAUDE.md and must stay as hex here.
+IMPORTANT: Replace ALL placeholders above before writing the final file:
+- DARK_BG     → `--color-bg` dark mode hex from CLAUDE.md
+- DARK_TEXT   → `--color-text` dark mode hex from CLAUDE.md
+- DARK_MUTED  → `--color-muted` dark mode hex from CLAUDE.md
+- HEADING_FONT → heading font display name from CLAUDE.md (e.g. `Lora`)
+- FONT_PACKAGE → @fontsource package name (e.g. `lora`, `playfair-display`)
+- FONT_FILE   → verified .woff filename inside the package (CRITICAL INSTRUCTION item 3)
+Satori runs at build time and cannot read CSS custom properties, so hardcoded hex is
+required here. Read the values from CLAUDE.md and use them directly. Remove the
+inline comments (// replace with...) from the written file.
 
 After creating the endpoint, update the article head meta tags.
 In src/pages/article/[slug].astro (or wherever the article OG tags live):

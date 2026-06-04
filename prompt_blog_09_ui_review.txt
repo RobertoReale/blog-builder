@@ -10,6 +10,10 @@ Do not add new features — only fix what is already there.
 CRITICAL INSTRUCTION: Before fixing anything, use your web search tools to
 look up current Astro accessibility patterns, WCAG 2.1 AA requirements for
 personal blogs, and any known dark-mode or CSS variable pitfalls in Astro 4.
+Also check whether any of the UI/UX patterns specified here (share button, TOC,
+back-to-top, dark mode) have been superseded by a widely adopted, better
+approach — if so, note findings as `<!-- ALTERNATIVE: <name> — <reason> -->`
+comments in the relevant component files, but only fix what is specified.
 If you encounter a bug you cannot resolve from the code alone, search online
 before giving up.
 

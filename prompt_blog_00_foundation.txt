@@ -8,6 +8,7 @@ CRITICAL INSTRUCTION: Before you begin writing code, use your web search tools t
 3. Verify the current @fontsource API for `lora` and `dm-sans` (confirm package names and import paths).
 4. Check for any known Astro 4 + Tailwind + MDX incompatibilities at the current versions.
 5. Find the current Node.js LTS version (active, not end-of-life) — use that as the minimum in the `engines` field instead of the placeholder below.
+6. Verify that the core packages listed below (@astrojs/tailwind, @astrojs/mdx, @fontsource/*) are still the recommended choices for their roles — if a clearly better alternative has emerged, add a `<!-- ALTERNATIVE: <name> — <reason> -->` comment in the relevant config file, but implement what is specified here.
 If you encounter a bug you cannot resolve by reading the code, search online for known issues and solutions before giving up.
 
 ## GOAL
@@ -66,18 +67,26 @@ Read the preferred fonts from the `CLAUDE.md` file and apply them to headings an
 - Base body size: 18px, line-height: 1.75
 - Max content width: 680px centered
 - Fonts are self-hosted via @fontsource — do NOT use a Google Fonts <link> tag.
-  Install the packages:
+  Read the heading and body font names from CLAUDE.md's STACK section (the "Fonts:" line).
+  Convert each name to an @fontsource package: lowercase + replace spaces with hyphens.
+  Examples: "Lora" → @fontsource/lora, "DM Sans" → @fontsource/dm-sans,
+  "Playfair Display" → @fontsource/playfair-display, "Source Sans 3" → @fontsource/source-sans-3.
+  Install those packages (if heading and body are the same font, install it once):
   ```
-  npm install @fontsource/lora @fontsource/dm-sans
+  npm install @fontsource/<heading-package> @fontsource/<body-package>
   ```
-  Then import the required weights at the top of `src/styles/global.css`:
+  Import the 400 and 700 weight CSS files for the heading font, and 400 and 500 weight
+  files for the body font, at the top of `src/styles/global.css`. For example, for
+  Lora (headings) + DM Sans (body) — the default — this looks like:
   ```css
   @import '@fontsource/lora/400.css';
   @import '@fontsource/lora/700.css';
   @import '@fontsource/dm-sans/400.css';
   @import '@fontsource/dm-sans/500.css';
   ```
-  Use `font-family: 'Lora', serif` for headings and `font-family: 'DM Sans', sans-serif` for body.
+  Substitute the actual package names from CLAUDE.md. Apply the font names in CSS:
+  `font-family: '<HeadingFont>', <heading-type>` for h1–h3,
+  `font-family: '<BodyFont>', sans-serif` for body and UI elements.
 
 ## LAYOUT RULES
 - Single centered column
@@ -131,8 +140,6 @@ Define in src/content/config.ts using Astro content collections + zod:
     label: z.string(),
     href: z.string(),
   })).optional().default([]),
-  origin: z.string().optional(),
-  originPosition: z.enum(['top', 'bottom']).optional().default('bottom'),
   status: z.enum(['draft', 'published']),
   series: z.string().optional(),
   part: z.number().optional(),

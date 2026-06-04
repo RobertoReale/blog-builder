@@ -13,6 +13,7 @@ CRITICAL INSTRUCTION: Before writing any code, use your web search tools to:
 3. Check the current `keystatic.config.ts` field API (the `fields.*` and `collection()` signatures change across minor versions).
 4. Search for known compatibility issues between the current Keystatic version, Astro 4, and the Node.js version running on this machine (`node --version`).
 5. Determine which version of `@astrojs/react` is compatible with **Astro 4** (not just the latest release — major versions of `@astrojs/react` track Astro major versions, so `@astrojs/react@5` targets Astro 5 and is incompatible here). Keystatic uses React for its admin UI and lists `@astrojs/react` as a peer dependency; npm v7+ will auto-install it at the latest version unless you pin it explicitly. Install the correct version based on your search result.
+6. Verify that Keystatic is still a maintained and recommended CMS for Astro static blogs with GitHub-based storage — if a clearly better alternative has emerged (actively maintained, similar capabilities, compatible with Astro 4 static output), add a `<!-- ALTERNATIVE: <name> — <reason> -->` comment at the top of keystatic.config.ts, but implement Keystatic as specified.
 If you encounter a bug you cannot resolve by reading the code, search for GitHub issues and community workarounds before giving up.
 
 ---
@@ -187,19 +188,6 @@ export default config({
           directory: 'public/images/articles',
           publicPath: '/images/articles/',
         }),
-        origin: fields.text({
-          label: 'Origin note',
-          multiline: true,
-          validation: { isRequired: false },
-        }),
-        originPosition: fields.select({
-          label: 'Origin position',
-          options: [
-            { label: 'Top', value: 'top' },
-            { label: 'Bottom', value: 'bottom' },
-          ],
-          defaultValue: 'bottom',
-        }),
         sources: fields.array(
           fields.object({
             label: fields.text({ label: 'Label' }),
@@ -307,7 +295,7 @@ If Pagefind is not installed, skip this step entirely.
 
 Do NOT modify any of the following:
 - src/pages/index.astro
-- src/pages/articles.astro
+- src/pages/articles/[...page].astro
 - src/pages/article/[slug].astro
 - src/pages/tag/[tag].astro
 - src/pages/about.astro
@@ -358,6 +346,24 @@ The build may produce output in `.vercel/output/` instead of `dist/` — this is
 
 ---
 
+### Step 8 — Update CLAUDE.md to reflect the new output mode
+
+After `npm run build` succeeds, update `CLAUDE.md` so all subsequent steps (E2E check,
+UI review, optional analytics/comments/newsletter) know the project is now hybrid:
+
+1. Find the line in the STACK section: `- Astro 4, output: 'static'`
+   Replace it with:
+   `- Astro 4, output: 'hybrid' (Keystatic requires hybrid — /keystatic and /api/keystatic run as serverless functions; all blog pages remain statically pre-rendered)`
+
+2. Find Rule 3 in FIXED RULES:
+   `3. No @astrojs/vercel adapter — static output, not needed`
+   Replace it with:
+   `3. @astrojs/vercel adapter is installed and required (Keystatic uses it for serverless OAuth routes). All blog pages are statically pre-rendered. Do NOT remove the adapter.`
+
+These changes ensure that if any future step reads CLAUDE.md, it won't incorrectly try to remove the adapter or switch back to static output.
+
+---
+
 ### Checklist before finishing
 
 - [ ] `npm install` succeeds (no blocking peer-dependency errors)
@@ -370,11 +376,13 @@ The build may produce output in `.vercel/output/` instead of `dist/` — this is
 - [ ] No modifications to existing pages, layouts, components, or utilities
 - [ ] No `export const prerender = true` added to any existing page
 - [ ] `npm run build` succeeds with zero TypeScript errors
+- [ ] CLAUDE.md STACK section updated: `output: 'hybrid'`
+- [ ] CLAUDE.md Rule 3 updated to note the adapter is required
 - [ ] `npm run dev` starts without crashing (if it fails, verify `@astrojs/react` is at `^4.x.x` — not v5; then use `npm run dev:build` as fallback)
 
 ---
 
-### Step 8 — Usability review
+### Step 9 — Usability review
 
 Once the CMS is running, take a step back and make sure the writing experience
 is actually well-made — clear, easy to use, and not invasive as the number of

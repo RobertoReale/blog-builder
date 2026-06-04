@@ -1,0 +1,118 @@
+## NEWSLETTER — Email signup form
+
+The blog is fully built. Add a newsletter signup form to the blog footer (visible on
+every page) and optionally inline within article pages.
+
+FIRST: Read CLAUDE.md and find the NEWSLETTER section. The "Provider" line tells you
+which provider to implement. If Provider is "none", stop immediately — nothing to do.
+
+CRITICAL INSTRUCTION: Before writing any code, use your web search tools to:
+1. Confirm the current embed form URL and required field names for the chosen provider.
+2. Check for any Astro-specific integration notes (form submission, JS requirements).
+3. Verify that the configured provider is still the recommended choice for a newsletter
+   on a static blog — if a clearly better alternative has emerged (better free tier,
+   better privacy story, simpler embed), add a `<!-- ALTERNATIVE: <name> — <reason> -->`
+   comment in the newsletter component file, but implement the configured provider as
+   specified.
+4. If you hit a bug you cannot resolve from the code, search GitHub issues and community
+   forums before giving up.
+
+Do NOT install any packages — all providers here work with a plain HTML form.
+Do NOT modify any existing feature — only add the newsletter form.
+The form must work without JavaScript (standard HTML form POST).
+
+---
+
+### Provider: buttondown
+
+Buttondown (https://buttondown.email) is a privacy-first email newsletter service.
+Free up to 100 subscribers. Simple HTML form embed.
+
+Implementation:
+1. Create `src/components/ui/NewsletterForm.astro`.
+2. The component renders an HTML form that POSTs to the Buttondown embed endpoint.
+3. Form content:
+   - A short heading: "Stay in the loop"
+   - A one-line description: "New articles delivered to your inbox — no spam, unsubscribe anytime."
+   - An `<input type="email">` field with placeholder "your@email.com" and aria-label
+   - A submit button labeled "Subscribe"
+   - The form action must use the placeholder: `https://buttondown.email/REPLACE_WITH_YOUR_USERNAME`
+   - method="post" target="popupwindow"
+   - Include the hidden input: `<input type="hidden" name="tag" value="blog" />`
+
+4. Style the form to match the blog design system:
+   - Background: `var(--color-surface)` (same as callout/code-block backgrounds)
+   - Border-left: 3px solid `var(--color-accent)`
+   - Input border: `var(--color-border)`; focused: `var(--color-accent)`
+   - Button background: `var(--color-accent)`; text: `var(--color-bg)`
+   - Font: DM Sans (body font) — use the CSS variable or inherit from body
+   - No hardcoded colors
+
+5. Add the component to `src/layouts/BaseLayout.astro`:
+   - Import `NewsletterForm` in the frontmatter
+   - Place it just above the `<footer>` element (i.e., it appears at the bottom of every
+     page, before the footer links)
+
+The string `REPLACE_WITH_YOUR_USERNAME` must remain as literal text — the user will
+replace it with their Buttondown username after creating an account at
+https://buttondown.email.
+
+---
+
+### Provider: substack
+
+Substack (https://substack.com) is a popular newsletter platform.
+Free to use; Substack takes a cut only on paid subscriptions.
+
+Implementation:
+1. Create `src/components/ui/NewsletterForm.astro`.
+2. The Substack embed is an iframe. Render:
+
+   ```html
+   <iframe
+     src="https://REPLACE_WITH_YOUR_SUBSTACK.substack.com/embed"
+     width="100%"
+     height="150"
+     style="border:none; background: var(--color-surface);"
+     frameborder="0"
+     scrolling="no"
+     title="Subscribe to newsletter"
+   ></iframe>
+   ```
+
+3. Wrap it in a styled container (same styling as Buttondown above: surface background,
+   accent border-left), add the heading "Stay in the loop" above the iframe.
+
+4. Add to `BaseLayout.astro` in the same position as described for Buttondown.
+
+The string `REPLACE_WITH_YOUR_SUBSTACK` must remain as literal text.
+
+---
+
+### Provider: kit
+
+Kit (formerly ConvertKit, https://kit.com) is an email platform popular with creators.
+Free up to 10,000 subscribers.
+
+Implementation:
+1. Create `src/components/ui/NewsletterForm.astro`.
+2. Kit embeds use a standard HTML form:
+   - Action: `https://app.kit.com/forms/REPLACE_WITH_YOUR_FORM_ID/subscriptions`
+   - Method: POST
+   - Fields: `email_address` (input type email), optional `first_name` (input type text)
+   - Submit button labeled "Subscribe"
+
+3. Same styling as Buttondown (surface background, accent border-left, no hardcoded
+   colors).
+
+4. Add to `BaseLayout.astro` in the same position as described for Buttondown.
+
+The string `REPLACE_WITH_YOUR_FORM_ID` must remain as literal text.
+
+---
+
+### After implementing
+
+Run `npm run build` to verify the build passes.
+Do NOT run E2E tests — the form submits to an external service; E2E cannot test it.
+The task is complete when `npm run build` succeeds.

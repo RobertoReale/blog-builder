@@ -5,7 +5,10 @@ experience improvements to the existing codebase.
 Do not change any existing functionality or design.
 All features are progressive enhancements — if JS is disabled, nothing breaks.
 
-CRITICAL INSTRUCTION: Before writing any code, use your web search tools to check for the most current and widely used implementations of reading progress bars, table of contents (with scroll-spy), and clipboard share APIs in Astro. If you encounter a bug you cannot resolve by reading the code, search online for known issues and solutions before giving up.
+CRITICAL INSTRUCTION: Before writing any code, use your web search tools to:
+1. Check for the most current and widely used implementations of reading progress bars, table of contents (with scroll-spy), and clipboard share APIs in Astro.
+2. Verify that a vanilla-JS approach (no third-party library) is still the norm for these reading UX features — if a widely adopted, well-maintained Astro library for any of them has emerged, add a `<!-- ALTERNATIVE: <name> — <reason> -->` comment in the relevant component file, but implement what is specified here.
+If you encounter a bug you cannot resolve by reading the code, search online for known issues and solutions before giving up.
 
 ---
 
@@ -78,8 +81,8 @@ Fallback if clipboard API unavailable:
 
 Where: article pages only
 Position: above the article body (after header)
-Render only if article has 2 or more headings (h2 or h3).
-If fewer than 2 headings: render nothing.
+Render only if article has 3 or more headings (h2 or h3).
+If fewer than 3 headings: render nothing.
 
 IMPORTANT: The TOC must be built from standard markdown headings (h2, h3) present in the rendered HTML.
 

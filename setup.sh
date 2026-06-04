@@ -26,7 +26,7 @@ if ! command -v python3 &>/dev/null; then
 fi
 
 # --- 1. Site info ---
-echo -e "${C}=== 1/3 — Site info ===${N}"
+echo -e "${C}=== 1/6 — Site info ===${N}"
 echo ""
 read -p "Blog title: " BLOG_TITLE
 read -p "Description (one sentence): " BLOG_DESC
@@ -42,7 +42,7 @@ read -p "Author name: " BLOG_AUTHOR
 echo ""
 
 # --- 2. Color palette ---
-echo -e "${C}=== 2/3 — Color palette ===${N}"
+echo -e "${C}=== 2/6 — Color palette ===${N}"
 echo ""
 echo "  1  Blue / Neutral  — clean, professional           (default)"
 echo "  2  Forest          — warm greens, earthy tones"
@@ -84,7 +84,7 @@ esac
 echo ""
 
 # --- 3. Typography ---
-echo -e "${C}=== 3/3 — Typography ===${N}"
+echo -e "${C}=== 3/6 — Typography ===${N}"
 echo ""
 echo "  1  Lora + DM Sans                  — classic serif + clean sans  (default)"
 echo "  2  Playfair Display + Source Sans 3 — editorial, elegant"
@@ -107,13 +107,66 @@ case "$f" in
 esac
 echo ""
 
-# --- 4. Update CLAUDE.md ---
+# --- 4. Analytics ---
+echo -e "${C}=== 4/6 — Analytics (optional) ===${N}"
+echo ""
+echo "  0  None                         — no analytics, skip this step  (default)"
+echo "  1  Umami Cloud                  — privacy-first, 100k events/month free  (recommended)"
+echo "  2  Cloudflare Web Analytics     — unlimited free, requires DNS nameserver change"
+echo "  3  Vercel Analytics             — 2,500 events/month free, minimal setup"
+echo ""
+read -p "Choice [0-3, default 0]: " an; an=${an:-0}
+
+case "$an" in
+  1) ANALYTICS_PROVIDER="umami" ;;
+  2) ANALYTICS_PROVIDER="cloudflare" ;;
+  3) ANALYTICS_PROVIDER="vercel" ;;
+  *) ANALYTICS_PROVIDER="none" ;;
+esac
+echo ""
+
+# --- 5. Comments ---
+echo -e "${C}=== 5/6 — Comments (optional) ===${N}"
+echo ""
+echo "  0  None         — no comments section  (default)"
+echo "  1  Giscus       — GitHub Discussions, privacy-first, free  (recommended)"
+echo "  2  Utterances   — GitHub Issues, simpler, free"
+echo ""
+read -p "Choice [0-2, default 0]: " cm; cm=${cm:-0}
+
+case "$cm" in
+  1) COMMENTS_PROVIDER="giscus" ;;
+  2) COMMENTS_PROVIDER="utterances" ;;
+  *) COMMENTS_PROVIDER="none" ;;
+esac
+echo ""
+
+# --- 6. Newsletter ---
+echo -e "${C}=== 6/6 — Newsletter (optional) ===${N}"
+echo ""
+echo "  0  None          — no newsletter form  (default)"
+echo "  1  Buttondown    — privacy-first, 100 subscribers free  (recommended)"
+echo "  2  Substack      — popular, free for free newsletters"
+echo "  3  Kit           — formerly ConvertKit, 10k subscribers free"
+echo ""
+read -p "Choice [0-3, default 0]: " nl; nl=${nl:-0}
+
+case "$nl" in
+  1) NEWSLETTER_PROVIDER="buttondown" ;;
+  2) NEWSLETTER_PROVIDER="substack" ;;
+  3) NEWSLETTER_PROVIDER="kit" ;;
+  *) NEWSLETTER_PROVIDER="none" ;;
+esac
+echo ""
+
+# --- 7. Update CLAUDE.md ---
 echo -e "${C}Updating CLAUDE.md...${N}"
 
 export BLOG_TITLE BLOG_DESC BLOG_URL BLOG_AUTHOR
 export LBG LTX LMU LAC LBO LSU
 export DBG DTX DMU DAC DBO DSU
 export HF HT BF
+export ANALYTICS_PROVIDER COMMENTS_PROVIDER NEWSLETTER_PROVIDER
 
 python3 << 'PYEOF'
 import os
@@ -136,11 +189,8 @@ block  = (f'Site values (use these when creating src/config.ts):\n'
 if marker in c and 'Site values' not in c:
     c = c.replace(marker, block + marker)
 
-# 2. Replace color palette (USER ACTION REQUIRED block + default CSS)
-old_col = ('> **USER ACTION REQUIRED**: Define your custom color palette here. \n'
-           '> Replace these generic defaults with your own brand colors before running.\n'
-           '\n'
-           '```css\n'
+# 2. Replace color palette (default CSS block)
+old_col = ('```css\n'
            '/* Light mode (:root) */\n'
            '--color-bg: #FFFFFF\n'
            '--color-text: #111827\n'
@@ -198,6 +248,15 @@ c = re.sub(
     f'- Fonts: {hf} (headings) + {bf} (body/UI) — self-hosted via @fontsource',
     c
 )
+
+# 5. Replace each provider value (section-aware)
+def replace_provider(text, section_name, new_value):
+    pattern = r'(## ' + re.escape(section_name) + r'\n\n)Provider:\s*\S+'
+    return re.sub(pattern, r'\g<1>Provider: ' + new_value, text)
+
+c = replace_provider(c, 'ANALYTICS',  os.environ.get('ANALYTICS_PROVIDER',  'none'))
+c = replace_provider(c, 'COMMENTS',   os.environ.get('COMMENTS_PROVIDER',   'none'))
+c = replace_provider(c, 'NEWSLETTER', os.environ.get('NEWSLETTER_PROVIDER', 'none'))
 
 with open('CLAUDE.md', 'w', encoding='utf-8') as fh:
     fh.write(c)
@@ -264,8 +323,21 @@ echo -e "${W}=================================================${N}"
 echo ""
 echo -e "Next steps:"
 echo ""
+OPTIONAL_STEPS=()
+[ "$ANALYTICS_PROVIDER"  != "none" ] && OPTIONAL_STEPS+=("analytics")
+[ "$COMMENTS_PROVIDER"   != "none" ] && OPTIONAL_STEPS+=("comments")
+[ "$NEWSLETTER_PROVIDER" != "none" ] && OPTIONAL_STEPS+=("newsletter")
+BASE_STEPS=10
+TOTAL_STEPS=$(( BASE_STEPS + ${#OPTIONAL_STEPS[@]} ))
+LAST_STEP=$(( TOTAL_STEPS - 1 ))
+if [ ${#OPTIONAL_STEPS[@]} -gt 0 ]; then
+  OPT_LABEL=$(IFS=', '; echo "${OPTIONAL_STEPS[*]}")
+  STEP_NOTE="runs all $TOTAL_STEPS steps, 0–$LAST_STEP — $OPT_LABEL included"
+else
+  STEP_NOTE="runs all $BASE_STEPS steps, 0–$(( BASE_STEPS - 1 ))"
+fi
 echo -e "  1. Generate the blog:"
-echo -e "       ${W}./run.sh${N}        (runs all 10 steps, 0–9)"
+echo -e "       ${W}./run.sh${N}        ($STEP_NOTE)"
 echo -e "       ${W}./run.sh -p${N}     (pauses after each step)"
 echo ""
 if [ -n "$GITHUB_REMOTE" ]; then

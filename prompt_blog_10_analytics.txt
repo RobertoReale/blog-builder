@@ -1,0 +1,93 @@
+## ANALYTICS — Privacy-first visitor tracking
+
+The blog is fully built. Add visitor analytics tracking to the blog.
+
+FIRST: Read CLAUDE.md and find the ANALYTICS section. The "Provider" line tells you
+which provider to implement. If Provider is "none", stop immediately — nothing to do.
+
+CRITICAL INSTRUCTION: Before writing any code, use your web search tools to:
+1. Confirm the current tracking script CDN URL and attribute syntax for the chosen provider.
+2. Check for any Astro-specific integration notes or known issues.
+3. If the provider requires a package install (Vercel Analytics only), find the current
+   package name, version, and correct import path.
+4. Verify that the configured provider is still among the best options for privacy-first
+   analytics on a static blog — if a clearly better alternative has emerged (better free
+   tier, better privacy story, simpler setup), add a `<!-- ALTERNATIVE: <name> — <reason> -->`
+   comment in BaseLayout.astro, but implement the configured provider as specified.
+5. If you hit a bug you cannot resolve from the code, search GitHub issues and community
+   forums before giving up.
+
+Do NOT install packages unless the provider explicitly requires one.
+Do NOT modify any existing feature — only add the tracking snippet.
+Do NOT remove the placeholder ID/token — the user will fill it in manually after setup.
+Do NOT add environment variables — these providers work with a static script tag or component.
+
+---
+
+### Provider: umami
+
+Umami Cloud (https://cloud.umami.is) is a privacy-first, cookie-free analytics service.
+It works with any static site via a single `<script>` tag.
+
+Implementation:
+1. Open `src/layouts/BaseLayout.astro`.
+2. Inside `<head>`, after the existing inline dark-mode `<script is:inline>` block, add:
+
+   <script is:inline defer src="https://cloud.umami.is/script.js" data-website-id="REPLACE_WITH_YOUR_UMAMI_WEBSITE_ID"></script>
+
+3. No package installs. No environment variables.
+
+The string `REPLACE_WITH_YOUR_UMAMI_WEBSITE_ID` must remain as literal text in the output.
+Do not replace it with anything — the user will swap it for their real website ID after
+creating an Umami account at https://cloud.umami.is.
+
+---
+
+### Provider: cloudflare
+
+Cloudflare Web Analytics is a privacy-first, cookie-free analytics service.
+It works with any static site via a single `<script>` tag with the `data-cf-beacon` attribute.
+
+Implementation:
+1. Open `src/layouts/BaseLayout.astro`.
+2. Inside `<head>`, after the existing inline dark-mode `<script is:inline>` block, add:
+
+   <script is:inline defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "REPLACE_WITH_YOUR_CF_BEACON_TOKEN"}'></script>
+
+3. No package installs. No environment variables.
+
+The string `REPLACE_WITH_YOUR_CF_BEACON_TOKEN` must remain as literal text in the output.
+Do not replace it with anything — the user will swap it for their real token after setting
+up Cloudflare Web Analytics at https://cloudflare.com.
+
+---
+
+### Provider: vercel
+
+Vercel Analytics is a first-party analytics service built into the Vercel platform.
+For Astro, it requires the `@vercel/analytics` package and a component in the layout.
+
+Implementation:
+1. Install the package:
+   npm install @vercel/analytics
+
+2. Open `src/layouts/BaseLayout.astro`.
+3. In the component frontmatter (the `---` block at the top), add the import:
+   import { Analytics } from '@vercel/analytics/astro';
+
+4. In the template, add the component just before the closing `</body>` tag:
+   <Analytics />
+
+No environment variables needed — Vercel injects configuration automatically on deploy.
+
+---
+
+### After implementing
+
+Run `npm run build` to verify the build passes. If the build fails:
+- For Umami / Cloudflare: check that the `<script>` tag is valid HTML inside `<head>`.
+- For Vercel: verify the import path is correct; search npm for the current package API if
+  the path has changed since your training data.
+
+Do NOT run E2E tests — the tracking snippet has no visible UI to test.
+The task is complete when `npm run build` succeeds.

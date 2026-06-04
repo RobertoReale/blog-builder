@@ -96,8 +96,6 @@ title: z.string()
 date: z.date()
 tags: z.array(z.string())
 description: z.string()
-origin: z.string().optional()
-originPosition: z.enum(['top', 'bottom']).optional().default('bottom')
 coverImage: z.string().optional()          // omit entirely if not set — never null
 sources: z.array(z.object({
   label: z.string(),
@@ -180,7 +178,7 @@ map and return all props in one object; never overwrite another feature's props.
 Render order on an article page:
 1. Header (title, date, reading time, tags, share button)
 2. SeriesNav        (if the article is in a series)
-3. TOC              (if the article has headings)
+3. TOC              (if the article has ≥ 3 h2/h3 headings)
 4. Article body (MDX)
 5. Sources
 6. ─── separator ───
@@ -223,6 +221,24 @@ If you touched a page or component: also run `npm run test:e2e`.
 
 ---
 
+## ANALYTICS
+
+Provider: none
+
+---
+
+## COMMENTS
+
+Provider: none
+
+---
+
+## NEWSLETTER
+
+Provider: none
+
+---
+
 ## FIXED RULES — always apply, every session
 
 1. No `any` types — TypeScript strict mode
@@ -231,7 +247,7 @@ If you touched a page or component: also run `npm run test:e2e`.
 4. Sources always passed as explicit prop: <Sources sources={frontmatter.sources} />
 5. coverImage omitted from frontmatter when empty — never written as null
 6. No new features beyond what is requested in the current task
-7. No comments system, no newsletter, no analytics, no auth — ever
+7. No auth — ever (incompatible with static output). Analytics, comments, and newsletter: only if their respective ANALYTICS / COMMENTS / NEWSLETTER section has Provider ≠ 'none'.
 8. `npm run build` must succeed before the task is considered done
 
 ---
@@ -250,3 +266,6 @@ Each step automatically implements its feature. After a full pipeline run
 - [ ] Feature 04 — Article series (SeriesNav, /series/[series])
 - [ ] Feature 05 — Related articles
 - [ ] Feature 06 — Keystatic CMS (browser editor, GitHub mode, hybrid output)
+- [ ] Analytics — optional, runs only if ANALYTICS section has Provider ≠ 'none'
+- [ ] Comments — optional, runs only if COMMENTS section has Provider ≠ 'none'
+- [ ] Newsletter — optional, runs only if NEWSLETTER section has Provider ≠ 'none'

@@ -1,0 +1,106 @@
+## COMMENTS — Visitor discussion via GitHub Discussions
+
+The blog is fully built. Add a comments section to every article page.
+
+FIRST: Read CLAUDE.md and find the COMMENTS section. The "Provider" line tells you
+which provider to implement. If Provider is "none", stop immediately — nothing to do.
+
+CRITICAL INSTRUCTION: Before writing any code, use your web search tools to:
+1. Confirm the current embed script URL and configuration attributes for the chosen provider.
+2. Check for any Astro-specific integration notes or known issues (script hydration, dark
+   mode compatibility, CSP headers).
+3. Verify that the configured provider is still the recommended choice for static blog
+   comments — if a clearly better alternative has emerged (better privacy, more active
+   maintenance, simpler setup), add a `<!-- ALTERNATIVE: <name> — <reason> -->` comment
+   in ArticleLayout.astro, but implement the configured provider as specified.
+4. If you hit a bug you cannot resolve from the code, search GitHub issues and community
+   forums before giving up.
+
+Do NOT install packages unless the provider explicitly requires one.
+Do NOT modify any existing feature — only add the comments widget.
+Do NOT add a comments section to non-article pages (homepage, /articles, /about, /search).
+
+---
+
+### Provider: giscus
+
+Giscus (https://giscus.app) is a comments system powered by GitHub Discussions.
+Visitors log in with their GitHub account to leave a comment. No ads, no tracking.
+
+Implementation:
+1. Open `src/layouts/ArticleLayout.astro`.
+2. Locate the article render order (defined in CLAUDE.md) — add the comments widget
+   AFTER the Sources block and separator line, BEFORE the footer (i.e., after Related
+   articles if present, otherwise after the separator).
+3. Add a `<GiscusComments />` Astro component that renders a `<div>` with the Giscus
+   script. Create it at `src/components/ui/GiscusComments.astro`.
+
+The component must:
+- Use `<script is:inline>` to load the Giscus embed script
+- Apply the correct data-theme based on the current `data-theme` attribute on `<html>`:
+  use `"light"` when `[data-theme="light"]` and `"dark"` when `[data-theme="dark"]`
+- React to theme changes at runtime: add a `storage` event listener that updates the
+  Giscus iframe theme when the user toggles dark mode
+- Use the following placeholder attributes (the user will replace these after creating
+  their Giscus app at https://giscus.app):
+
+  data-repo="REPLACE_WITH_OWNER/REPO"
+  data-repo-id="REPLACE_WITH_REPO_ID"
+  data-category="REPLACE_WITH_CATEGORY_NAME"
+  data-category-id="REPLACE_WITH_CATEGORY_ID"
+  data-mapping="pathname"
+  data-strict="0"
+  data-reactions-enabled="1"
+  data-emit-metadata="0"
+  data-input-position="top"
+  data-lang="en"
+  data-loading="lazy"
+  crossorigin="anonymous"
+  async
+
+All placeholder strings must remain as literal text in the output — the user will
+replace them after creating a Giscus app at https://giscus.app.
+
+4. Style the comments wrapper with a top border (`var(--color-border)`) and top margin
+   (`2rem`) to visually separate it from the article body. Use only CSS variables — no
+   hardcoded colors.
+
+---
+
+### Provider: utterances
+
+Utterances (https://utteranc.es) is a comments system powered by GitHub Issues.
+Simpler than Giscus but uses Issues rather than Discussions.
+
+Implementation:
+1. Open `src/layouts/ArticleLayout.astro`.
+2. Add the comments widget in the same position as described for Giscus (after Sources,
+   before footer).
+3. Create `src/components/ui/UtterancesComments.astro`.
+
+The component must:
+- Use `<script is:inline>` to add the Utterances embed script to the DOM dynamically
+  (Utterances requires the script to be appended to a container div, not used as a
+  regular `<script>` tag)
+- Set the correct theme: `"github-light"` or `"github-dark"` based on `[data-theme]`
+- React to theme changes at runtime (postMessage to the Utterances iframe)
+- Use these placeholder attributes:
+
+  repo="REPLACE_WITH_OWNER/REPO"
+  issue-term="pathname"
+  label="comments"
+  theme="github-light"
+  crossorigin="anonymous"
+  async
+
+All placeholder strings must remain as literal text.
+
+4. Same border/margin styling as Giscus section above.
+
+---
+
+### After implementing
+
+Run `npm run build` to verify the build passes.
+Do NOT run E2E tests — the comments widget loads an external iframe; E2E cannot test it.
+The task is complete when `npm run build` succeeds.

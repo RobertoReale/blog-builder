@@ -55,6 +55,23 @@ STEP_NAMES=(
   "UI & design review"
 )
 
+# Conditionally append optional steps based on CLAUDE.md configuration
+# Analytics (step 10)
+if [ -f "CLAUDE.md" ] && awk '/^## ANALYTICS/{f=1} f && /^Provider:/{print; exit}' CLAUDE.md | grep -qE 'umami|cloudflare|vercel'; then
+  PROMPTS+=("prompt_blog_10_analytics.txt")
+  STEP_NAMES+=("Analytics")
+fi
+# Comments (step 11)
+if [ -f "CLAUDE.md" ] && awk '/^## COMMENTS/{f=1} f && /^Provider:/{print; exit}' CLAUDE.md | grep -qE 'giscus|utterances'; then
+  PROMPTS+=("prompt_blog_11_comments.txt")
+  STEP_NAMES+=("Comments")
+fi
+# Newsletter (step 12)
+if [ -f "CLAUDE.md" ] && awk '/^## NEWSLETTER/{f=1} f && /^Provider:/{print; exit}' CLAUDE.md | grep -qE 'buttondown|substack|kit'; then
+  PROMPTS+=("prompt_blog_12_newsletter.txt")
+  STEP_NAMES+=("Newsletter")
+fi
+
 # --- Preliminary checks ---
 assert_command() {
   if ! command -v "$1" &> /dev/null; then

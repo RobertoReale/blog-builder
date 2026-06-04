@@ -23,8 +23,8 @@ Core idea: **each prompt runs in a separate Claude Code session**, so the contex
 
        node -v
 
-   Version 22 or higher recommended (Node 22 LTS is the current long-term support release;
-   Node 20 reached end-of-life on April 30, 2026).
+   Use the current active LTS version (download from nodejs.org — the LTS badge
+   shows which version to use). Avoid end-of-life releases.
 
 3. **Python 3** (Linux/macOS only) — used by the setup script to update `CLAUDE.md`.
    Most Linux distributions and macOS include it by default. Verify:

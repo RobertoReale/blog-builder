@@ -38,12 +38,9 @@ hybrid mode — do NOT add that annotation to existing files.
 
 **Pre-flight check — Node.js version**
 
-Run `node --version` before installing. The recommended runtime is **Node 22 LTS**
-(Node 20 reached end-of-life on April 30, 2026 and no longer receives security patches).
-Node 22+ has a known esbuild incompatibility with `@astrojs/vercel` that
-can break the dev server (error: `Expected "}" but found ":"`). The production
-build (`npm run build`) is not affected. See Step 1.5 and Step 2 for the
-mitigations built into this prompt.
+Run `node --version` before installing. Use the current active LTS version
+(CRITICAL INSTRUCTION item 5 tells you which version to use). Avoid
+end-of-life Node.js releases — they no longer receive security patches.
 
 ```bash
 npm install @keystatic/core @keystatic/astro @astrojs/vercel @astrojs/react@<VERSION>

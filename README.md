@@ -433,7 +433,7 @@ The blog is designed to be stable over time. Once deployed, the static HTML outp
 | **Tailwind CSS / @astrojs/tailwind** | Medium | `@astrojs/tailwind` is deprecated in Astro 5+. With pinned Astro 4 it works fine. Future migration to Astro 5+ requires switching to `@tailwindcss/vite` plugin. |
 | **Keystatic CMS** | High | Maintenance has slowed significantly in 2026. Works with Astro 5 but NOT with Astro 6. If Keystatic causes problems, the blog works perfectly without it — articles can always be written as `.mdx` files directly. |
 | **Pagefind (search)** | Very low | Build-time only, actively maintained (v1.5.2 as of April 2026). No runtime dependency. |
-| **Node.js** | Low | The pipeline detects the current active LTS at build time and sets `"engines": { "node": ">=<LTS>" }` accordingly. Node 22 LTS (EOL April 2027) is the current recommendation. Node 20 reached EOL on April 30, 2026. |
+| **Node.js** | Low | The pipeline detects the current active LTS at build time and sets `"engines": { "node": ">=<LTS>" }` accordingly. Always use the active LTS — avoid end-of-life versions as they no longer receive security patches. |
 
 **If a future `npm run build` fails** after a dependency update, the fastest fix is to pin the previously working versions in `package.json` and re-run the build. The pipeline prompts instruct Claude to search for current best practices at execution time, so re-running a prompt step will always produce code compatible with the then-current package versions.
 

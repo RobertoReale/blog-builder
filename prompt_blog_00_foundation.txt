@@ -10,6 +10,7 @@ CRITICAL INSTRUCTION: Before you begin writing code, use your web search tools t
 5. Find the current Node.js LTS version (active, not end-of-life) — use that as the minimum in the `engines` field instead of the placeholder below.
 6. Verify that the core packages listed below (@astrojs/tailwind, @astrojs/mdx, @fontsource/*) are still the recommended choices for their roles — if a clearly better alternative has emerged, add a `<!-- ALTERNATIVE: <name> — <reason> -->` comment in the relevant config file, but implement what is specified here.
 If you encounter a bug you cannot resolve by reading the code, search online for known issues and solutions before giving up.
+Your research findings always take precedence over any package versions, URLs, API signatures, or code patterns shown in this prompt. Treat all implementation examples as reference patterns — update them to match current reality based on what you find.
 
 ## GOAL
 A fully working blog where:

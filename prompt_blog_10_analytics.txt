@@ -16,6 +16,7 @@ CRITICAL INSTRUCTION: Before writing any code, use your web search tools to:
    comment in BaseLayout.astro, but implement the configured provider as specified.
 5. If you hit a bug you cannot resolve from the code, search GitHub issues and community
    forums before giving up.
+Your research findings always take precedence over any package versions, URLs, API signatures, or code patterns shown in this prompt — especially CDN script URLs and provider endpoints, which change when services update their infrastructure. Treat all implementation examples as reference patterns.
 
 Do NOT install packages unless the provider explicitly requires one.
 Do NOT modify any existing feature — only add the tracking snippet.
@@ -29,17 +30,28 @@ Do NOT add environment variables — these providers work with a static script t
 Umami Cloud (https://cloud.umami.is) is a privacy-first, cookie-free analytics service.
 It works with any static site via a single `<script>` tag.
 
+IMPORTANT — region-specific script URL:
+Umami Cloud has two regions (US and EU). The script URL differs by region:
+- US region: `https://cloud.umami.is/script.js`
+- EU region:  `https://eu.umami.is/script.js`
+
+Using the wrong URL causes a 400 Bad Request error (the website ID exists on the other
+region's servers and cannot be found). Always use the URL that matches the region chosen
+during account creation. When in doubt, go to cloud.umami.is → your site → the `</>` icon
+(Tracking code) and copy the exact src URL shown there.
+
 Implementation:
 1. Open `src/layouts/BaseLayout.astro`.
 2. Inside `<head>`, after the existing inline dark-mode `<script is:inline>` block, add:
 
-   <script is:inline defer src="https://cloud.umami.is/script.js" data-website-id="REPLACE_WITH_YOUR_UMAMI_WEBSITE_ID"></script>
+   <script is:inline defer src="REPLACE_WITH_YOUR_UMAMI_SCRIPT_URL" data-website-id="REPLACE_WITH_YOUR_UMAMI_WEBSITE_ID"></script>
 
 3. No package installs. No environment variables.
 
-The string `REPLACE_WITH_YOUR_UMAMI_WEBSITE_ID` must remain as literal text in the output.
-Do not replace it with anything — the user will swap it for their real website ID after
-creating an Umami account at https://cloud.umami.is.
+The strings `REPLACE_WITH_YOUR_UMAMI_SCRIPT_URL` and `REPLACE_WITH_YOUR_UMAMI_WEBSITE_ID`
+must remain as literal text in the output. Do not replace them with anything — the user
+will swap them after creating an Umami account at https://cloud.umami.is.
+The easiest way: go to cloud.umami.is → your site → `</>` → copy the entire script tag.
 
 ---
 

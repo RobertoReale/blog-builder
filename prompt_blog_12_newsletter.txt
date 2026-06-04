@@ -16,6 +16,7 @@ CRITICAL INSTRUCTION: Before writing any code, use your web search tools to:
    specified.
 4. If you hit a bug you cannot resolve from the code, search GitHub issues and community
    forums before giving up.
+Your research findings always take precedence over any package versions, URLs, API signatures, or code patterns shown in this prompt — especially CDN script URLs and provider endpoints, which change when services update their infrastructure. Treat all implementation examples as reference patterns.
 
 Do NOT install any packages — all providers here work with a plain HTML form.
 Do NOT modify any existing feature — only add the newsletter form.

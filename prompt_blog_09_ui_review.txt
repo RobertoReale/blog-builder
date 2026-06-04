@@ -16,6 +16,7 @@ approach — if so, note findings as `<!-- ALTERNATIVE: <name> — <reason> -->`
 comments in the relevant component files, but only fix what is specified.
 If you encounter a bug you cannot resolve from the code alone, search online
 before giving up.
+Your research findings always take precedence over any package versions, URLs, API signatures, or code patterns shown in this prompt. Treat all implementation examples as reference patterns — update them to match current reality based on what you find.
 
 ---
 

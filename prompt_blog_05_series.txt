@@ -8,6 +8,7 @@ CRITICAL INSTRUCTION: Before writing any code, use your web search tools to:
 1. Look up current Astro content collection patterns for grouping and filtering entries by a shared field. Check for the most efficient and widely used approaches.
 2. Verify that a pure Astro content collection approach (no third-party library) is still standard for series navigation — if a better pattern has emerged in the community, note it as a `<!-- ALTERNATIVE: ... -->` comment in SeriesNav.astro, but implement what is specified here.
 If you encounter a bug you cannot resolve by reading the code, search online for known issues and solutions before giving up.
+Your research findings always take precedence over any package versions, URLs, API signatures, or code patterns shown in this prompt. Treat all implementation examples as reference patterns — update them to match current reality based on what you find.
 
 ---
 

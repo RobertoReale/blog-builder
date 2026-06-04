@@ -10,6 +10,7 @@ CRITICAL INSTRUCTION: Before writing any code, use your web search tools to:
 3. Read the heading font name from CLAUDE.md's STACK section ("Fonts:" line). This is the font to use in the OG image — not necessarily Lora. Convert the name to an @fontsource package (e.g. "Playfair Display" → @fontsource/playfair-display). Then verify the correct internal file path for the 400-weight .woff file inside that package (the path layout `files/<name>-latin-400-normal.woff` is common but changes between major @fontsource versions — check the actual package contents). If the font is Lora, the example path is `node_modules/@fontsource/lora/files/lora-latin-400-normal.woff` — verify this still exists.
 4. Verify that `satori` + `@resvg/resvg-js` is still the recommended approach for OG image generation in Astro static sites — if a built-in Astro feature or a more actively maintained package has emerged, add a `<!-- ALTERNATIVE: <name> — <reason> -->` comment in the OG image generation file, but implement what is specified here.
 If you encounter a bug you cannot resolve by reading the code, search online for known issues and solutions before giving up.
+Your research findings always take precedence over any package versions, URLs, API signatures, or code patterns shown in this prompt. Treat all implementation examples as reference patterns — update them to match current reality based on what you find.
 
 ---
 

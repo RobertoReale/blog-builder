@@ -1,5 +1,5 @@
 <#
-  setup.ps1 — Configures the blog before running the pipeline.
+  setup.ps1 - Configures the blog before running the pipeline.
   Run this once, then run .\run.ps1 to generate the blog.
 
   USAGE:
@@ -23,7 +23,7 @@ function Write-Section($text) {
   Write-Host ""
 }
 
-Write-Header "Blog Builder — Setup"
+Write-Header "Blog Builder - Setup"
 
 # --- Prerequisites ---
 if (-not (Test-Path "CLAUDE.md")) {
@@ -32,7 +32,7 @@ if (-not (Test-Path "CLAUDE.md")) {
 }
 
 # --- 1. Site info ---
-Write-Section "1/6 — Site info"
+Write-Section "1/6 - Site info"
 $blogTitle = Read-Host "Blog title"
 $blogDesc  = Read-Host "Description (one sentence)"
 Write-Host ""
@@ -46,13 +46,13 @@ $blogUrl   = Read-Host "URL (e.g. https://yourdomain.vercel.app)"
 $blogAuthor = Read-Host "Author name"
 
 # --- 2. Color palette ---
-Write-Section "2/6 — Color palette"
-Write-Host "  1  Blue / Neutral  — clean, professional           (default)"
-Write-Host "  2  Forest          — warm greens, earthy tones"
-Write-Host "  3  Sunset          — warm oranges, amber"
-Write-Host "  4  Ink             — deep purples, editorial"
-Write-Host "  5  Mono            — pure black and white, minimal"
-Write-Host "  6  Custom          — enter your own hex values"
+Write-Section "2/6 - Color palette"
+Write-Host "  1  Blue / Neutral  - clean, professional           (default)"
+Write-Host "  2  Forest          - warm greens, earthy tones"
+Write-Host "  3  Sunset          - warm oranges, amber"
+Write-Host "  4  Ink             - deep purples, editorial"
+Write-Host "  5  Mono            - pure black and white, minimal"
+Write-Host "  6  Custom          - enter your own hex values"
 Write-Host ""
 $c = Read-Host "Choice [1-6, default 1]"
 if (-not $c) { $c = "1" }
@@ -99,13 +99,13 @@ switch ($c) {
 }
 
 # --- 3. Typography ---
-Write-Section "3/6 — Typography"
-Write-Host "  1  Lora + DM Sans                  — classic serif + clean sans  (default)"
-Write-Host "  2  Playfair Display + Source Sans 3 — editorial, elegant"
-Write-Host "  3  DM Serif Display + DM Sans      — modern, cohesive"
-Write-Host "  4  Fraunces + Inter                — quirky serif + tech sans"
-Write-Host "  5  Inter + Inter                   — pure sans-serif, minimal"
-Write-Host "  6  Custom                          — enter your own fontsource.org font names"
+Write-Section "3/6 - Typography"
+Write-Host "  1  Lora + DM Sans                  - classic serif + clean sans  (default)"
+Write-Host "  2  Playfair Display + Source Sans 3 - editorial, elegant"
+Write-Host "  3  DM Serif Display + DM Sans      - modern, cohesive"
+Write-Host "  4  Fraunces + Inter                - quirky serif + tech sans"
+Write-Host "  5  Inter + Inter                   - pure sans-serif, minimal"
+Write-Host "  6  Custom                          - enter your own fontsource.org font names"
 Write-Host ""
 $f = Read-Host "Choice [1-6, default 1]"
 if (-not $f) { $f = "1" }
@@ -124,11 +124,11 @@ switch ($f) {
 }
 
 # --- 4. Analytics ---
-Write-Section "4/6 — Analytics (optional)"
-Write-Host "  0  None                         — no analytics, skip this step   (default)"
-Write-Host "  1  Umami Cloud                  — privacy-first, 100k events/month free   (recommended)"
-Write-Host "  2  Cloudflare Web Analytics     — unlimited free, requires DNS nameserver change"
-Write-Host "  3  Vercel Analytics             — 2,500 events/month free, minimal setup"
+Write-Section "4/6 - Analytics (optional)"
+Write-Host "  0  None                         - no analytics, skip this step   (default)"
+Write-Host "  1  Umami Cloud                  - privacy-first, 100k events/month free   (recommended)"
+Write-Host "  2  Cloudflare Web Analytics     - unlimited free, requires DNS nameserver change"
+Write-Host "  3  Vercel Analytics             - 2,500 events/month free, minimal setup"
 Write-Host ""
 $a = Read-Host "Choice [0-3, default 0]"
 if (-not $a) { $a = "0" }
@@ -141,10 +141,10 @@ switch ($a) {
 }
 
 # --- 5. Comments ---
-Write-Section "5/6 — Comments (optional)"
-Write-Host "  0  None         — no comments section   (default)"
-Write-Host "  1  Giscus       — GitHub Discussions, privacy-first, free   (recommended)"
-Write-Host "  2  Utterances   — GitHub Issues, simpler, free"
+Write-Section "5/6 - Comments (optional)"
+Write-Host "  0  None         - no comments section   (default)"
+Write-Host "  1  Giscus       - GitHub Discussions, privacy-first, free   (recommended)"
+Write-Host "  2  Utterances   - GitHub Issues, simpler, free"
 Write-Host ""
 $cm = Read-Host "Choice [0-2, default 0]"
 if (-not $cm) { $cm = "0" }
@@ -156,11 +156,11 @@ switch ($cm) {
 }
 
 # --- 6. Newsletter ---
-Write-Section "6/6 — Newsletter (optional)"
-Write-Host "  0  None          — no newsletter form   (default)"
-Write-Host "  1  Buttondown    — privacy-first, 100 subscribers free   (recommended)"
-Write-Host "  2  Substack      — popular, free for free newsletters"
-Write-Host "  3  Kit           — formerly ConvertKit, 10k subscribers free"
+Write-Section "6/6 - Newsletter (optional)"
+Write-Host "  0  None          - no newsletter form   (default)"
+Write-Host "  1  Buttondown    - privacy-first, 100 subscribers free   (recommended)"
+Write-Host "  2  Substack      - popular, free for free newsletters"
+Write-Host "  3  Kit           - formerly ConvertKit, 10k subscribers free"
 Write-Host ""
 $nl = Read-Host "Choice [0-3, default 0]"
 if (-not $nl) { $nl = "0" }
@@ -179,36 +179,21 @@ Write-Host "Updating CLAUDE.md..." -ForegroundColor Cyan
 $content = (Get-Content 'CLAUDE.md' -Raw -Encoding UTF8) -replace "`r`n", "`n"
 $fence = '```'
 
-# 1. Insert site values before "Import SITE" paragraph
+# 1. Insert or update site values before "Import SITE" paragraph
 $siteMarker = 'Import SITE wherever site-level data is needed.'
 $siteBlock  = "Site values (use these when creating src/config.ts):`n" +
               "- title: `"$blogTitle`"`n" +
               "- description: `"$blogDesc`"`n" +
               "- url: `"$blogUrl`"`n" +
               "- author: `"$blogAuthor`"`n`n"
-if ($content.Contains($siteMarker) -and -not $content.Contains('Site values')) {
+$sitePattern = "(?s)Site values \(use these when creating src/config\.ts\):`n.*?author: `".*?`"`n`n"
+if ($content -match $sitePattern) {
+  $content = $content -replace $sitePattern, $siteBlock
+} elseif ($content.Contains($siteMarker)) {
   $content = $content.Replace($siteMarker, $siteBlock + $siteMarker)
 }
 
-# 2. Replace color palette (default CSS block)
-$oldColor = ("${fence}css`n" +
-             "/* Light mode (:root) */`n" +
-             "--color-bg: #FFFFFF`n" +
-             "--color-text: #111827`n" +
-             "--color-muted: #6B7280`n" +
-             "--color-accent: #2563EB`n" +
-             "--color-border: #E5E7EB`n" +
-             "--color-surface: #F9FAFB`n" +
-             "`n" +
-             "/* Dark mode ([data-theme=`"dark`"] on <html>) */`n" +
-             "--color-bg: #111827`n" +
-             "--color-text: #F3F4F6`n" +
-             "--color-muted: #9CA3AF`n" +
-             "--color-accent: #3B82F6`n" +
-             "--color-border: #374151`n" +
-             "--color-surface: #1F2937`n" +
-             "${fence}")
-
+# 2. Replace color palette (using regex to match any existing CSS block)
 $newColor = ("${fence}css`n" +
              "/* Light mode (:root) */`n" +
              "--color-bg: $lBg`n" +
@@ -227,18 +212,19 @@ $newColor = ("${fence}css`n" +
              "--color-surface: $dSu`n" +
              "${fence}")
 
-if ($content.Contains($oldColor)) {
-  $content = $content.Replace($oldColor, $newColor)
+$colorPattern = "(?s)${fence}css`n/\* Light mode \(:root\) \*/.*?${fence}"
+if ($content -match $colorPattern) {
+  $content = $content -replace $colorPattern, $newColor
 } else {
-  Write-Host "  Note: color block not found — already configured?" -ForegroundColor Yellow
+  Write-Host "  Note: color block not found - already configured?" -ForegroundColor Yellow
 }
 
-# 3. Replace typography lines (regex — matches any current font value)
-$content = $content -replace '- Headings \(h1–h3\): .+', "- Headings (h1`u{2013}h3): $headingFont, $headingType"
+# 3. Replace typography lines (regex - matches any current font value)
+$content = $content -replace '- Headings \(h1.h3\): .+', "- Headings (h1`u{2013}h3): $headingFont, $headingType"
 $content = $content -replace '- Body \+ UI: .+, sans-serif', "- Body + UI: $bodyFont, sans-serif"
 
-# 4. Update font line in STACK section (regex — matches any current value)
-$content = $content -replace '- Fonts: .+\(headings\) \+ .+\(body/UI\).*', "- Fonts: $headingFont (headings) + $bodyFont (body/UI) — self-hosted via @fontsource"
+# 4. Update font line in STACK section (regex - matches any current value)
+$content = $content -replace '- Fonts: .+\(headings\) \+ .+\(body/UI\).*', "- Fonts: $headingFont (headings) + $bodyFont (body/UI) - self-hosted via @fontsource"
 
 # 5. Replace each provider value (section-aware, so ANALYTICS/COMMENTS/NEWSLETTER stay independent)
 $providers = @(
@@ -262,7 +248,7 @@ Write-Host "CLAUDE.md configured." -ForegroundColor Green
 # --- 5. GitHub (optional) ---
 Write-Section "GitHub (optional)"
 Write-Host "Create a GitHub repository for your blog?"
-Write-Host "  Requires: GitHub CLI (gh) — https://cli.github.com" -ForegroundColor White
+Write-Host "  Requires: GitHub CLI (gh) - https://cli.github.com" -ForegroundColor White
 Write-Host ""
 $ghAns = Read-Host "Set up GitHub? [y/N]"
 
@@ -321,7 +307,7 @@ $baseSteps = 10
 $totalSteps = $baseSteps + $optionalSteps.Count
 $lastStep   = $totalSteps - 1
 $stepNote = if ($optionalSteps.Count -gt 0) {
-  "runs all $totalSteps steps, 0-$lastStep — $($optionalSteps -join ', ') included"
+  "runs all $totalSteps steps, 0-$lastStep - $($optionalSteps -join ', ') included"
 } else {
   "runs all $baseSteps steps, 0-$($baseSteps-1)"
 }

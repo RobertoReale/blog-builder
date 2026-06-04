@@ -179,34 +179,19 @@ hf, ht, bf   = os.environ['HF'], os.environ['HT'], os.environ['BF']
 with open('CLAUDE.md', 'r', encoding='utf-8') as fh:
     c = fh.read()
 
-# 1. Insert site values before the "Import SITE" paragraph
+# 1. Insert or update site values before the "Import SITE" paragraph
+import re
 marker = 'Import SITE wherever site-level data is needed.'
 block  = (f'Site values (use these when creating src/config.ts):\n'
           f'- title: "{t}"\n'
           f'- description: "{d}"\n'
           f'- url: "{u}"\n'
           f'- author: "{a}"\n\n')
-if marker in c and 'Site values' not in c:
+if marker in c:
+    c = re.sub(r'Site values \(use these when creating src/config\.ts\):\n.*?\n\n(?=' + re.escape(marker) + r')', '', c, flags=re.DOTALL)
     c = c.replace(marker, block + marker)
 
-# 2. Replace color palette (default CSS block)
-old_col = ('```css\n'
-           '/* Light mode (:root) */\n'
-           '--color-bg: #FFFFFF\n'
-           '--color-text: #111827\n'
-           '--color-muted: #6B7280\n'
-           '--color-accent: #2563EB\n'
-           '--color-border: #E5E7EB\n'
-           '--color-surface: #F9FAFB\n'
-           '\n'
-           '/* Dark mode ([data-theme="dark"] on <html>) */\n'
-           '--color-bg: #111827\n'
-           '--color-text: #F3F4F6\n'
-           '--color-muted: #9CA3AF\n'
-           '--color-accent: #3B82F6\n'
-           '--color-border: #374151\n'
-           '--color-surface: #1F2937\n'
-           '```')
+# 2. Replace color palette (using regex to match any existing CSS block)
 new_col = (f'```css\n'
            f'/* Light mode (:root) */\n'
            f'--color-bg: {lbg}\n'
@@ -224,13 +209,13 @@ new_col = (f'```css\n'
            f'--color-border: {dbo}\n'
            f'--color-surface: {dsu}\n'
            f'```')
-if old_col in c:
-    c = c.replace(old_col, new_col)
-else:
-    print('  Note: color block not found — already configured?')
+
+c, count = re.subn(r'```css\n/\* Light mode \(:root\) \*/.*?```', new_col, c, flags=re.DOTALL)
+if count == 0:
+    print('  Note: color block not found - already configured?')
 
 # 3. Replace typography lines (regex — matches any current value, including first run)
-import re
+# 3. Replace typography lines (regex matches any current value)
 old_typ = ('> **USER ACTION REQUIRED**: Define your preferred typography here.\n'
            '- Headings (h1–h3): [YOUR_HEADING_FONT], serif/sans-serif\n'
            '- Body + UI: [YOUR_BODY_FONT], sans-serif')

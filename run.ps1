@@ -1,5 +1,5 @@
 <#
-  run.ps1 — Runs the blog prompts in sequence via Claude Code (headless mode),
+  run.ps1 - Runs the blog prompts in sequence via Claude Code (headless mode),
   one step at a time, each in a NEW SESSION (so the context window never fills up),
   and after each step independently verifies that the build (and unit tests) pass.
   If something breaks, it STOPS: it never builds on top of a broken state.
@@ -88,7 +88,7 @@ New-Item -ItemType Directory -Force -Path "logs" | Out-Null
 # --- Verification gate (anti-drift mechanism) ------------------------------
 function Test-Project([bool]$InstallNeeded = $true) {
   if (-not (Test-Path "package.json")) {
-    Write-Host "  (package.json not present yet — skipping verification)" -ForegroundColor DarkGray
+    Write-Host "  (package.json not present yet - skipping verification)" -ForegroundColor DarkGray
     return $true
   }
 
@@ -97,7 +97,7 @@ function Test-Project([bool]$InstallNeeded = $true) {
     npm install --no-audit --no-fund 2>&1 | Out-Host
     if ($LASTEXITCODE -ne 0) { return $false }
   } else {
-    Write-Host "  -> npm install (skipped — package.json unchanged)" -ForegroundColor DarkGray
+    Write-Host "  -> npm install (skipped - package.json unchanged)" -ForegroundColor DarkGray
   }
 
   Write-Host "  -> npm run build" -ForegroundColor Cyan
@@ -152,7 +152,7 @@ $stopAt = if ($EndStep -ge 0 -and $EndStep -lt $prompts.Count) { $EndStep } else
 # --- Dry run ---------------------------------------------------------------
 if ($DryRun) {
   Write-Host ""
-  Write-Host "DRY RUN — steps that would be executed:" -ForegroundColor Cyan
+  Write-Host "DRY RUN - steps that would be executed:" -ForegroundColor Cyan
   Write-Host ""
   for ($j = $StartStep; $j -le $stopAt; $j++) {
     Write-Host ("  Step {0,-2}  {1,-20}  ({2})" -f $j, $stepNames[$j], $prompts[$j]) -ForegroundColor White
@@ -166,7 +166,7 @@ if ($DryRun) {
 # --- Startup banner --------------------------------------------------------
 $stepCount = $stopAt - $StartStep + 1
 Write-Host ""
-Write-Host "Blog Builder Pipeline — steps $StartStep-$stopAt  ($stepCount step$(if ($stepCount -ne 1) {'s'}))" -ForegroundColor White
+Write-Host "Blog Builder Pipeline - steps $StartStep-$stopAt  ($stepCount step$(if ($stepCount -ne 1) {'s'}))" -ForegroundColor White
 Write-Host "To pause: CTRL+C   |   To resume: .\run.ps1 -StartStep N" -ForegroundColor Yellow
 Write-Host ""
 
@@ -228,7 +228,7 @@ for ($i = $StartStep; $i -le $stopAt; $i++) {
   $null = git commit -m "Step ${i}: $($stepNames[$i])" --quiet 2>&1
 
   Write-Host ""
-  Write-Host "  STEP $i OK — build (and unit tests) passed." -ForegroundColor Green
+  Write-Host "  STEP $i OK - build (and unit tests) passed." -ForegroundColor Green
 
   # Token usage counter
   $usage = Get-StepUsage "logs\step_$i.json"
@@ -259,7 +259,7 @@ for ($i = $StartStep; $i -le $stopAt; $i++) {
         Write-Host ""
         Write-Host "Full E2E tests (optional):  npm run test:e2e" -ForegroundColor White
         Write-Host ""
-        Write-Host "Before going live — open README.md for:" -ForegroundColor Cyan
+        Write-Host "Before going live - open README.md for:" -ForegroundColor Cyan
         Write-Host "  - How to write and publish articles" -ForegroundColor White
         Write-Host "  - How to set up the Keystatic CMS on Vercel" -ForegroundColor White
         Write-Host "  - How to customize colors, fonts, and content" -ForegroundColor White
@@ -267,7 +267,7 @@ for ($i = $StartStep; $i -le $stopAt; $i++) {
         Write-Host "Start the blog with:  npm run dev   (then open http://localhost:4321)" -ForegroundColor Green
         Write-Host "Full E2E tests (optional):  npm run test:e2e" -ForegroundColor Green
         Write-Host ""
-        Write-Host "Before going live — open README.md for:" -ForegroundColor Cyan
+        Write-Host "Before going live - open README.md for:" -ForegroundColor Cyan
         Write-Host "  - How to write and publish articles" -ForegroundColor White
         Write-Host "  - How to customize and deploy the blog" -ForegroundColor White
       }

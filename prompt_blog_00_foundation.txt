@@ -114,6 +114,11 @@ Inline script template (place in BaseLayout <head> before any CSS):
 </script>
 ```
 
+Add a generic emoji favicon to the `<head>` to replace the default Astro logo:
+```html
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
+```
+
 ## LANGUAGE
 The frontmatter `language` field ('en' | 'it', default 'en') must actually be
 consumed — it sets the document language for accessibility and SEO.

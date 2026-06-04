@@ -218,6 +218,14 @@ To change fonts:
 3. Replace the `@import` lines at the top of `src/styles/global.css`.
 4. Update the `font-family` references in the same file.
 
+### Favicon / Logo
+
+By default, the blog uses a generic emoji (📝) as a favicon so it looks good out of the box. 
+To use your own logo:
+1. Create a `favicon.svg`, `favicon.ico`, or `favicon.png` file with your logo.
+2. Place it in the `public/` directory (replacing any existing favicon if present).
+3. Update `src/layouts/BaseLayout.astro` to point `<link rel="icon" ...>` to your new file (e.g. `href="/favicon.svg"`).
+
 ### Navigation links
 
 The nav is in `src/layouts/BaseLayout.astro`. It contains links to `/articles`, `/series`, `/about`, `/search`. The current page is automatically highlighted. Add, remove, or rename links there.

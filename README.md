@@ -670,7 +670,7 @@ architecture**:
 | 10 | `prompt_blog_10_analytics.txt` | **Optional** — analytics tracking; only runs if configured during setup |
 | 11 | `prompt_blog_11_comments.txt` | **Optional** — comments section (Giscus or Utterances); only runs if configured during setup |
 | 12 | `prompt_blog_12_newsletter.txt` | **Optional** — newsletter signup form; only runs if configured during setup |
-| — | `prompt_blog_10_future_features.txt` | **Optional** — web-researched report of missing features and future improvements (no code changes) |
+| — | `prompt_blog_13_future_features.txt` | **Optional** — web-researched report of missing features and future improvements (no code changes) |
 
 After every successful step, a git commit is created as a rollback point.
 
@@ -712,7 +712,7 @@ might be missing compared to the best personal blogs on the web today.
 **How to run it:**
 
 Open a new Claude Code session in your blog folder and paste the contents of
-`prompt_blog_10_future_features.txt`.
+`prompt_blog_13_future_features.txt`.
 
 Claude will:
 1. Search the web for what makes a great personal blog in the current year

@@ -2,6 +2,11 @@
 
 A framework to build a complete, production-ready personal blog using Astro 4, Tailwind CSS, and MDX — generated entirely through sequenced LLM prompts via Claude Code.
 
+## Live example
+
+This pipeline generated [RobertoReale/blog](https://github.com/RobertoReale/blog) — 
+browse the source or visit the [live site](https://blog-roberto-reale.vercel.app).
+
 ---
 
 ## Table of Contents

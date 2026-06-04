@@ -128,30 +128,204 @@ Fix every accessibility issue found.
 
 ---
 
-### 5. Responsive Design
+### 5. Responsive Design & Mobile UX
 
-Check the following in each layout and component:
+Test at 375px width (iPhone SE / smallest common phone).
+Fix every issue you find — the blog must be fully usable on mobile.
 
-**Article page:**
-- TOC (src/components/ui/TOC.astro) uses a <details>/<summary> element on mobile
-  so it collapses. On desktop it should always be expanded (CSS media query or
-  the details element is left open by default).
-- Article body max-width (680px) has horizontal padding on small screens
-  so text doesn't touch screen edges (e.g., padding: 0 1rem on mobile)
+**5a. Viewport meta tag (critical foundation)**
 
-**Navigation (BaseLayout.astro):**
-- Nav links do not overflow on narrow screens
-- Logo/title is not truncated
+Open src/layouts/BaseLayout.astro and verify the <head> contains:
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1">
+```
+Without this, the entire blog renders at desktop scale on mobile and is unusable.
+If missing, add it as the first meta tag inside <head>.
 
-**BackToTop button:**
-- Must be at least 40×40px (adequate touch target on mobile)
-- Must not overlap the article text on mobile (positioned far enough right/bottom)
+**5b. Touch targets**
 
-**General:**
-- No element has a fixed width wider than 100vw
-- Images inside articles are max-width: 100%
+All interactive elements must have a minimum clickable area of 44×44px
+(WCAG 2.5.5 / iOS Human Interface Guidelines / Android Material guidelines).
 
-Fix any responsive issues found.
+Audit every component:
+- ThemeToggle button in the nav
+- BackToTop button (raise to 44×44px if currently 40×40px)
+- Tag pills (ArticleCard.astro, TagPill.astro, TagFilter.astro) — add vertical
+  padding so the tap target is at least 44px tall even if the visual pill is smaller
+- Share button in the article header
+- TOC links (padding: 8px 0 each link)
+- SeriesNav prev/next links
+- Nav links in BaseLayout.astro
+
+Add padding to reach 44×44px. Do NOT change the visual appearance — add padding
+that expands the hit area without changing the rendered size (e.g., use inline
+padding on the element and negative margin or a wrapper to keep layout intact).
+
+**5c. Navigation on mobile**
+
+Open src/layouts/BaseLayout.astro.
+At 375px width, the nav bar must:
+- Not overflow horizontally or push content off screen
+- Not truncate the blog title/logo
+- Keep all links reachable without horizontal scroll
+- Allow links to wrap to a second line if needed (flex-wrap: wrap)
+
+Verify the nav container uses something like:
+```css
+display: flex;
+flex-wrap: wrap;
+align-items: center;
+gap: 16px;
+```
+
+If nav items are crammed: reduce font size at small breakpoints or add a mobile
+layout where the title sits on its own line above the links.
+
+**5d. Article body on mobile**
+
+- Horizontal padding: the article content area must have at least 16px of
+  horizontal padding at mobile widths so text does not touch the screen edge.
+  The main container should use padding: 0 1rem (or Tailwind px-4) at mobile.
+- Max-width: `width: 100%; max-width: 680px; margin: 0 auto` — must not cause
+  horizontal scroll at 375px.
+- Code blocks: must have `overflow-x: auto` so long lines scroll horizontally
+  within the block instead of pushing the page layout wider. Check global.css
+  for `pre, code { overflow-x: auto; }`. Add if missing.
+- Tables: if any article uses markdown tables, wrap them in a div with
+  `overflow-x: auto` so they scroll horizontally on narrow screens.
+
+**5e. Tag filter pills on mobile**
+
+The row of tag pills (TagFilter.astro on homepage and articles page) must not
+cause the page itself to scroll horizontally.
+
+If pills overflow their container:
+- Set the pills container to `overflow-x: auto; white-space: nowrap;`
+- Hide the scrollbar visually while keeping scroll behavior:
+  ```css
+  .category-scroll { /* or whatever the container class is */
+    scrollbar-width: none; /* Firefox */
+  }
+  .category-scroll::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+  ```
+- Use `-webkit-overflow-scrolling: touch` for smooth scrolling on iOS.
+
+**5f. TOC on mobile**
+
+- TOC.astro must collapse on mobile via a `<details>/<summary>` structure.
+  The `<summary>` should read "Contents" or "Contents ↓".
+- On mobile, the default state is closed (no `open` attribute on `<details>`).
+- On desktop (≥ 768px), the TOC must always be expanded.
+  The reliable cross-browser way is JS + CSS. In the existing TOC client-side
+  script (inside the `astro:page-load` listener, after building the TOC content),
+  add:
+  ```js
+  const detailsEl = container.querySelector('details');
+  if (detailsEl && window.matchMedia('(min-width: 768px)').matches) {
+    detailsEl.open = true;
+  }
+  ```
+  Then in global.css, hide the summary toggle on desktop:
+  ```css
+  @media (min-width: 768px) {
+    #toc-container summary { display: none; }
+  }
+  ```
+  Do NOT use `display: contents` on `<details>` — it is unreliable across
+  browsers for controlling the native open/closed state.
+- TOC links must have adequate tap targets (at least 44px height via padding).
+
+**5g. BackToTop button on mobile**
+
+- Must be at least 44×44px (touch target — increase from 40×40px if needed).
+- Position: bottom-right, with at least 20px from the bottom edge and 20px from
+  the right edge to keep it within safe areas on notched phones.
+- Must not overlap or obscure the article body, footer, or related articles section.
+
+**5h. Share button — Web Share API on mobile**
+
+On mobile, the standard UX is the native share sheet (not clipboard copy).
+Read the existing share button implementation (in the article page or a dedicated
+component) and update its click handler to prefer Web Share API when available:
+
+```js
+// Wrap the existing click handler — find the share button by reading
+// the actual component file (ArticleLayout.astro or [slug].astro).
+// Replace the click handler body with:
+if (navigator.share) {
+  try {
+    await navigator.share({ title: document.title, url: window.location.href });
+    return;
+  } catch (err) {
+    if (err.name !== 'AbortError') console.error(err);
+    return; // user cancelled — do not fall through to clipboard
+  }
+}
+// If navigator.share is not available, run the existing clipboard copy logic.
+```
+
+Make the click handler async if it is not already.
+This gives mobile users the native share sheet (WhatsApp, Messages, copy link,
+etc.) while desktop users keep the existing clipboard copy flow.
+
+**5i. Images on mobile**
+
+- All `<img>` elements inside article content must be responsive:
+  `max-width: 100%; height: auto;`
+- Check global.css for `img { max-width: 100%; height: auto; }` and add if absent.
+- ImageWithCaption.astro: the image must not overflow its container at 375px.
+  If size="half" is used on mobile, consider resetting to 100% below a breakpoint.
+
+**5j. Search input — prevent iOS zoom**
+
+iOS Safari auto-zooms the page when the user taps an input with font-size < 16px.
+Open src/pages/search.astro and src/styles/global.css.
+Ensure the search input has `font-size: 1rem` (16px) or larger.
+If it uses a smaller size, add a mobile override:
+```css
+@media (max-width: 768px) {
+  input[type="search"], input[type="text"] {
+    font-size: 1rem;
+  }
+}
+```
+
+**5k. Horizontal overflow — no page-level scroll**
+
+Verify the page does not scroll horizontally at 375px. The safest fix is:
+```css
+html {
+  overflow-x: clip; /* 'clip' does NOT break position: sticky, unlike 'hidden' */
+}
+```
+Add `overflow-x: clip` to the `html` rule in global.css if not already present.
+Do NOT use `overflow-x: hidden` on `body` — it breaks `position: sticky` elements
+like the reading progress bar.
+
+**5l. Reading progress bar on mobile**
+
+- The 3px bar at the top of article pages must sit above the content and nav,
+  not behind them. Verify z-index is high (9999 or similar).
+- On iOS Safari with safe-area insets, the bar should appear below the notch.
+  This is generally handled automatically by the browser, but verify the bar
+  uses `top: 0` and not a negative top value.
+
+**5m. SeriesNav and RelatedArticles on mobile**
+
+- SeriesNav (prev/next links): at 375px, both prev and next links may sit in the
+  same row and overflow. They should either wrap to separate lines or stack as a
+  column. Ensure the container uses `flex-wrap: wrap` or `flex-direction: column`
+  at narrow widths so neither link is cut off or hidden.
+- RelatedArticles: the component uses a CSS grid with
+  `grid-template-columns: repeat(auto-fill, minmax(180px, 1fr))` (specified in
+  Step 6). At 375px viewport with 16px side padding, available width ≈ 343px,
+  which fits exactly one 343px column — so the grid collapses to 1 column
+  automatically. Verify this is the case and that no card text overflows or is
+  clipped at 375px width.
+
+Fix all responsive and mobile issues found.
 
 ---
 
@@ -369,8 +543,20 @@ After all fixes:
 - [ ] Semantic landmarks: <header>, <main>, <footer>, <nav>, <article>
 - [ ] One <h1> per page, no skipped heading levels
 - [ ] Search input has accessible label
-- [ ] TOC collapses on mobile via <details>/<summary>
-- [ ] BackToTop is at least 40×40px
+- [ ] Viewport meta tag (width=device-width, initial-scale=1) in BaseLayout.astro
+- [ ] All interactive elements have ≥ 44×44px touch targets (nav, toggle, pills, share, TOC links, back-to-top)
+- [ ] Nav links wrap cleanly at 375px without overflow or truncation
+- [ ] Article body has ≥ 16px horizontal padding on mobile
+- [ ] Code blocks have overflow-x: auto (no horizontal page scroll from long lines)
+- [ ] Tag filter pills row scrolls horizontally on mobile, does not cause page overflow
+- [ ] TOC collapses on mobile via <details>/<summary>; expanded by default on desktop
+- [ ] BackToTop is at least 44×44px, positioned ≥ 20px from screen edges
+- [ ] Share button uses Web Share API on mobile, clipboard fallback on desktop
+- [ ] Images are responsive: max-width: 100%; height: auto in global.css
+- [ ] Search input font-size ≥ 16px (prevents iOS auto-zoom)
+- [ ] html { overflow-x: clip } prevents horizontal page scroll on mobile
+- [ ] SeriesNav prev/next links wrap or stack at 375px (no overflow)
+- [ ] RelatedArticles grid collapses to 1 column at 375px
 - [ ] All interactive elements have visible hover states
 - [ ] Active nav link uses var(--color-text); inactive links use var(--color-muted)
 - [ ] Article render order matches the CLAUDE.md spec

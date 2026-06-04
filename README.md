@@ -486,7 +486,7 @@ architecture**:
 
 **Web search baked into every prompt.** Each prompt instructs Claude to search the web for current documentation and known issues *before* writing any code — and to search again if it hits a bug it can't solve from the code alone. Package APIs change, adapters add breaking releases, community patterns evolve. A prompt that relies only on Claude's training data has a shelf life; a prompt that fetches current docs doesn't.
 
-**Two final quality gates.** After all features are built, Step 8 runs the full Playwright E2E suite and fixes any cross-feature regressions. Step 9 then performs a dedicated UI/UX audit: it verifies that no raw hex colors leaked outside the design system, that every interactive element is accessible (ARIA labels, focus styles, semantic HTML), that dark mode is complete, and that the example article has enough structure for all reading-UX features to render correctly. It also cross-checks `src/config.ts`, the fontsource imports, and the CSS color variables against the values the user entered at setup time — catching the common case where Step 0 generated placeholder defaults instead of the real values. These two steps catch the classes of bugs that unit tests miss: visual regressions, accessibility gaps, configuration drift, and design inconsistencies.
+**Two final quality gates.** After all features are built, Step 8 runs the full Playwright E2E suite and fixes any cross-feature regressions. Step 9 then performs a dedicated UI/UX audit: it verifies that no raw hex colors leaked outside the design system, that every interactive element is accessible (ARIA labels, focus styles, semantic HTML), that the blog is fully usable on mobile phones (touch targets, responsive nav, overflow handling, Web Share API, iOS zoom prevention), that dark mode is complete, and that the example article has enough structure for all reading-UX features to render correctly. It also cross-checks `src/config.ts`, the fontsource imports, and the CSS color variables against the values the user entered at setup time — catching the common case where Step 0 generated placeholder defaults instead of the real values. These two steps catch the classes of bugs that unit tests miss: visual regressions, accessibility gaps, mobile UX failures, configuration drift, and design inconsistencies.
 
 ---
 
@@ -501,7 +501,7 @@ architecture**:
 | 6 | `prompt_blog_06_related.txt` | Related articles recommendation |
 | 7 | `prompt_blog_07_keystatic.txt` | Keystatic CMS (browser editor, GitHub mode) |
 | 8 | `prompt_blog_08_e2e_check.txt` | E2E integration check, fix any cross-feature failures |
-| 9 | `prompt_blog_09_ui_review.txt` | UI/UX & design audit — accessibility, consistency, polish, configuration completeness |
+| 9 | `prompt_blog_09_ui_review.txt` | UI/UX & design audit — accessibility, mobile responsiveness, consistency, polish, configuration completeness |
 | — | `prompt_blog_10_future_features.txt` | **Optional** — web-researched report of missing features and future improvements (no code changes) |
 
 After every successful step, a git commit is created as a rollback point.

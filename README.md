@@ -223,7 +223,8 @@ Edit `src/pages/about.astro` and `src/pages/now.astro` — they contain placehol
 1. Push your repository to GitHub.
 2. Go to [vercel.com](https://vercel.com) → **Add New Project** → import your repo.
 3. Vercel auto-detects Astro. Leave all settings at default.
-4. Click **Deploy**.
+4. Go to **Settings** → **General** → **Node.js Version** and set it to **22.x**. Click **Save**.
+5. Click **Deploy** (or **Redeploy** if the first deploy already ran).
 
 Your blog is live. Every `git push` triggers an automatic redeploy.
 
@@ -376,10 +377,15 @@ See [GitHub issue discussion](https://github.com/withastro/astro/issues) for det
 
 **Fix**: Run `npm run build` (not just `npm run build:astro`). The full build script runs Pagefind after the Astro build.
 
-### Vercel deploy fails with runtime version error
+### Vercel build warns about Node.js version or deploy fails with runtime error
 
-**Cause**: Vercel restricts which Node.js versions can be used for Serverless Functions.
-**Fix**: Ensure your `package.json` contains `"engines": { "node": ">=20" }`. The pipeline sets this automatically in Step 0. Node 22 LTS is the recommended runtime as of mid-2026 (Node 20 reached end-of-life on April 30, 2026).
+**Cause**: Vercel defaults to Node 20, but `@astrojs/react` (used by Keystatic) requires Node ≥22.
+
+**Fix**:
+1. In your Vercel project → **Settings** → **General** → **Node.js Version**, select **22.x** and click **Save**.
+2. Trigger a redeploy (**Deployments** → `...` → **Redeploy**).
+
+> The pipeline sets `"engines": { "node": ">=22" }` in `package.json` automatically (Step 0), but Vercel's dashboard setting takes precedence and must be updated manually.
 
 ### Port 4321 is already in use
 

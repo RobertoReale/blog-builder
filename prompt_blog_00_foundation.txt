@@ -22,8 +22,12 @@ A fully working blog where:
   ```
   npm create astro@4 . -- --yes --template minimal --typescript strict --no-git --no-install
   ```
-  This runs in the current directory (`.`) without prompts. Pin `"astro": "^4.15.0"` in package.json.
-  IMPORTANT: You MUST add `"engines": { "node": "20.x" }` to `package.json` to ensure Vercel uses Node 20 for serverless functions, preventing Node 24/18 compatibility errors.
+  This runs in the current directory (`.`) without prompts. After the scaffold completes,
+  verify that the installed Astro version is 4.x (the web search in the critical instruction
+  above will tell you the latest stable 4.x release — use that). Do NOT upgrade to Astro 5.
+  IMPORTANT: You MUST add `"engines": { "node": ">=20" }` to `package.json` to ensure
+  Vercel uses a supported Node.js version. Node 22 LTS is recommended (Node 20 reached
+  end-of-life on April 30, 2026).
 - @astrojs/tailwind
 - @astrojs/mdx
 - TypeScript (strict mode)

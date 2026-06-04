@@ -26,11 +26,11 @@ CRITICAL INSTRUCTION: If you encounter test failures or build errors that you ca
 
 ---
 
-### Known issue: dev server with Node.js 24 + Vercel adapter
+### Known issue: dev server with Node.js 22+ and Vercel adapter
 
 If the E2E tests fail because the dev server (started automatically by
 Playwright via `npm run dev`) fails to serve pages (blank page or 500 error),
-this is the known Node.js 24 + @astrojs/vercel compatibility issue.
+this is the known Node.js 22+ / @astrojs/vercel esbuild compatibility issue.
 
 To fix this, check `astro.config.mjs`. If the `vite.esbuild.target` setting
 is missing, add it now:

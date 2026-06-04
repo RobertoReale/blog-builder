@@ -277,21 +277,16 @@ Placeholder patterns that must NOT appear in src/config.ts:
 Fonts are self-hosted via @fontsource — there should be NO Google Fonts <link> tag
 in BaseLayout.astro. If one exists, remove it.
 
-Open src/styles/global.css and verify these @import lines appear at the top:
-```css
-@import '@fontsource/lora/400.css';
-@import '@fontsource/lora/700.css';
-@import '@fontsource/dm-sans/400.css';
-@import '@fontsource/dm-sans/500.css';
-```
+Read the font names from CLAUDE.md's STACK section (the "Fonts:" line).
+Open src/styles/global.css and verify that @import lines for the correct
+@fontsource packages appear at the top (e.g. `@import '@fontsource/lora/400.css'`
+for Lora). The exact package name is the font name lowercased with hyphens
+(e.g. "DM Sans" → `@fontsource/dm-sans`).
 
-Also verify that `@fontsource/lora` and `@fontsource/dm-sans` are listed in
-package.json dependencies. If either package is missing, install it:
-```bash
-npm install @fontsource/lora @fontsource/dm-sans
-```
+Also verify that the corresponding @fontsource packages are listed in
+package.json dependencies. If any package is missing, install it.
 
-Then add the @import lines above to the top of global.css if absent.
+Then add the @import lines to the top of global.css if absent.
 
 **Step D — Verify CSS color variables in global.css.**
 

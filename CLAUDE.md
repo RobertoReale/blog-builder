@@ -238,7 +238,9 @@ If you touched a page or component: also run `npm run test:e2e`.
 
 ## FEATURES STATUS
 
-Update this section manually as features are completed.
+This section reflects the template state BEFORE the pipeline runs.
+Each step automatically implements its feature. After a full pipeline run
+(steps 0–9), all features below will be complete.
 
 - [x] Foundation (pages, MDX components, dark mode, example article)
 - [ ] Testing setup (Vitest + Playwright)

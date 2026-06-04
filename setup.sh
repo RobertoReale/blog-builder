@@ -91,7 +91,7 @@ echo "  2  Playfair Display + Source Sans 3 — editorial, elegant"
 echo "  3  DM Serif Display + DM Sans      — modern, cohesive"
 echo "  4  Fraunces + Inter                — quirky serif + tech sans"
 echo "  5  Inter + Inter                   — pure sans-serif, minimal"
-echo "  6  Custom                          — enter your own Google Font names"
+echo "  6  Custom                          — enter your own fontsource.org font names"
 echo ""
 read -p "Choice [1-6, default 1]: " f; f=${f:-1}
 
@@ -100,9 +100,9 @@ case "$f" in
   3) HF="DM Serif Display" HT="serif"     BF="DM Sans" ;;
   4) HF="Fraunces"         HT="serif"     BF="Inter" ;;
   5) HF="Inter"            HT="sans-serif" BF="Inter" ;;
-  6) read -p "Heading font (exact Google Fonts name): " HF
+  6) read -p "Heading font (exact name as on fontsource.org): " HF
      read -p "  serif or sans-serif? " HT
-     read -p "Body/UI font (exact Google Fonts name): " BF ;;
+     read -p "Body/UI font (exact name as on fontsource.org): " BF ;;
   *) HF="Lora" HT="serif" BF="DM Sans" ;;
 esac
 echo ""
@@ -189,10 +189,12 @@ if old_typ in c:
 else:
     print('  Note: typography block not found — already configured?')
 
-# 4. Update Google Fonts line in STACK section
-c = c.replace(
-    '- Google Fonts: Lora (headings) + DM Sans (body/UI)',
-    f'- Google Fonts: {hf} (headings) + {bf} (body/UI)'
+# 4. Update Fonts line in STACK section (regex — matches any current value)
+import re
+c = re.sub(
+    r'- Fonts: .+\(headings\) \+ .+\(body/UI\).*',
+    f'- Fonts: {hf} (headings) + {bf} (body/UI) — self-hosted via @fontsource',
+    c
 )
 
 with open('CLAUDE.md', 'w', encoding='utf-8') as fh:

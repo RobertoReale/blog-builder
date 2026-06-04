@@ -37,8 +37,9 @@ hybrid mode — do NOT add that annotation to existing files.
 
 **Pre-flight check — Node.js version**
 
-Run `node --version` before installing. The recommended runtime is **Node 20**.
-Node 22 and 24 have a known esbuild incompatibility with `@astrojs/vercel` that
+Run `node --version` before installing. The recommended runtime is **Node 22 LTS**
+(Node 20 reached end-of-life on April 30, 2026 and no longer receives security patches).
+Node 22+ has a known esbuild incompatibility with `@astrojs/vercel` that
 can break the dev server (error: `Expected "}" but found ":"`). The production
 build (`npm run build`) is not affected. See Step 1.5 and Step 2 for the
 mitigations built into this prompt.
@@ -55,7 +56,7 @@ npm install @keystatic/core @keystatic/astro @astrojs/vercel --legacy-peer-deps
 ```
 
 > **Node.js compatibility note**: `@astrojs/vercel` bundles its own esbuild
-> version for bundling serverless functions. With Node.js 22 or 24 this can cause
+> version for bundling serverless functions. With Node.js 22+ this can cause
 > the dev server to fail to render pages (error: `Expected "}" but found ":"`)
 > because the bundled esbuild has trouble parsing certain Astro template patterns
 > in hybrid mode. The **production build** (`npm run build`) is not affected.
@@ -66,7 +67,7 @@ npm install @keystatic/core @keystatic/astro @astrojs/vercel --legacy-peer-deps
 
 ### Step 1.5 — Add a fallback dev script to package.json
 
-If `npm run dev` fails after this step (which can happen on Node.js 24+ due to
+If `npm run dev` fails after this step (which can happen on Node.js 22+ due to
 the esbuild issue described above), users need an alternative. Add a `dev:build`
 script to `package.json` that builds the site and serves the output statically:
 
@@ -97,7 +98,7 @@ export default defineConfig({
   output: 'hybrid',
   adapter: vercel(),
   vite: {
-    // Required for compatibility with Node.js 22–24 + the Vercel adapter.
+    // Required for compatibility with Node.js 22+ and the Vercel adapter.
     // Without this, esbuild may fail to parse CSS custom properties inside
     // Astro template strings during dev server rendering.
     esbuild: {
@@ -333,4 +334,4 @@ The build may produce output in `.vercel/output/` instead of `dist/` — this is
 - [ ] No modifications to existing pages, layouts, components, or utilities
 - [ ] No `export const prerender = true` added to any existing page
 - [ ] `npm run build` succeeds with zero TypeScript errors
-- [ ] `npm run dev` starts without crashing (pages may show errors on Node 24+ — that is addressed by the Vite esbuild target above; if errors persist, use `npm run dev:build` as the documented fallback)
+- [ ] `npm run dev` starts without crashing (pages may show errors on Node 22+ — that is addressed by the Vite esbuild target above; if errors persist, use `npm run dev:build` as the documented fallback)

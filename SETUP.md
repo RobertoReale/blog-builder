@@ -23,9 +23,15 @@ Core idea: **each prompt runs in a separate Claude Code session**, so the contex
 
        node -v
 
-   Version 18 or higher required.
+   Version 22 or higher recommended (Node 22 LTS is the current long-term support release;
+   Node 20 reached end-of-life on April 30, 2026).
 
-3. **Claude Code** (requires a paid plan: Pro, Max, Team, or Enterprise):
+3. **Python 3** (Linux/macOS only) — used by the setup script to update `CLAUDE.md`.
+   Most Linux distributions and macOS include it by default. Verify:
+
+       python3 --version
+
+4. **Claude Code** (requires a paid plan: Pro, Max, Team, or Enterprise):
 
        winget install Anthropic.ClaudeCode
 

@@ -23,7 +23,7 @@ A framework to build a complete, production-ready personal blog using Astro 4, T
 
 Follow **[SETUP.md](SETUP.md)** for the full build instructions. Quick overview:
 
-1. Install **Node.js LTS**, **Git**, and **Claude Code**.
+1. Install **Node.js 22 LTS** (or newer), **Git**, and **Claude Code**.
 2. Run the interactive setup (configures colors, fonts, site title):
    - Windows: `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` then `.\setup.ps1`
    - Linux/macOS: `chmod +x setup.sh run.sh && ./setup.sh`
@@ -376,10 +376,10 @@ See [GitHub issue discussion](https://github.com/withastro/astro/issues) for det
 
 **Fix**: Run `npm run build` (not just `npm run build:astro`). The full build script runs Pagefind after the Astro build.
 
-### Vercel deploy fails with "invalid runtime: nodejs18.x"
+### Vercel deploy fails with runtime version error
 
-**Cause**: Vercel no longer allows deploying new Serverless Functions on Node 18, but the Astro adapter falls back to Node 18 if it detects an unsupported Node version (like Node 24).
-**Fix**: Ensure your `package.json` contains `"engines": { "node": "20.x" }`. This forces Vercel to use Node 20, which is fully supported. The `blog-builder` pipeline handles this automatically in Step 0.
+**Cause**: Vercel restricts which Node.js versions can be used for Serverless Functions.
+**Fix**: Ensure your `package.json` contains `"engines": { "node": ">=20" }`. The pipeline sets this automatically in Step 0. Node 22 LTS is the recommended runtime as of mid-2026 (Node 20 reached end-of-life on April 30, 2026).
 
 ### Port 4321 is already in use
 
@@ -415,18 +415,21 @@ Check:
 
 ### Long-term compatibility
 
-The blog is designed to be stable over time. Here is what you need to know about each dependency:
+The blog is designed to be stable over time. Once deployed, the static HTML output runs forever — only the build tooling ages. Here is the current status of each dependency (updated June 2026):
 
 | Dependency | Risk | Notes |
 |---|---|---|
-| **Astro 4** | Low | Static output is pre-built HTML — it runs forever once deployed. Only the build tooling ages. |
+| **Astro 4** | Medium | Astro 4 is now legacy — the current version is Astro 6. The blog works with Astro 4 and pinned dependencies. If you need to upgrade, see the migration note below. |
 | **Vercel static hosting** | Very low | Static files have no runtime — no serverless functions to break unless you use Keystatic. |
 | **Fonts (@fontsource)** | Very low | Self-hosted in your `node_modules` — no external CDN. Fonts load even if fontsource.org goes down. |
-| **Tailwind CSS** | Low | Used only for spacing/layout, not for colors. Design is isolated in CSS variables. |
-| **Keystatic CMS** | Medium | Requires `@astrojs/vercel` which has known issues on Node.js 22+. Use Node 20 (already enforced via `engines` in `package.json`). If Keystatic causes problems, the blog works perfectly without it — articles can always be written as `.mdx` files directly. |
-| **Pagefind (search)** | Low | Build-time only. Generates a static search index. No runtime dependency. |
+| **Tailwind CSS / @astrojs/tailwind** | Medium | `@astrojs/tailwind` is deprecated in Astro 5+. With pinned Astro 4 it works fine. Future migration to Astro 5+ requires switching to `@tailwindcss/vite` plugin. |
+| **Keystatic CMS** | High | Maintenance has slowed significantly in 2026. Works with Astro 5 but NOT with Astro 6. If Keystatic causes problems, the blog works perfectly without it — articles can always be written as `.mdx` files directly. |
+| **Pagefind (search)** | Very low | Build-time only, actively maintained (v1.5.2 as of April 2026). No runtime dependency. |
+| **Node.js** | Low | The pipeline uses `"engines": { "node": ">=20" }`. Node 22 LTS (EOL April 2027) is recommended. Node 20 reached EOL on April 30, 2026. |
 
 **If a future `npm run build` fails** after a dependency update, the fastest fix is to pin the previously working versions in `package.json` and re-run the build. The pipeline prompts instruct Claude to search for current best practices at execution time, so re-running a prompt step will always produce code compatible with the then-current package versions.
+
+**Future migration to Astro 5+**: When you're ready to upgrade, the key changes are: (1) Content Collections must use the Content Layer API with `glob()` loader, (2) `src/content/config.ts` moves to `src/content.config.ts`, (3) `entry.slug` becomes `entry.id` and `entry.render()` becomes `render(entry)`, (4) `@astrojs/tailwind` is replaced by `@tailwindcss/vite` plugin, (5) `output: 'hybrid'` is replaced by `output: 'static'` with `export const prerender = false` on server-rendered routes. Run `npx @astrojs/upgrade` for guided migration.
 
 ### A pipeline step fails
 

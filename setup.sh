@@ -179,7 +179,8 @@ if old_col in c:
 else:
     print('  Note: color block not found — already configured?')
 
-# 3. Replace typography USER ACTION REQUIRED
+# 3. Replace typography lines (regex — matches any current value, including first run)
+import re
 old_typ = ('> **USER ACTION REQUIRED**: Define your preferred typography here.\n'
            '- Headings (h1–h3): [YOUR_HEADING_FONT], serif/sans-serif\n'
            '- Body + UI: [YOUR_BODY_FONT], sans-serif')
@@ -187,10 +188,11 @@ new_typ = f'- Headings (h1–h3): {hf}, {ht}\n- Body + UI: {bf}, sans-serif'
 if old_typ in c:
     c = c.replace(old_typ, new_typ)
 else:
-    print('  Note: typography block not found — already configured?')
+    # Re-run: replace existing font values with regex (matches any font name)
+    c = re.sub(r'- Headings \(h1–h3\): .+', f'- Headings (h1–h3): {hf}, {ht}', c)
+    c = re.sub(r'- Body \+ UI: .+, sans-serif', f'- Body + UI: {bf}, sans-serif', c)
 
 # 4. Update Fonts line in STACK section (regex — matches any current value)
-import re
 c = re.sub(
     r'- Fonts: .+\(headings\) \+ .+\(body/UI\).*',
     f'- Fonts: {hf} (headings) + {bf} (body/UI) — self-hosted via @fontsource',

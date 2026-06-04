@@ -45,7 +45,7 @@ Core idea: **each prompt runs in a separate Claude Code session**, so the contex
 
    If `claude` is not recognized, it's a PATH issue — close and reopen the terminal.
 
-4. **Login** (authenticates automated runs too). Run once interactively:
+5. **Login** (authenticates automated runs too). Run once interactively:
 
        claude
 
@@ -190,6 +190,7 @@ See the [Troubleshooting section in README.md](README.md#8-troubleshooting) for 
       node_modules/
       dist/
       .astro/
+      .vercel/
       test-results/
       playwright-report/
       logs/

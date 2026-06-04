@@ -22,6 +22,7 @@ npx playwright install chromium
 Create vitest.config.ts in the project root:
 
 ```ts
+/// <reference types="vitest" />
 import { getViteConfig } from 'astro/config'
 
 export default getViteConfig({

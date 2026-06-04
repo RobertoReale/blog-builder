@@ -7,6 +7,7 @@ CRITICAL INSTRUCTION: Before you begin writing code, use your web search tools t
 2. Check for any breaking changes in @astrojs/tailwind and @astrojs/mdx since their latest releases.
 3. Verify the current @fontsource API for `lora` and `dm-sans` (confirm package names and import paths).
 4. Check for any known Astro 4 + Tailwind + MDX incompatibilities at the current versions.
+5. Find the current Node.js LTS version (active, not end-of-life) — use that as the minimum in the `engines` field instead of the placeholder below.
 If you encounter a bug you cannot resolve by reading the code, search online for known issues and solutions before giving up.
 
 ## GOAL
@@ -25,9 +26,10 @@ A fully working blog where:
   This runs in the current directory (`.`) without prompts. After the scaffold completes,
   verify that the installed Astro version is 4.x (the web search in the critical instruction
   above will tell you the latest stable 4.x release — use that). Do NOT upgrade to Astro 5.
-  IMPORTANT: You MUST add `"engines": { "node": ">=20" }` to `package.json` to ensure
-  Vercel uses a supported Node.js version. Node 22 LTS is recommended (Node 20 reached
-  end-of-life on April 30, 2026).
+  IMPORTANT: You MUST add `"engines": { "node": ">=<LTS>" }` to `package.json` to ensure
+  Vercel uses a supported Node.js version. Replace `<LTS>` with the current active LTS
+  version you found in CRITICAL INSTRUCTION item 5 (e.g. `>=22` if 22.x is current LTS).
+  Never use a Node.js version that has reached end-of-life.
 - @astrojs/tailwind
 - @astrojs/mdx
 - TypeScript (strict mode)

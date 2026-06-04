@@ -12,6 +12,7 @@ CRITICAL INSTRUCTION: Before writing any code, use your web search tools to:
 2. Verify the correct import path for the Vercel adapter (it changed between major versions — e.g. `@astrojs/vercel` vs `@astrojs/vercel/serverless`).
 3. Check the current `keystatic.config.ts` field API (the `fields.*` and `collection()` signatures change across minor versions).
 4. Search for known compatibility issues between the current Keystatic version, Astro 4, and the Node.js version running on this machine (`node --version`).
+5. Determine which version of `@astrojs/react` is compatible with **Astro 4** (not just the latest release — major versions of `@astrojs/react` track Astro major versions, so `@astrojs/react@5` targets Astro 5 and is incompatible here). Keystatic uses React for its admin UI and lists `@astrojs/react` as a peer dependency; npm v7+ will auto-install it at the latest version unless you pin it explicitly. Install the correct version based on your search result.
 If you encounter a bug you cannot resolve by reading the code, search for GitHub issues and community workarounds before giving up.
 
 ---
@@ -45,23 +46,19 @@ build (`npm run build`) is not affected. See Step 1.5 and Step 2 for the
 mitigations built into this prompt.
 
 ```bash
-npm install @keystatic/core @keystatic/astro @astrojs/vercel
+npm install @keystatic/core @keystatic/astro @astrojs/vercel @astrojs/react@<VERSION>
 ```
 
-No dev-only flag — all three are runtime or build-time dependencies.
+Replace `<VERSION>` with the Astro-4-compatible version you found in CRITICAL INSTRUCTION item 5
+(e.g. `^4` if v4.x is still current for Astro 4). Always install it explicitly —
+do NOT omit it and let npm auto-install, or you will get an incompatible major version.
+
+No dev-only flag — all four are runtime or build-time dependencies.
 
 If the install fails with peer-dependency errors, retry with:
 ```bash
-npm install @keystatic/core @keystatic/astro @astrojs/vercel --legacy-peer-deps
+npm install @keystatic/core @keystatic/astro @astrojs/vercel @astrojs/react@<VERSION> --legacy-peer-deps
 ```
-
-> **Node.js compatibility note**: `@astrojs/vercel` bundles its own esbuild
-> version for bundling serverless functions. With Node.js 22+ this can cause
-> the dev server to fail to render pages (error: `Expected "}" but found ":"`)
-> because the bundled esbuild has trouble parsing certain Astro template patterns
-> in hybrid mode. The **production build** (`npm run build`) is not affected.
-> See Step 3 for the Vite configuration that fixes this, and Step 1.5 for the
-> fallback dev script.
 
 ---
 
@@ -97,14 +94,6 @@ import keystatic from '@keystatic/astro'
 export default defineConfig({
   output: 'hybrid',
   adapter: vercel(),
-  vite: {
-    // Required for compatibility with Node.js 22+ and the Vercel adapter.
-    // Without this, esbuild may fail to parse CSS custom properties inside
-    // Astro template strings during dev server rendering.
-    esbuild: {
-      target: 'es2022',
-    },
-  },
   integrations: [
     tailwind(),
     mdx(),
@@ -343,7 +332,7 @@ The build may produce output in `.vercel/output/` instead of `dist/` — this is
 ### Checklist before finishing
 
 - [ ] `npm install` succeeds (no blocking peer-dependency errors)
-- [ ] `astro.config.mjs` has `output: 'hybrid'`, `adapter: vercel()`, `keystatic()` in integrations, and `vite.esbuild.target: 'es2022'`
+- [ ] `astro.config.mjs` has `output: 'hybrid'`, `adapter: vercel()`, `keystatic()` in integrations
 - [ ] `keystatic.config.ts` exists at project root with the full schema above
 - [ ] `.env.example` exists with the three required variable names
 - [ ] `.env` is listed in `.gitignore`
@@ -352,4 +341,4 @@ The build may produce output in `.vercel/output/` instead of `dist/` — this is
 - [ ] No modifications to existing pages, layouts, components, or utilities
 - [ ] No `export const prerender = true` added to any existing page
 - [ ] `npm run build` succeeds with zero TypeScript errors
-- [ ] `npm run dev` starts without crashing (pages may show errors on Node 22+ — that is addressed by the Vite esbuild target above; if errors persist, use `npm run dev:build` as the documented fallback)
+- [ ] `npm run dev` starts without crashing (if it fails, verify `@astrojs/react` is at `^4.x.x` — not v5; then use `npm run dev:build` as fallback)

@@ -4,7 +4,11 @@ The blog foundation is already built. Add the following SEO and
 discoverability features to the existing codebase.
 Do not change any existing functionality or design.
 
-CRITICAL INSTRUCTION: Before writing any code, use your web search tools to verify the current best practices for RSS feeds, JSON-LD structured data, sitemaps, and canonical URLs in Astro 4 — both the official Astro docs and community patterns. If you encounter a bug you cannot resolve by reading the code, search online for known issues and solutions before giving up.
+CRITICAL INSTRUCTION: Before writing any code, use your web search tools to:
+1. Verify the current best practices for RSS feeds, JSON-LD structured data, sitemaps, and canonical URLs in Astro 4 — both the official Astro docs and community patterns.
+2. Check the current versions and API of `satori` and `@resvg/resvg-js` — both packages evolve independently and their APIs change between major versions.
+3. Verify the current `@fontsource/lora` file structure for accessing font binary files at build time (the internal `files/` path layout changes between major versions of @fontsource). If the path `node_modules/@fontsource/lora/files/lora-latin-400-normal.woff` no longer exists, find the correct path from the package contents or documentation.
+If you encounter a bug you cannot resolve by reading the code, search online for known issues and solutions before giving up.
 
 ---
 

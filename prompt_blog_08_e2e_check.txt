@@ -26,31 +26,28 @@ CRITICAL INSTRUCTION: If you encounter test failures or build errors that you ca
 
 ---
 
-### Known issue: dev server with Node.js 22+ and Vercel adapter
+### Known issue: dev server fails with "Expected } but found :"
 
 If the E2E tests fail because the dev server (started automatically by
-Playwright via `npm run dev`) fails to serve pages (blank page or 500 error),
-this is the known Node.js 22+ / @astrojs/vercel esbuild compatibility issue.
+Playwright via `npm run dev`) fails to serve pages (blank page, 500 error,
+or `Expected "}" but found ":"` in the console), the most common cause is
+an `@astrojs/react` version mismatch.
 
-To fix this, check `astro.config.mjs`. If the `vite.esbuild.target` setting
-is missing, add it now:
+**Check first:** run `npm list @astrojs/react` and verify the installed version
+is compatible with Astro 4 (major versions of `@astrojs/react` track Astro
+major versions — v5+ targets Astro 5 and breaks Astro 4). If a wrong version
+is installed, downgrade:
 
-```js
-export default defineConfig({
-  // ... existing config ...
-  vite: {
-    esbuild: {
-      target: 'es2022',
-    },
-  },
-  // ...
-})
+```bash
+npm install @astrojs/react@^4
 ```
 
-After adding this, run `npm run dev`, visit http://localhost:4321, and confirm
-pages render. Then re-run `npm run test:e2e`.
+After fixing the React version, re-run `npm run dev` and confirm pages render.
+Then re-run `npm run test:e2e`.
 
-If `npm run dev` still has issues after the Vite fix, update `playwright.config.ts`
+If `npm run dev` still has issues after verifying the React version, search
+online for current known issues with your exact package versions before
+proceeding to the fallback below. Update `playwright.config.ts`
 to use a build-based server instead of the dev server:
 
 ```ts
@@ -84,5 +81,5 @@ Also ensure `package.json` has the `dev:build` script for users:
 - [ ] `npm run build` passes with zero errors
 - [ ] `npm run test:unit` passes
 - [ ] `npm run test:e2e` passes all tests
-- [ ] `vite.esbuild.target: 'es2022'` is set in `astro.config.mjs` (if Keystatic was installed)
+- [ ] `@astrojs/react` is at a version compatible with Astro 4 (if Keystatic was installed)
 - [ ] `dev:build` script exists in `package.json` (if Keystatic was installed)

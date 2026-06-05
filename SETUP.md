@@ -29,12 +29,7 @@ Core idea: **each prompt runs in a separate Claude Code session**, so the contex
    Use the current active LTS version (download from nodejs.org — the LTS badge
    shows which version to use). Avoid end-of-life releases.
 
-3. **Python 3** (Linux/macOS only) — used by the setup script to update `CLAUDE.md`.
-   Most Linux distributions and macOS include it by default. Verify:
-
-       python3 --version
-
-4. **Claude Code** (requires a paid plan: Pro, Max, Team, or Enterprise):
+3. **Claude Code** (requires a paid plan: Pro, Max, Team, or Enterprise):
 
        winget install Anthropic.ClaudeCode
 
@@ -63,8 +58,9 @@ Core idea: **each prompt runs in a separate Claude Code session**, so the contex
 
 Run the interactive setup script — it fills in `CLAUDE.md` for you:
 
-    Linux/macOS:  chmod +x setup.sh run.sh && ./setup.sh
-    Windows:      .\setup.ps1
+    Cross-platform:  node setup.js                              (recommended — Node.js only, no Python)
+    Linux/macOS:     chmod +x setup.sh run.sh && ./setup.sh    (alternative)
+    Windows:         .\setup.ps1                               (alternative)
 
 The script asks for:
 - **Site info**: blog title, description, URL, author name.

@@ -156,7 +156,7 @@ if (!fs.existsSync('CHOSEN_TOOLS.md') && startStep === 0) {
 if (startStep === 0 && !/Site values \(use these when creating/.test(claudeMd)) {
   console.log('')
   console.log(c.yellow('  Warning: CLAUDE.md does not contain "Site values" — setup may not have been run.'))
-  console.log(c.yellow('  Run setup first:  .\\setup.ps1 (Windows)  or  ./setup.sh (Linux/macOS)'))
+  console.log(c.yellow('  Run setup first:  node setup.js  (cross-platform)  or  .\\setup.ps1 / ./setup.sh'))
   console.log(c.yellow('  Without setup, the blog will be generated with generic placeholder values.'))
 }
 

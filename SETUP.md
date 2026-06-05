@@ -206,6 +206,9 @@ See the [Troubleshooting section in README.md](README.md#11-troubleshooting) for
   Optionally also exclude the builder infrastructure if you don't want it in the published repo:
 
       SETUP.md
+      setup.js
+      setup.ps1
+      setup.sh
       run.js
       run.sh
       run.ps1

@@ -11,9 +11,9 @@ CRITICAL INSTRUCTION: Before writing any code, use your web search tools to:
 1. Find the current latest versions of `@keystatic/core`, `@keystatic/astro`, and `@astrojs/vercel`.
 2. Verify the correct import path for the Vercel adapter (it changed between major versions — e.g. `@astrojs/vercel` vs `@astrojs/vercel/serverless`).
 3. Check the current `keystatic.config.ts` field API (the `fields.*` and `collection()` signatures change across minor versions).
-4. Search for known compatibility issues between the current Keystatic version, Astro 4, and the Node.js version running on this machine (`node --version`).
-5. Determine which version of `@astrojs/react` is compatible with **Astro 4** (not just the latest release — major versions of `@astrojs/react` track Astro major versions, so `@astrojs/react@5` targets Astro 5 and is incompatible here). Keystatic uses React for its admin UI and lists `@astrojs/react` as a peer dependency; npm v7+ will auto-install it at the latest version unless you pin it explicitly. Install the correct version based on your search result.
-6. Verify that Keystatic is still a maintained and recommended CMS for Astro static blogs with GitHub-based storage — if a clearly better alternative has emerged (actively maintained, similar capabilities, compatible with Astro 4 static output), add a `<!-- ALTERNATIVE: <name> — <reason> -->` comment at the top of keystatic.config.ts, but implement Keystatic as specified.
+4. Search for known compatibility issues between the current Keystatic version and the current Astro version and Node.js version running on this machine (`node --version`).
+5. Determine which version of `@astrojs/react` is compatible with the current Astro major version (major versions of `@astrojs/react` track Astro major versions — the major must match). Keystatic uses React for its admin UI and lists `@astrojs/react` as a peer dependency; npm v7+ will auto-install it at the latest version unless you pin it explicitly. Install the correct matching version based on your search result.
+6. Verify that Keystatic is still a maintained and recommended CMS for Astro static blogs with GitHub-based storage — if a clearly better alternative has emerged (actively maintained, similar capabilities, compatible with the current Astro static output), add a `<!-- ALTERNATIVE: <name> — <reason> -->` comment at the top of keystatic.config.ts, but implement Keystatic as specified.
 If you encounter a bug you cannot resolve by reading the code, search for GitHub issues and community workarounds before giving up.
 Your research findings always take precedence over any package versions, URLs, API signatures, or code patterns shown in this prompt. Treat all implementation examples as reference patterns — update them to match current reality based on what you find.
 
@@ -48,9 +48,9 @@ end-of-life Node.js releases — they no longer receive security patches.
 npm install @keystatic/core @keystatic/astro @astrojs/vercel @astrojs/react@<VERSION>
 ```
 
-Replace `<VERSION>` with the Astro-4-compatible version you found in CRITICAL INSTRUCTION item 5
-(e.g. `^4` if v4.x is still current for Astro 4). Always install it explicitly —
-do NOT omit it and let npm auto-install, or you will get an incompatible major version.
+Replace `<VERSION>` with the version compatible with your current Astro major version,
+as found in CRITICAL INSTRUCTION item 5 (e.g. `^5` if running Astro 5). Always install
+it explicitly — do NOT omit it and let npm auto-install, or you may get an incompatible major version.
 
 No dev-only flag — all four are runtime or build-time dependencies.
 
@@ -352,9 +352,9 @@ The build may produce output in `.vercel/output/` instead of `dist/` — this is
 After `npm run build` succeeds, update `CLAUDE.md` so all subsequent steps (E2E check,
 UI review, optional analytics/comments/newsletter) know the project is now hybrid:
 
-1. Find the line in the STACK section: `- Astro 4, output: 'static'`
+1. Find the line in the STACK section: `- Astro, output: 'static'`
    Replace it with:
-   `- Astro 4, output: 'hybrid' (Keystatic requires hybrid — /keystatic and /api/keystatic run as serverless functions; all blog pages remain statically pre-rendered)`
+   `- Astro, output: 'hybrid' (Keystatic requires hybrid — /keystatic and /api/keystatic run as serverless functions; all blog pages remain statically pre-rendered)`
 
 2. Find Rule 3 in FIXED RULES:
    `3. No @astrojs/vercel adapter — static output, not needed`
@@ -379,7 +379,7 @@ These changes ensure that if any future step reads CLAUDE.md, it won't incorrect
 - [ ] `npm run build` succeeds with zero TypeScript errors
 - [ ] CLAUDE.md STACK section updated: `output: 'hybrid'`
 - [ ] CLAUDE.md Rule 3 updated to note the adapter is required
-- [ ] `npm run dev` starts without crashing (if it fails, verify `@astrojs/react` is at `^4.x.x` — not v5; then use `npm run dev:build` as fallback)
+- [ ] `npm run dev` starts without crashing (if it fails, verify `@astrojs/react` major matches the installed Astro major version; then use `npm run dev:build` as fallback)
 
 ---
 

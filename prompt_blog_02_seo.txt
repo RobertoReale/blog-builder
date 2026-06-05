@@ -5,7 +5,7 @@ discoverability features to the existing codebase.
 Do not change any existing functionality or design.
 
 CRITICAL INSTRUCTION: Before writing any code, use your web search tools to:
-1. Verify the current best practices for RSS feeds, JSON-LD structured data, sitemaps, and canonical URLs in Astro 4 — both the official Astro docs and community patterns.
+1. Verify the current best practices for RSS feeds, JSON-LD structured data, sitemaps, and canonical URLs in the current Astro version — both the official Astro docs and community patterns.
 2. Check the current versions and API of `satori` and `@resvg/resvg-js` — both packages evolve independently and their APIs change between major versions.
 3. Read the heading font name from CLAUDE.md's STACK section ("Fonts:" line). This is the font to use in the OG image — not necessarily Lora. Convert the name to an @fontsource package (e.g. "Playfair Display" → @fontsource/playfair-display). Then verify the correct internal file path for the 400-weight .woff file inside that package (the path layout `files/<name>-latin-400-normal.woff` is common but changes between major @fontsource versions — check the actual package contents). If the font is Lora, the example path is `node_modules/@fontsource/lora/files/lora-latin-400-normal.woff` — verify this still exists.
 4. Verify that `satori` + `@resvg/resvg-js` is still the recommended approach for OG image generation in Astro static sites — if a built-in Astro feature or a more actively maintained package has emerged, add a `<!-- ALTERNATIVE: <name> — <reason> -->` comment in the OG image generation file, but implement what is specified here.

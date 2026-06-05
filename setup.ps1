@@ -311,12 +311,19 @@ $stepNote = if ($optionalSteps.Count -gt 0) {
 } else {
   "runs all $baseSteps steps, 0-$($baseSteps-1)"
 }
-Write-Host "  1. Generate the blog:"
+Write-Host "  1. Run the ecosystem discovery (optional but recommended):"
+Write-Host "       Open Claude Code in this folder, then send the contents of:" -ForegroundColor White
+Write-Host "       prompt_blog_pre_discovery.txt" -ForegroundColor White
+Write-Host "       Claude searches for the best current tools, shows them to you," -ForegroundColor DarkGray
+Write-Host "       and writes your choices to CHOSEN_TOOLS.md." -ForegroundColor DarkGray
+Write-Host "       Every subsequent build step will pick them up automatically." -ForegroundColor DarkGray
+Write-Host ""
+Write-Host "  2. Generate the blog:"
 Write-Host "       .\run.ps1        ($stepNote)" -ForegroundColor White
 Write-Host "       .\run.ps1 -Pause (pauses after each step)" -ForegroundColor White
 Write-Host ""
 if ($githubRemote) {
-  Write-Host "  2. After the pipeline finishes, push to GitHub:"
+  Write-Host "  3. After the pipeline finishes, push to GitHub:"
   Write-Host "       git push -u origin HEAD" -ForegroundColor White
   Write-Host ""
 }

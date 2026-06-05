@@ -1,0 +1,251 @@
+## ECOSYSTEM DISCOVERY — Run ONCE before prompt_blog_00_foundation.txt
+
+PURPOSE
+This is a pre-flight step. Its only job is to find the best available tools
+for this specific project right now (latest, most-downloaded, most-maintained),
+present them to the user, and record the chosen ones in CHOSEN_TOOLS.md.
+Every subsequent prompt reads that file and uses the selected tools automatically.
+
+Run this step exactly once per project. Skip it on re-runs.
+
+---
+
+CRITICAL INSTRUCTION — Search before presenting. Never rely on training knowledge.
+
+The Astro ecosystem evolves rapidly. Packages become deprecated, better
+alternatives emerge, and download rankings shift. You MUST perform ALL web
+searches listed in Step 1 before generating the tool list.
+Your research always takes precedence over anything hardcoded in this prompt.
+
+---
+
+## STEP 1 — Search for current tools (run all searches in parallel)
+
+For each result, collect: npm weekly downloads (if applicable), GitHub stars,
+date of last release, and confirmed compatibility with the current Astro version.
+
+Search queries to run simultaneously:
+
+  1. "astro integrations most downloaded npm site:npmjs.com"
+  2. "expressive-code astro syntax highlighting plugin"
+  3. "astro image optimization sharp unpic-img astro:assets"
+  4. "astro og image social card satori @vercel/og"
+  5. "@vite-pwa/astro PWA service worker"
+  6. "@playform/compress astro-compress performance"
+  7. "astro-icon iconify lucide-astro icon system"
+  8. "astro blog template github most stars"
+  9. "astro lint format eslint prettier plugin"
+  10. "astro view transitions page transitions best"
+
+Also search for any tools in these categories you did NOT find above:
+- Accessibility auditing at build time (axe, pa11y integrations)
+- Reading time / estimated read auto-annotation
+- Footnotes / citations in MDX
+- Feed aggregation (RSS/Atom/JSON Feed)
+
+---
+
+## STEP 2 — Inventory available Claude Code skills in this session
+
+The following skills are built into Claude Code and available right now.
+Evaluate which are most valuable for an Astro static blog project:
+
+  verify          — Launch the app in a real browser and confirm a change works.
+                    High value: catches regressions that build passes miss.
+
+  run             — Start the dev server and screenshot the result.
+                    High value: confirms the golden path after big changes.
+
+  code-review     — Diff-level correctness + quality review before merging.
+                    High value: catches logic errors and unnecessary complexity.
+
+  security-review — Audit pending changes for OWASP-style vulnerabilities.
+                    Medium value for a static blog (no auth/DB), still useful.
+
+  simplify        — Remove duplication and unnecessary complexity from changed code.
+                    Medium value: good to run after large feature additions.
+
+  fewer-permission-prompts — Scan transcripts and add allowlists to reduce
+                    interruptions. High value: run once early in the project.
+
+  schedule        — Create recurring automated agents on a cron schedule.
+                    Low value unless the user wants scheduled content or checks.
+
+  loop            — Run a command on a repeating interval.
+                    Low value unless live-polling during a long build.
+
+---
+
+## STEP 3 — Inventory connected MCP servers
+
+Check which MCP servers are currently connected in this session.
+For each one, assess its relevance to building and maintaining an Astro blog:
+
+  Google Drive    — Import/sync article drafts written in Google Docs.
+  Hugging Face    — Generate cover images, run ML-based tasks.
+  Canva           — Create cover images and social cards visually.
+  GitHub          — Create issues, PRs, manage releases from within Claude.
+  Playwright/Browser — Automate visual regression testing and screenshots.
+
+List only the servers that ARE currently active. Skip irrelevant ones.
+
+---
+
+## STEP 4 — Present findings to the user
+
+After completing all searches and inventories, present the results using
+exactly this format. Be concise — one line per item.
+
+═══════════════════════════════════════════════════════════════════
+BLOG PROJECT — TOOL & INTEGRATION DISCOVERY
+═══════════════════════════════════════════════════════════════════
+
+### A. Astro Integrations (npm packages)
+
+Sorted by value-to-effort ratio. Recommendation key:
+  ✅ Essential   — strongly recommended, widely adopted, low risk
+  🔶 High value  — meaningful improvement, worth the install
+  ⚪ Optional    — situational, only if you have the use case
+  ❌ Skip        — deprecated, unmaintained, or superseded
+
+| # | Package | Purpose | Downloads/wk or ⭐ | Last release | Rec |
+|---|---------|---------|---------------------|--------------|-----|
+(populate from your web search results — at least 10 rows)
+
+### B. Claude Code Skills
+
+| # | Skill | When to use in this project | Rec |
+|---|-------|----------------------------|-----|
+(list skills from Step 2 with your recommendation for this specific project)
+
+### C. Connected MCP Servers
+
+| # | Server | How it applies to this blog | Rec |
+|---|--------|----------------------------|-----|
+(list only active servers from Step 3 — skip if none are relevant)
+
+### D. GitHub Reference Projects
+
+Top 3 Astro blog starters/themes by GitHub stars (for reading patterns only —
+never copy code from them):
+
+  1. [repo] — [star count] — [what's worth referencing]
+  2. [repo] — [star count] — [what's worth referencing]
+  3. [repo] — [star count] — [what's worth referencing]
+
+═══════════════════════════════════════════════════════════════════
+
+THEN PAUSE and ask the user:
+
+  "Which would you like to activate?
+   • For integrations: type numbers (e.g. '1 3 5'), 'all essential', or
+     'all essential + high value'.
+   • For skills: type numbers or 'all recommended'.
+   • For MCP servers: type numbers or 'all relevant'.
+   • Or type 'skip' to proceed with no additions."
+
+Do NOT continue to Step 5 until the user responds.
+
+---
+
+## STEP 5 — Write CHOSEN_TOOLS.md
+
+After the user responds, use the Write tool to create CHOSEN_TOOLS.md
+in the project root. Use exactly this structure:
+
+```
+# Chosen Integrations & Tools
+Updated: [today's date — ISO format YYYY-MM-DD]
+Project: Astro static blog
+
+## Active npm Integrations
+
+[For each chosen integration — one block per package:]
+
+### [package-name]
+- Purpose: [one sentence]
+- Install: npm install [package-name]
+- When Claude uses this: [concrete instruction — e.g. "use for all syntax
+  highlighting in code blocks; replaces manual Shiki config"]
+
+## Active Claude Code Skills
+
+[For each chosen skill — one block per skill:]
+
+### [skill-name]
+- When to invoke: [concrete trigger — e.g. "after every feature prompt
+  that touches a page or component, before marking done"]
+
+## Active MCP Servers
+
+[For each chosen MCP server:]
+
+### [server name]
+- Purpose in this project: [one sentence]
+- Example use: [one concrete example]
+
+## GitHub Reference Projects
+
+[List repos to consult for patterns — read-only, never copy:]
+- [repo-url] — [what to reference]
+
+## Deferred
+
+[Items the user explicitly skipped, one line each:]
+- [name] — [reason user skipped or "user chose not to add"]
+```
+
+If the user said "skip", write a minimal file:
+
+```
+# Chosen Integrations & Tools
+Updated: [today's date]
+Status: No integrations chosen — discovery was skipped.
+```
+
+---
+
+## STEP 6 — Update CLAUDE.md
+
+Open CLAUDE.md. Find the line:
+
+  ## FIXED RULES — always apply, every session
+
+Insert the following section DIRECTLY ABOVE that line (between NEWSLETTER and
+FIXED RULES). If the section already exists, skip this step.
+
+```
+## CHOSEN INTEGRATIONS
+
+See CHOSEN_TOOLS.md in the project root.
+Written by the discovery step (prompt_blog_pre_discovery.txt).
+Contains the npm packages, Claude Code skills, and MCP servers the user
+has opted into for this project.
+
+RULE: Read CHOSEN_TOOLS.md at the start of every task. Use listed integrations
+wherever they apply. Invoke listed skills at the triggers documented in that file.
+If CHOSEN_TOOLS.md does not exist, the discovery step has not been run yet.
+```
+
+Also add one line to the FIXED RULES numbered list:
+
+  9. Read CHOSEN_TOOLS.md before every task. Use chosen integrations
+     and invoke chosen skills at the triggers documented there.
+
+Do NOT modify any other section of CLAUDE.md.
+
+---
+
+## STEP 7 — Confirm to the user
+
+Print a summary:
+
+  ✅ CHOSEN_TOOLS.md written
+     [N] npm integrations active
+     [N] Claude Code skills active
+     [N] MCP servers active
+
+  CLAUDE.md updated — all subsequent prompts will read CHOSEN_TOOLS.md
+  automatically and use your chosen tools.
+
+  Next step: run prompt_blog_00_foundation.txt

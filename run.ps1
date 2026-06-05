@@ -83,6 +83,14 @@ if (-not (Test-Path "CLAUDE.md")) {
   exit 1
 }
 
+if (-not (Test-Path "CHOSEN_TOOLS.md") -and $StartStep -eq 0) {
+  Write-Host ""
+  Write-Host "  Tip: CHOSEN_TOOLS.md not found - ecosystem discovery has not been run." -ForegroundColor DarkGray
+  Write-Host "  Open Claude Code and send prompt_blog_pre_discovery.txt to enable optional" -ForegroundColor DarkGray
+  Write-Host "  integrations (syntax highlighting, PWA, OG images, etc.)." -ForegroundColor DarkGray
+  Write-Host "  Continuing without it is fine - all core features still work." -ForegroundColor DarkGray
+}
+
 New-Item -ItemType Directory -Force -Path "logs" | Out-Null
 
 # --- Verification gate (anti-drift mechanism) ------------------------------

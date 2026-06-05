@@ -1,6 +1,6 @@
 # Blog Builder
 
-A framework to build a complete, production-ready personal blog using Astro 4, Tailwind CSS, and MDX — generated entirely through sequenced LLM prompts via Claude Code.
+A framework to build a complete, production-ready personal blog using Astro, Tailwind CSS, and MDX — generated entirely through sequenced LLM prompts via Claude Code.
 
 ## Live example
 
@@ -33,7 +33,7 @@ browse the source or visit the [live site](https://blog-roberto-reale.vercel.app
 
 Follow **[SETUP.md](SETUP.md)** for the full build instructions. Quick overview:
 
-1. Install **Node.js 22 LTS** (or newer), **Git**, and **Claude Code**.
+1. Install the current **Node.js LTS** release (or newer), **Git**, and **Claude Code**.
 2. Run the interactive setup (configures colors, fonts, site title):
    - Windows: `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` then `.\setup.ps1`
    - Linux/macOS: `chmod +x setup.sh run.sh && ./setup.sh`
@@ -56,7 +56,7 @@ Open **http://localhost:4321**. Hot-reload is active — edits to pages, compone
 ### With Keystatic (Step 7 included)
 
 After Step 7 installs the Vercel adapter, the dev server may have issues on
-**Node.js 22+**. Try in order:
+some Node.js versions. Try in order:
 
 **Option A — standard dev server (try first):**
 ```bash
@@ -91,7 +91,7 @@ The filename becomes the URL slug:
 ```yaml
 ---
 title: "Your Article Title"
-date: 2025-06-03          # YYYY-MM-DD, no quotes needed
+date: YYYY-MM-DD           # ISO date format, no quotes needed
 description: "A short summary shown in article lists and search results."
 tags: ["thinking", "writing"]     # free-form — add any tags you want
 status: published          # or: draft (drafts are hidden from lists)
@@ -531,18 +531,18 @@ After the pipeline adds the signup form, replace the placeholder:
 ### `npm run dev` shows a blank page, 500 error, or "Expected } but found :"
 
 **Cause**: Most likely an `@astrojs/react` version mismatch. Major versions of
-`@astrojs/react` track Astro major versions — `@astrojs/react@5` targets Astro 5
-and is incompatible with Astro 4. npm v7+ auto-installs the latest version
-(currently v5) unless explicitly pinned, so a fresh `npm install` can pull in
-the wrong version without any warning.
+`@astrojs/react` must match the Astro major version. npm v7+ auto-installs the
+latest release unless explicitly pinned, so a fresh `npm install` can pull in
+a mismatched version without any warning.
 
-**Fix A** — Check the installed version and downgrade if needed:
+**Fix A** — Check the installed versions and re-pin if they diverge:
 ```bash
-npm list @astrojs/react
-# should show 4.x.x — if it shows 5.x, downgrade:
-npm install @astrojs/react@^4
+npm list @astrojs/react   # note the major version
+npm list astro             # verify the Astro major version matches
+# if the majors differ, re-pin to match (replace N with the Astro major):
+npm install @astrojs/react@^N
 ```
-Restart the dev server after downgrading.
+Restart the dev server after re-pinning.
 
 **Fix B** — Use the build-based preview (always works, search included):
 ```bash
@@ -559,13 +559,14 @@ npm run dev:build
 
 ### Vercel build warns about Node.js version or deploy fails with runtime error
 
-**Cause**: Vercel defaults to Node 20, but `@astrojs/react` (used by Keystatic) requires Node ≥22.
+**Cause**: Vercel may use an older Node.js version by default than what the installed packages require.
 
 **Fix**:
-1. In your Vercel project → **Settings** → **General** → **Node.js Version**, select **22.x** and click **Save**.
-2. Trigger a redeploy (**Deployments** → `...` → **Redeploy**).
+1. Check the `"engines"` field in `package.json` to see the minimum Node.js version required (set by the pipeline at Step 0).
+2. In your Vercel project → **Settings** → **General** → **Node.js Version**, select a version that meets the `engines` requirement and click **Save**.
+3. Trigger a redeploy (**Deployments** → `...` → **Redeploy**).
 
-> The pipeline sets `"engines": { "node": ">=22" }` in `package.json` automatically (Step 0), but Vercel's dashboard setting takes precedence and must be updated manually.
+> The `"engines"` field is set automatically by the pipeline (Step 0) based on the active LTS at build time, but Vercel's dashboard setting takes precedence and must be updated manually.
 
 ### Port 4321 is already in use
 
@@ -601,21 +602,21 @@ Check:
 
 ### Long-term compatibility
 
-The blog is designed to be stable over time. Once deployed, the static HTML output runs forever — only the build tooling ages. Here is the current status of each dependency (updated June 2026):
+The blog is designed to be stable over time. Once deployed, the static HTML output runs forever — only the build tooling ages.
 
 | Dependency | Risk | Notes |
 |---|---|---|
-| **Astro 4** | Medium | Astro 4 is now legacy — the current version is Astro 6. The blog works with Astro 4 and pinned dependencies. If you need to upgrade, see the migration note below. |
+| **Astro** | Medium | Astro introduces breaking changes between major versions. The pipeline detects the current major at build time and adapts. To upgrade to a newer major, run `npx @astrojs/upgrade` and follow the official migration guide. |
 | **Vercel static hosting** | Very low | Static files have no runtime — no serverless functions to break unless you use Keystatic. |
 | **Fonts (@fontsource)** | Very low | Self-hosted in your `node_modules` — no external CDN. Fonts load even if fontsource.org goes down. |
-| **Tailwind CSS / @astrojs/tailwind** | Medium | `@astrojs/tailwind` is deprecated in Astro 5+. With pinned Astro 4 it works fine. Future migration to Astro 5+ requires switching to `@tailwindcss/vite` plugin. |
-| **Keystatic CMS** | High | Maintenance has slowed significantly in 2026. Works with Astro 5 but NOT with Astro 6. If Keystatic causes problems, the blog works perfectly without it — articles can always be written as `.mdx` files directly. |
-| **Pagefind (search)** | Very low | Build-time only, actively maintained (v1.5.2 as of April 2026). No runtime dependency. |
-| **Node.js** | Low | The pipeline detects the current active LTS at build time and sets `"engines": { "node": ">=<LTS>" }` accordingly. Always use the active LTS — avoid end-of-life versions as they no longer receive security patches. |
+| **Tailwind CSS** | Low | The Tailwind integration method may change between Astro major versions (e.g. integration plugin vs. Vite plugin). Check the Astro docs for the recommended approach when upgrading. |
+| **Keystatic CMS** | Medium | Keystatic maintains its own compatibility with Astro. Before upgrading Astro, check the Keystatic changelog. If Keystatic causes problems, the blog works perfectly without it — articles can always be written as `.mdx` files directly. |
+| **Pagefind (search)** | Very low | Build-time only, actively maintained. No runtime dependency. |
+| **Node.js** | Low | The pipeline detects the current active LTS at build time and sets `"engines"` in `package.json` accordingly. Always use the active LTS — avoid end-of-life versions as they no longer receive security patches. |
 
 **If a future `npm run build` fails** after a dependency update, the fastest fix is to pin the previously working versions in `package.json` and re-run the build. The pipeline prompts instruct Claude to search for current best practices at execution time, so re-running a prompt step will always produce code compatible with the then-current package versions.
 
-**Future migration to Astro 5+**: When you're ready to upgrade, the key changes are: (1) Content Collections must use the Content Layer API with `glob()` loader, (2) `src/content/config.ts` moves to `src/content.config.ts`, (3) `entry.slug` becomes `entry.id` and `entry.render()` becomes `render(entry)`, (4) `@astrojs/tailwind` is replaced by `@tailwindcss/vite` plugin, (5) `output: 'hybrid'` is replaced by `output: 'static'` with `export const prerender = false` on server-rendered routes. Run `npx @astrojs/upgrade` for guided migration.
+**Migrating to a new Astro major version**: Run `npx @astrojs/upgrade` for automated, guided migration. Check the [Astro upgrade guides](https://docs.astro.build/en/guides/upgrade-to/) for version-specific manual steps. Common changes between majors include updates to the Content Collections API, the Tailwind integration method, and hybrid/static output configuration.
 
 ### A pipeline step fails
 

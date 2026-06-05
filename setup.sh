@@ -321,12 +321,19 @@ if [ ${#OPTIONAL_STEPS[@]} -gt 0 ]; then
 else
   STEP_NOTE="runs all $BASE_STEPS steps, 0–$(( BASE_STEPS - 1 ))"
 fi
-echo -e "  1. Generate the blog:"
+echo -e "  1. Run the ecosystem discovery (optional but recommended):"
+echo -e "       Open Claude Code in this folder, then send the contents of:"
+echo -e "       ${W}prompt_blog_pre_discovery.txt${N}"
+echo -e "       Claude searches for the best current tools, shows them to you,"
+echo -e "       and writes your choices to CHOSEN_TOOLS.md."
+echo -e "       Every subsequent build step will pick them up automatically."
+echo ""
+echo -e "  2. Generate the blog:"
 echo -e "       ${W}./run.sh${N}        ($STEP_NOTE)"
 echo -e "       ${W}./run.sh -p${N}     (pauses after each step)"
 echo ""
 if [ -n "$GITHUB_REMOTE" ]; then
-echo -e "  2. After the pipeline finishes, push to GitHub:"
+echo -e "  3. After the pipeline finishes, push to GitHub:"
 echo -e "       ${W}git push -u origin HEAD${N}"
 echo ""
 fi

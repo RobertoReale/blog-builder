@@ -1,6 +1,6 @@
 # Blog — Claude Code Context
 
-This is a personal blog built with Astro 4 + Tailwind CSS + MDX + TypeScript.
+This is a personal blog built with Astro + Tailwind CSS + MDX + TypeScript.
 Deploy target: Vercel (static). Open source on GitHub.
 
 Read this file before doing anything. It contains rules and conventions
@@ -10,7 +10,7 @@ that must be respected in every session, regardless of what task you're doing.
 
 ## STACK
 
-- Astro 4, output: 'static'
+- Astro, output: 'static'
 - @astrojs/tailwind
 - @astrojs/mdx
 - TypeScript (strict mode — no `any` types)
@@ -195,7 +195,7 @@ sits outside this flow.
 getReadingTime(content: string): string  // Math.ceil(words / 200) + " min read"
 
 // formatDate.ts
-formatDate(date: Date): string  // "June 3, 2025" format — uses timeZone: 'UTC'
+formatDate(date: Date): string  // "Month D, YYYY" format — e.g. "January 15, 2026" — uses timeZone: 'UTC'
 // (frontmatter dates parse as UTC midnight; UTC formatting keeps the displayed
 //  day identical to the frontmatter day in every timezone)
 
@@ -239,6 +239,19 @@ Provider: none
 
 ---
 
+## CHOSEN INTEGRATIONS
+
+See CHOSEN_TOOLS.md in the project root.
+Written by the discovery step (prompt_blog_pre_discovery.txt).
+Contains the npm packages, Claude Code skills, and MCP servers the user
+has opted into for this project.
+
+RULE: Read CHOSEN_TOOLS.md at the start of every task. Use listed integrations
+wherever they apply. Invoke listed skills at the triggers documented in that file.
+If CHOSEN_TOOLS.md does not exist, the discovery step has not been run yet.
+
+---
+
 ## FIXED RULES — always apply, every session
 
 1. No `any` types — TypeScript strict mode
@@ -249,6 +262,8 @@ Provider: none
 6. No new features beyond what is requested in the current task
 7. No auth — ever (incompatible with static output). Analytics, comments, and newsletter: only if their respective ANALYTICS / COMMENTS / NEWSLETTER section has Provider ≠ 'none'.
 8. `npm run build` must succeed before the task is considered done
+9. Read CHOSEN_TOOLS.md before every task. Use chosen integrations and invoke
+   chosen skills at the triggers documented there.
 
 ---
 

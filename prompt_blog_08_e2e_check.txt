@@ -35,13 +35,15 @@ or `Expected "}" but found ":"` in the console), the most common cause is
 an `@astrojs/react` version mismatch.
 
 **Check first:** run `npm list @astrojs/react` and verify the installed version
-is compatible with Astro 4 (major versions of `@astrojs/react` track Astro
-major versions — v5+ targets Astro 5 and breaks Astro 4). If a wrong version
-is installed, downgrade:
+is compatible with the installed Astro major version (major versions of
+`@astrojs/react` track Astro major versions — the major must match). If a wrong
+version is installed, fix it:
 
 ```bash
-npm install @astrojs/react@^4
+npm install @astrojs/react@^<ASTRO_MAJOR>
 ```
+
+Replace `<ASTRO_MAJOR>` with the Astro major version currently in package.json.
 
 After fixing the React version, re-run `npm run dev` and confirm pages render.
 Then re-run `npm run test:e2e`.
@@ -82,5 +84,5 @@ Also ensure `package.json` has the `dev:build` script for users:
 - [ ] `npm run build` passes with zero errors
 - [ ] `npm run test:unit` passes
 - [ ] `npm run test:e2e` passes all tests
-- [ ] `@astrojs/react` is at a version compatible with Astro 4 (if Keystatic was installed)
+- [ ] `@astrojs/react` is at a version compatible with the installed Astro major version (if Keystatic was installed)
 - [ ] `dev:build` script exists in `package.json` (if Keystatic was installed)

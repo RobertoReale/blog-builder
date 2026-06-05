@@ -89,6 +89,14 @@ if [ ! -f "CLAUDE.md" ]; then
   exit 1
 fi
 
+if [ ! -f "CHOSEN_TOOLS.md" ] && [ "$START_STEP" -eq 0 ]; then
+  echo ""
+  echo -e "\033[1;30m  Tip: CHOSEN_TOOLS.md not found — ecosystem discovery has not been run.\033[0m"
+  echo -e "\033[1;30m  Open Claude Code and send prompt_blog_pre_discovery.txt to enable optional\033[0m"
+  echo -e "\033[1;30m  integrations (syntax highlighting, PWA, OG images, etc.).\033[0m"
+  echo -e "\033[1;30m  Continuing without it is fine — all core features still work.\033[0m"
+fi
+
 mkdir -p logs
 
 # --- Verification gate (anti-drift mechanism) ---

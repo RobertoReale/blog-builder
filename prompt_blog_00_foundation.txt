@@ -3,10 +3,10 @@ This is the FOUNDATION build — focus on correctness and completeness.
 Do not add anything beyond what is specified here. No extra features.
 
 CRITICAL INSTRUCTION: Before you begin writing code, use your web search tools to:
-1. Find the current latest stable release of Astro 4.x and use that exact version (not the floor version in this prompt).
+1. Find the current latest stable release of Astro and note the major version number. Use that exact version throughout — do not downgrade or pin to an older major.
 2. Check for any breaking changes in @astrojs/tailwind and @astrojs/mdx since their latest releases.
 3. Verify the current @fontsource API for `lora` and `dm-sans` (confirm package names and import paths).
-4. Check for any known Astro 4 + Tailwind + MDX incompatibilities at the current versions.
+4. Check for any known incompatibilities between the current Astro major version, Tailwind, and MDX. If the major version is newer than 4 (when this prompt was written), look for any API differences (content collections, image handling, config format) and adapt the code patterns below accordingly.
 5. Find the current Node.js LTS version (active, not end-of-life) — use that as the minimum in the `engines` field instead of the placeholder below.
 6. Verify that the core packages listed below (@astrojs/tailwind, @astrojs/mdx, @fontsource/*) are still the recommended choices for their roles — if a clearly better alternative has emerged, add a `<!-- ALTERNATIVE: <name> — <reason> -->` comment in the relevant config file, but implement what is specified here.
 If you encounter a bug you cannot resolve by reading the code, search online for known issues and solutions before giving up.
@@ -21,13 +21,15 @@ A fully working blog where:
 - `npm run dev` and `npm run build` both succeed
 
 ## STACK
-- Astro 4 — create the project with this exact command (non-interactive, required for headless execution):
+- Astro — create the project using the major version found in CRITICAL INSTRUCTION step 1.
+  Command (non-interactive, required for headless execution):
   ```
-  npm create astro@4 . -- --yes --template minimal --typescript strict --no-git --no-install
+  npm create astro@[MAJOR] . -- --yes --template minimal --typescript strict --no-git --no-install
   ```
-  This runs in the current directory (`.`) without prompts. After the scaffold completes,
-  verify that the installed Astro version is 4.x (the web search in the critical instruction
-  above will tell you the latest stable 4.x release — use that). Do NOT upgrade to Astro 5.
+  Replace [MAJOR] with the current stable major version number you found (e.g. 5, 6, or later).
+  This runs in the current directory (`.`) without prompts. After scaffolding, verify the
+  installed version matches. If the major version differs from 4 (when this prompt was written),
+  use your CRITICAL INSTRUCTION item 4 findings to adapt any changed APIs before writing code.
   IMPORTANT: You MUST add `"engines": { "node": ">=<LTS>" }` to `package.json` to ensure
   Vercel uses a supported Node.js version. Replace `<LTS>` with the current active LTS
   version you found in CRITICAL INSTRUCTION item 5 (e.g. `>=22` if 22.x is current LTS).
@@ -268,7 +270,7 @@ export function getReadingTime(content: string): string {
 ```
 
 ### src/utils/formatDate.ts
-Format: "June 3, 2025" (no weekday, no time)
+Format: "Month D, YYYY" (no weekday, no time) — e.g. "January 15, 2026"
 ```ts
 export function formatDate(date: Date): string {
   return date.toLocaleDateString('en-US', {
@@ -277,10 +279,10 @@ export function formatDate(date: Date): string {
 }
 ```
 IMPORTANT — timeZone: 'UTC' is required, not optional. YAML frontmatter dates
-(e.g. `date: 2025-06-03`) are parsed by Astro as UTC midnight. Without
+(e.g. `date: YYYY-MM-DD`) are parsed by Astro as UTC midnight. Without
 timeZone: 'UTC', toLocaleDateString uses the build/server local timezone, so
-in any negative-offset timezone (e.g. the US) an article dated 2025-06-03
-would render as "June 2, 2025". Forcing UTC makes the displayed day match the
+in any negative-offset timezone (e.g. the US) the displayed day can fall one
+day behind the frontmatter date. Forcing UTC makes the displayed day match the
 frontmatter day everywhere, and makes the unit tests deterministic across CI
 machines regardless of their TZ.
 

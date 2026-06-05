@@ -4,7 +4,8 @@ This folder contains everything needed to generate the blog:
 
 - `CLAUDE.md` — the project rules, read by Claude Code at every step
 - `prompt_blog_*.txt` — the 10 prompts, in order (steps 0–9)
-- `run.sh` / `run.ps1` — the pipeline scripts (Linux/macOS and Windows)
+- `run.js` — the pipeline script (cross-platform, recommended)
+- `run.sh` / `run.ps1` — platform-specific alternatives (Linux/macOS and Windows)
 - `SETUP.md` — this guide
 
 Core idea: **each prompt runs in a separate Claude Code session**, so the context window never fills up. After each step, the script independently verifies that `npm run build` (and unit tests) pass, commits a git checkpoint, then **stops at the first failure** — it never builds on top of a broken state.
@@ -83,28 +84,33 @@ Allow script execution (Windows only, once per terminal session):
 
 Preview which steps would run without executing anything:
 
-    Linux/macOS:  ./run.sh -d
-    Windows:      .\run.ps1 -DryRun
+    Cross-platform:  node run.js --dry-run
+    Linux/macOS:     ./run.sh -d
+    Windows:         .\run.ps1 -DryRun
 
 Normal execution (stops automatically at the first error):
 
-    Linux/macOS:  ./run.sh
-    Windows:      .\run.ps1
+    Cross-platform:  node run.js
+    Linux/macOS:     ./run.sh
+    Windows:         .\run.ps1
 
 Pause after every step to inspect the output before continuing:
 
-    Linux/macOS:  ./run.sh -p
-    Windows:      .\run.ps1 -Pause
+    Cross-platform:  node run.js --pause
+    Linux/macOS:     ./run.sh -p
+    Windows:         .\run.ps1 -Pause
 
 Resume from step N after fixing an error:
 
-    Linux/macOS:  ./run.sh -s 3
-    Windows:      .\run.ps1 -StartStep 3
+    Cross-platform:  node run.js --start-step 3
+    Linux/macOS:     ./run.sh -s 3
+    Windows:         .\run.ps1 -StartStep 3
 
 Run only a subset of steps (useful for testing a single feature in isolation):
 
-    Linux/macOS:  ./run.sh -s 3 -e 5
-    Windows:      .\run.ps1 -StartStep 3 -EndStep 5
+    Cross-platform:  node run.js --start-step 3 --end-step 5
+    Linux/macOS:     ./run.sh -s 3 -e 5
+    Windows:         .\run.ps1 -StartStep 3 -EndStep 5
 
 Logs for each step are saved to `logs/step_N.json` (output + call cost).
 
@@ -124,8 +130,12 @@ The script **does not proceed** if the build breaks. When it stops:
 
 4. Resume the pipeline from the failed step:
 
-       Linux/macOS:  ./run.sh -s N
-       Windows:      .\run.ps1 -StartStep N
+       Cross-platform:  node run.js --start-step N
+       Linux/macOS:     ./run.sh -s N
+       Windows:         .\run.ps1 -StartStep N
+
+> **Note**: `run.js` includes automatic self-healing — when a build fails, it
+> asks Claude to fix the errors and retries up to 2 times before stopping.
 
 **Terminal vs VS Code extension**: same engine. Launch the pipeline from the terminal; use the VS Code extension for the manual fix in step 2.
 
@@ -200,6 +210,7 @@ See the [Troubleshooting section in README.md](README.md#11-troubleshooting) for
   Optionally also exclude the builder infrastructure if you don't want it in the published repo:
 
       SETUP.md
+      run.js
       run.sh
       run.ps1
       prompt_blog_*.txt

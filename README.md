@@ -24,6 +24,7 @@ browse the source or visit the [live site](https://blog-roberto-reale.vercel.app
 11. [Troubleshooting](#11-troubleshooting)
 12. [How the Pipeline Works](#12-how-the-pipeline-works)
 13. [What Could This Blog Do Better?](#13-what-could-this-blog-do-better-optional)
+14. [Pipeline Roadmap](#14-pipeline-roadmap)
 
 ---
 
@@ -37,9 +38,10 @@ Follow **[SETUP.md](SETUP.md)** for the full build instructions. Quick overview:
 2. Run the interactive setup (configures colors, fonts, site title):
    - Windows: `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` then `.\setup.ps1`
    - Linux/macOS: `chmod +x setup.sh run.sh && ./setup.sh`
-3. Run the pipeline:
-   - Windows: `.\run.ps1`
-   - Linux/macOS: `./run.sh`
+3. Run the pipeline (use whichever you prefer):
+   - Cross-platform (Node.js, recommended): `node run.js`
+   - Windows (PowerShell): `.\run.ps1`
+   - Linux/macOS (bash): `./run.sh`
 4. Follow the instructions printed at the end.
 
 ---
@@ -384,7 +386,7 @@ If you chose "None" during setup, skip this section.
 
 > **Changing your choice after setup**: Edit `CLAUDE.md`, find the `ANALYTICS` section,
 > and change the `Provider:` line to `umami`, `cloudflare`, `vercel`, or `none`.
-> Then run: `.\run.ps1 -StartStep 10` (Windows) or `./run.sh -s 10` (Linux/macOS).
+> Then run: `node run.js --start-step 10` (or `.\run.ps1 -StartStep 10` on Windows / `./run.sh -s 10` on macOS).
 
 ### Choosing a provider
 
@@ -456,8 +458,8 @@ Configured during setup (`setup.ps1` / `setup.sh`). If you chose "None", skip th
 
 > **Changing your choice after setup**: Edit `CLAUDE.md`, find the `COMMENTS` section,
 > and change the `Provider:` line to `giscus`, `utterances`, or `none`.
-> Then run: `.\run.ps1 -StartStep 11` (Windows) or `./run.sh -s 11` (Linux/macOS).
-> Note: if analytics was not configured, comments will be step 10, not 11 — check `.\run.ps1 -DryRun`.
+> Then run: `node run.js --dry-run` to confirm the step number, then `node run.js --start-step N`
+> (or `.\run.ps1 -DryRun` / `.\run.ps1 -StartStep N` on Windows).
 
 ### Choosing a provider
 
@@ -503,7 +505,8 @@ Configured during setup. If you chose "None", skip this section.
 
 > **Changing your choice after setup**: Edit `CLAUDE.md`, find the `NEWSLETTER` section,
 > and change the `Provider:` line to `buttondown`, `substack`, `kit`, or `none`.
-> Then run the appropriate step number (check `.\run.ps1 -DryRun` to confirm).
+> Then run `node run.js --dry-run` to confirm the step number, then `node run.js --start-step N`
+> (or `.\run.ps1 -DryRun` / `.\run.ps1 -StartStep N` on Windows).
 
 ### Choosing a provider
 
@@ -635,10 +638,17 @@ The blog is designed to be stable over time. Once deployed, the static HTML outp
 
 ### A pipeline step fails
 
-The script stops and tells you which step failed. To fix:
+If you are using `run.js`, it will first try to **fix the error automatically** (self-healing) before stopping — up to 2 attempts by default. If the self-healing succeeds, the pipeline continues on its own.
+
+If it still fails (or you are using `run.ps1` / `run.sh`), the script stops and prints which step failed. To fix manually:
 1. Open the folder in VS Code: `code .`
 2. Run `claude` (interactive mode) and describe the error.
-3. Once `npm run build` passes manually, resume: `.\run.ps1 -StartStep N`
+3. Once `npm run build` passes manually, resume:
+   ```
+   node run.js --start-step N      # cross-platform
+   .\run.ps1 -StartStep N          # Windows
+   ./run.sh -s N                   # macOS/Linux
+   ```
 
 To roll back to the previous working state:
 ```bash
@@ -706,7 +716,7 @@ Tokens this step: 52,410 in / 4,830 out   |   Total so far: 148,200 in / 13,500 
 ```
 
 - **Claude Max plan**: fits comfortably within typical monthly usage.
-- **Claude Pro plan**: limits may be hit mid-pipeline. Press CTRL+C, wait for the limit to reset, then resume: `.\run.ps1 -StartStep N`
+- **Claude Pro plan**: limits may be hit mid-pipeline. Press CTRL+C, wait for the limit to reset, then resume: `node run.js --start-step N` (or `.\run.ps1 -StartStep N` on Windows)
 
 ### Project structure (CLAUDE.md rules)
 
@@ -747,6 +757,50 @@ Claude will:
 This prompt produces a report only — it makes no changes to your code.
 Use the findings as a backlog: pick one item, write a focused prompt for it
 (in the style of the existing pipeline prompts), and run it as a new step.
+
+---
+
+## 14. Pipeline Roadmap
+
+These improvements are planned for future versions of `run.js`. They are not part of the current release — this section documents them so they can be picked up and implemented.
+
+### Prompt caching + multi-provider (via Aider)
+
+[Aider](https://aider.chat) is an open-source CLI tool that works similarly to Claude Code but natively supports prompt caching and multiple AI providers (Claude, GPT-4o, Google Gemini, and others).
+
+**The change**: swap `claude -p` in `run.js` for `aider --message-file`. No pipeline logic changes needed.
+
+**Benefits**: CLAUDE.md is cached across calls, reducing the re-reading cost by ~40–60% on a full pipeline run; switch between AI providers by changing one flag.
+
+**Status**: planned — requires adapting the prompts to Aider's instruction format.
+
+---
+
+### Provider agnosticism (direct API calls, `.env` file)
+
+Call AI APIs directly from `run.js` using the [Vercel AI SDK](https://sdk.vercel.ai) or individual provider SDKs (`@anthropic-ai/sdk`, `openai`, `@google/genai`). A `.env` file at the project root would let you choose your model:
+
+```
+AI_PROVIDER=anthropic   # or: openai, google
+AI_MODEL=claude-sonnet-4-6
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+No dependency on any external CLI. Full control over prompt caching configuration. Users supply their own API key and pay only for what they use.
+
+**Status**: planned — requires implementing file-editing tools in Node.js (today `claude -p` provides these for free).
+
+---
+
+### Local models — Ollama (free, offline, private)
+
+[Ollama](https://ollama.com) runs open-source models (Llama 3, Qwen, Mistral, and others) on your local machine and exposes an OpenAI-compatible API on `localhost:11434`. Once provider agnosticism is implemented, adding Ollama support would take minimal extra code.
+
+**Benefits**: no API key, no cost, no data sent to the cloud, works offline.
+
+**Tradeoffs**: requires powerful hardware (8 GB RAM for small models; 32 GB+ for quality comparable to cloud models); local models are slower; complex multi-file edits may require a larger model to succeed reliably.
+
+**Status**: planned — depends on the provider agnosticism work above.
 
 ---
 

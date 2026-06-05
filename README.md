@@ -36,6 +36,7 @@ Follow **[SETUP.md](SETUP.md)** for the full build instructions. Quick overview:
 
 1. Install the current **Node.js LTS** release (or newer), **Git**, and **Claude Code**.
 2. Run the interactive setup (configures colors, fonts, site title):
+   - Cross-platform (recommended): `node setup.js`
    - Windows: `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` then `.\setup.ps1`
    - Linux/macOS: `chmod +x setup.sh run.sh && ./setup.sh`
 3. Run the pipeline (use whichever you prefer):
@@ -283,7 +284,7 @@ When Vercel first deploys your project it assigns an auto-generated URL like `bl
 
 **Custom domain** (e.g. `www.yourname.com`): on the same Domains page, click **Add**. Vercel handles SSL automatically.
 
-> **Pro tip — know your URL before running the pipeline**: import the repo into Vercel first (Vercel deploys even an empty/broken project and shows the assigned URL immediately), rename the domain in Settings, then enter that URL in `setup.ps1` / `setup.sh`. That way `src/config.ts` is correct from step 0.
+> **Pro tip — know your URL before running the pipeline**: import the repo into Vercel first (Vercel deploys even an empty/broken project and shows the assigned URL immediately), rename the domain in Settings, then enter that URL when running `node setup.js` (or `setup.ps1` / `setup.sh`). That way `src/config.ts` is correct from step 0.
 
 ---
 
@@ -380,7 +381,7 @@ To use keyboard shortcut: press **`/`** anywhere on the blog (not while typing i
 
 ## 8. Analytics (Optional)
 
-Analytics is configured during setup (`setup.ps1` / `setup.sh`). If you chose a
+Analytics is configured during setup (`node setup.js`, `setup.ps1`, or `setup.sh`). If you chose a
 provider, the pipeline automatically runs Step 10 to add the tracking script.
 If you chose "None" during setup, skip this section.
 
@@ -454,7 +455,7 @@ Dashboard: Vercel project → **Analytics** tab
 ## 9. Comments (Optional)
 
 A comments section lets readers respond directly to your articles using their GitHub account.
-Configured during setup (`setup.ps1` / `setup.sh`). If you chose "None", skip this section.
+Configured during setup (`node setup.js`, `setup.ps1`, or `setup.sh`). If you chose "None", skip this section.
 
 > **Changing your choice after setup**: Edit `CLAUDE.md`, find the `COMMENTS` section,
 > and change the `Provider:` line to `giscus`, `utterances`, or `none`.

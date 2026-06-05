@@ -43,7 +43,7 @@ Core idea: **each prompt runs in a separate Claude Code session**, so the contex
 
    If `claude` is not recognized, it's a PATH issue — close and reopen the terminal.
 
-5. **Login** (authenticates automated runs too). Run once interactively:
+4. **Login** (authenticates automated runs too). Run once interactively:
 
        claude
 
@@ -59,7 +59,7 @@ Core idea: **each prompt runs in a separate Claude Code session**, so the contex
 Run the interactive setup script — it fills in `CLAUDE.md` for you:
 
     Cross-platform:  node setup.js                              (recommended — Node.js only, no Python)
-    Linux/macOS:     chmod +x setup.sh run.sh && ./setup.sh    (alternative)
+    Linux/macOS:     chmod +x setup.sh run.sh && ./setup.sh    (alternative — requires Python 3)
     Windows:         .\setup.ps1                               (alternative)
 
 The script asks for:

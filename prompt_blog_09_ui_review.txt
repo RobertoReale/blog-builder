@@ -7,6 +7,19 @@ Your goal: audit every page and component for visual consistency,
 accessibility, and UX polish. Fix every issue you find.
 Do not add new features — only fix what is already there.
 
+SCALABILITY REQUIREMENT: The design must look and work correctly even if the
+blog grows to hundreds of articles and dozens of tags. Verify that:
+- Article listing pages paginate cleanly and never show an unmanageable wall of cards
+- Tag filter pills do not break the layout when there are many tags (they must
+  scroll or wrap without causing page-level overflow)
+- Article cards handle long titles, many tags, and long descriptions without
+  breaking alignment or overflowing their container
+- Tag pages and series pages render correctly regardless of how many articles
+  they contain
+The blog must be fully usable on mobile at every scale — a reader on a phone
+with hundreds of articles available must have the same quality experience as
+a reader on desktop with only a handful.
+
 CRITICAL INSTRUCTION: Before fixing anything, use your web search tools to
 look up current Astro accessibility patterns, WCAG 2.1 AA requirements for
 personal blogs, and any known dark-mode or CSS variable pitfalls in the current Astro version.

@@ -11,8 +11,9 @@
  *   node run.js --dry-run                    # preview steps without executing
  *   node run.js --max-retries 3              # self-healing retries on build failure (default: 2)
  *   node run.js --max-retries 0              # disable self-healing
+ *   node run.js --help                       # show all options
  *
- * Short flags: -s, -e, -p, -d, -r
+ * Short flags: -s, -e, -p, -d, -r, -h
  */
 
 'use strict'
@@ -42,6 +43,30 @@ let maxRetries = 2
 
 for (let i = 0; i < argv.length; i++) {
   const a = argv[i]
+  if (a === '--help' || a === '-h') {
+    console.log(`
+Blog Builder Pipeline — cross-platform orchestrator with self-healing.
+
+Usage:  node run.js [options]
+
+Options:
+  -s, --start-step N    Resume from step N (default: 0)
+  -e, --end-step N      Stop after step N
+  -p, --pause           Pause after each step for inspection
+  -d, --dry-run         Preview which steps would run, without executing
+  -r, --max-retries N   Self-healing retries on build failure (default: 2, 0 to disable)
+  -h, --help            Show this help message
+
+Examples:
+  node run.js                           Run all steps
+  node run.js --start-step 3            Resume from step 3
+  node run.js -s 3 -e 5                 Run only steps 3, 4, and 5
+  node run.js --pause                   Pause after each step
+  node run.js --dry-run                 Preview steps without executing
+  node run.js --max-retries 0           Disable self-healing
+`)
+    process.exit(0)
+  }
   if ((a === '--start-step'  || a === '-s') && argv[i + 1] !== undefined) startStep  = parseInt(argv[++i], 10)
   else if ((a === '--end-step'     || a === '-e') && argv[i + 1] !== undefined) endStep    = parseInt(argv[++i], 10)
   else if (a === '--pause'         || a === '-p') pause      = true
@@ -125,6 +150,14 @@ if (!fs.existsSync('CHOSEN_TOOLS.md') && startStep === 0) {
   console.log(c.gray('  Open Claude Code and send prompt_blog_pre_discovery.txt to enable optional'))
   console.log(c.gray('  integrations (syntax highlighting, PWA, OG images, etc.).'))
   console.log(c.gray('  Continuing without it is fine — all core features still work.'))
+}
+
+// Warn if setup was not run (CLAUDE.md still has placeholder values)
+if (startStep === 0 && !/Site values \(use these when creating/.test(claudeMd)) {
+  console.log('')
+  console.log(c.yellow('  Warning: CLAUDE.md does not contain "Site values" — setup may not have been run.'))
+  console.log(c.yellow('  Run setup first:  .\\setup.ps1 (Windows)  or  ./setup.sh (Linux/macOS)'))
+  console.log(c.yellow('  Without setup, the blog will be generated with generic placeholder values.'))
 }
 
 fs.mkdirSync('logs', { recursive: true })
@@ -286,6 +319,7 @@ console.log('')
 
     const promptContent = fs.readFileSync(file, 'utf8')
     const pkgBefore     = fs.existsSync('package.json') ? fs.readFileSync('package.json', 'utf8') : null
+    const stepStartTime = Date.now()
     const logFile       = path.join('logs', `step_${i}.json`)
 
     // Run Claude for this step
@@ -360,7 +394,11 @@ console.log('')
     console.log('')
     console.log(c.green(`  STEP ${i} OK — build (and unit tests) passed.`))
 
-    // Token counter
+    // Token counter + elapsed time
+    const elapsedMs = Date.now() - stepStartTime
+    const elapsedMin = Math.floor(elapsedMs / 60000)
+    const elapsedSec = Math.floor((elapsedMs % 60000) / 1000)
+    const elapsedStr = elapsedMin > 0 ? `${elapsedMin}m ${elapsedSec}s` : `${elapsedSec}s`
     const usage = getStepUsage(logFile)
     if (usage) {
       totalInput  += usage.input
@@ -368,8 +406,11 @@ console.log('')
       const fmt = n => n.toLocaleString('en-US')
       console.log(c.gray(
         `  Tokens this step: ${fmt(usage.input)} in / ${fmt(usage.output)} out` +
-        `   |   Total so far: ${fmt(totalInput)} in / ${fmt(totalOutput)} out`
+        `   |   Total so far: ${fmt(totalInput)} in / ${fmt(totalOutput)} out` +
+        `   |   Time: ${elapsedStr}`
       ))
+    } else {
+      console.log(c.gray(`  Time: ${elapsedStr}`))
     }
 
     // Final step: print completion message

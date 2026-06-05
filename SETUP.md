@@ -3,7 +3,7 @@
 This folder contains everything needed to generate the blog:
 
 - `CLAUDE.md` — the project rules, read by Claude Code at every step
-- `prompt_blog_*.txt` — the 10 prompts, in order (steps 0–9)
+- `prompt_blog_*.txt` — the build prompts (steps 0–9 core, 10–12 optional, 13 manual)
 - `run.js` — the pipeline script (cross-platform, recommended)
 - `run.sh` / `run.ps1` — platform-specific alternatives (Linux/macOS and Windows)
 - `SETUP.md` — this guide

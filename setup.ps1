@@ -319,7 +319,8 @@ Write-Host "       and writes your choices to CHOSEN_TOOLS.md." -ForegroundColor
 Write-Host "       Every subsequent build step will pick them up automatically." -ForegroundColor DarkGray
 Write-Host ""
 Write-Host "  2. Generate the blog:"
-Write-Host "       .\run.ps1        ($stepNote)" -ForegroundColor White
+Write-Host "       node run.js      (cross-platform, recommended - $stepNote)" -ForegroundColor White
+Write-Host "       .\run.ps1        (Windows alternative)" -ForegroundColor White
 Write-Host "       .\run.ps1 -Pause (pauses after each step)" -ForegroundColor White
 Write-Host ""
 if ($githubRemote) {

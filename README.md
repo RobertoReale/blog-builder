@@ -710,9 +710,9 @@ After every successful step, a git commit is created as a rollback point.
 
 ### Token usage
 
-The pipeline prints a running token counter after each step:
+The pipeline prints a running token counter and elapsed time after each step:
 ```
-Tokens this step: 52,410 in / 4,830 out   |   Total so far: 148,200 in / 13,500 out
+Tokens this step: 52,410 in / 4,830 out   |   Total so far: 148,200 in / 13,500 out   |   Time: 3m 42s
 ```
 
 - **Claude Max plan**: fits comfortably within typical monthly usage.
@@ -728,8 +728,6 @@ All architectural decisions are documented in `CLAUDE.md`. Claude Code reads thi
 - Page render order
 
 Edit `CLAUDE.md` if you want to add new architectural rules or change defaults before running additional prompts.
-
----
 
 ---
 

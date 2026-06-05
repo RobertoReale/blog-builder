@@ -88,7 +88,7 @@ Create src/pages/404.astro.
 Design:
 - Use BaseLayout
 - Centered content (same max-width as rest of site)
-- Large "404" in Lora, muted color
+- Large "404" in the heading font (h1 inherits from global.css), muted color
 - Short message: "This page doesn't exist."
 - Link back to homepage: "← Back to home"
 - No other content, no suggestions, no search

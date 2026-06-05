@@ -290,7 +290,7 @@ machines regardless of their TZ.
 
 ### ArticleCard.astro
 Props: title, description, date, slug, tags, readingTime, series?, part?, language?: string
-- Title: Lora, links to /article/[slug]
+- Title: heading font, links to /article/[slug]
 - Description: DM Sans, muted
 - Bottom row: date (muted, small) + reading time (muted, small) + tag pills
 - If `language` is present and not 'en': show a small language badge at the end

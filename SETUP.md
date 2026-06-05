@@ -157,7 +157,7 @@ npm run dev:build
 ```
 
 If `npm run dev` shows blank pages or 500 errors after Step 7, use `npm run dev:build`.
-See the [Troubleshooting section in README.md](README.md#8-troubleshooting) for the cause and fix.
+See the [Troubleshooting section in README.md](README.md#11-troubleshooting) for the cause and fix.
 
 ### What you get
 

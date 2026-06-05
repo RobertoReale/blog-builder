@@ -54,7 +54,7 @@ Layout:
 - Use CSS grid: `grid-template-columns: repeat(auto-fill, minmax(180px, 1fr))`
 
 Each card (compact version of ArticleCard):
-- Title: Lora, links to /article/[slug], 16px, normal weight
+- Title: heading font, links to /article/[slug], 16px, normal weight
   Hover: underline only
 - Tags: small tag pills (same TagPill component, non-linking version)
 - Date + reading time: DM Sans, 13px, var(--color-muted)

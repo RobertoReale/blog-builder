@@ -135,9 +135,11 @@ Highlighted box for important notes or warnings:
   src="/images/my-photo.jpg"
   alt="A descriptive alt text"
   caption="This caption appears below the image."
-  size="full"   <!-- or: "half" for 50% width -->
+  size="full"
 />
 ```
+
+Use `size="half"` for a 50% wide image (centered). Use `size="full"` (default) for full content width.
 
 Place images in `public/images/` and reference them with `/images/filename.jpg`.
 
@@ -240,10 +242,23 @@ Edit `src/pages/about.astro` and `src/pages/now.astro` — they contain placehol
 
 ### Without Keystatic (Steps 0–6: fully static)
 
-1. Push your repository to GitHub.
+> **Accounts needed**: a free [GitHub](https://github.com) account and a free [Vercel](https://vercel.com) account.
+
+**If your blog is not on GitHub yet** (you skipped the GitHub step during setup):
+1. Create a new repository at [github.com/new](https://github.com/new) — leave it empty (no README, no .gitignore).
+2. In your project folder, run:
+   ```bash
+   git remote add origin https://github.com/your-username/your-repo.git
+   git push -u origin master
+   ```
+   Replace `your-username` and `your-repo` with your actual GitHub username and repository name.
+
+**Then deploy:**
+
+1. Push your repository to GitHub (done above if not already).
 2. Go to [vercel.com](https://vercel.com) → **Add New Project** → import your repo.
 3. Vercel auto-detects Astro. Leave all settings at default.
-4. Go to **Settings** → **General** → **Node.js Version** and set it to **22.x**. Click **Save**.
+4. Go to **Settings** → **General** → **Node.js Version**. Open `package.json` in your project folder, find the `"engines"` field (e.g. `"node": ">=22"`), and select the matching version in Vercel (e.g. **22.x**). Click **Save**.
 5. Click **Deploy** (or **Redeploy** if the first deploy already ran).
 
 Your blog is live. Every `git push` triggers an automatic redeploy.

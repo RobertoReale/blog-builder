@@ -67,7 +67,7 @@ Create src/pages/search.astro
 Layout: use BaseLayout, same max-width as rest of site.
 
 UI:
-- H1: "Search" (Lora)
+- H1: "Search" (heading font — inherited from global.css, same as all other h1s)
 - Search input: full width of content column, DM Sans, 18px,
   border: 1px solid var(--color-border), padding 12px 16px,
   no border-radius (or very subtle 4px), background var(--color-bg),
@@ -147,7 +147,7 @@ Use Pagefind's JS API (not the default UI widget) to keep full design control:
 ```
 
 Style .search-result to match ArticleCard (no border, just spacing,
-title in Lora linking to the article, description in muted DM Sans).
+title in the heading font linking to the article, description in muted DM Sans).
 
 ---
 

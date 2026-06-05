@@ -34,7 +34,7 @@ Props:
 UI design:
 - Label: "Series" + series name — DM Sans, small, var(--color-muted)
 - Subtitle: "Part {currentPart} of {totalParts}"
-  Lora, slightly larger than body, var(--color-text)
+  heading font (from global.css), slightly larger than body, var(--color-text)
 - List of all parts:
   - Each item: "Part N — Article title", links to /article/[slug]
   - Current part: var(--color-accent) color, no link (just text or cursor:default)
@@ -106,7 +106,7 @@ getStaticPaths:
 - Pass seriesName and seriesSlug as props
 
 Page:
-- H1: "{Series Name}" (Lora)
+- H1: "{Series Name}" (heading font — inherited from global.css)
 - Subtitle: "{N} articles" in muted DM Sans
 - List articles in this series sorted by part number ascending
 - Use ArticleCard component
@@ -115,11 +115,11 @@ Page:
 **4b. Series index page — src/pages/series/index.astro**
 
 Create a listing page for all series:
-- H1: "Series" (Lora)
+- H1: "Series" (heading font — inherited from global.css)
 - Subtitle: "Multi-part articles grouped by topic." (muted DM Sans)
 - For each series (sorted alphabetically by name), render a row:
   - `<a href="/series/[seriesSlug]">` wrapping the whole row
-  - Series name: Lora, 1.25rem, var(--color-text)
+  - Series name: heading font, 1.25rem, var(--color-text)
   - Article count: DM Sans, 14px, var(--color-muted), e.g. "3 articles"
   - Separator between rows: 1px solid var(--color-border)
   - Hover: series name underlines

@@ -71,6 +71,96 @@ Fix any typography or layout inconsistency found.
 
 ---
 
+### 2b. Prose Content Readability
+
+The `.prose` class wraps MDX article body content. Verify that
+`src/styles/global.css` contains **explicit** rules for every item below.
+"Explicit" means an actual CSS rule — not a comment, not a browser default,
+not a Tailwind utility. If any rule is missing or under-specified, add it.
+
+**Heading sizing — the single most common readability failure.**
+Without explicit sizes, h2/h3 in prose collapse to near-body-text size.
+Verify:
+- `.prose h2` has `font-size` at least 1.35rem, `font-weight: 700`, and
+  `margin-bottom` of at least 0.6rem so it reads as a section break.
+- `.prose h3` has `font-size` at least 1.05rem, `font-weight: 700`, and
+  `margin-top` of at least 1.5rem so sub-sections breathe.
+- The size gap between h1 (article title) → h2 → h3 is clearly perceptible.
+  Reject if h2 and body text differ by less than 4px.
+
+If either rule is missing or sizes are too small, set:
+```css
+.prose h2 { font-size: 1.45rem; font-weight: 700; line-height: 1.3;
+            margin-top: 0.5rem; margin-bottom: 0.75rem; letter-spacing: -0.01em; }
+.prose h3 { font-size: 1.1rem;  font-weight: 700; line-height: 1.4;
+            margin-top: 1.75rem; margin-bottom: 0.5rem; }
+```
+
+**Horizontal rule spacing.**
+Articles use `---` between sections. Verify `.prose hr` has `margin: 2.5rem 0`
+(or equivalent). Without it, section breaks visually disappear.
+
+**Lists — indentation.**
+Verify `.prose ul, .prose ol` has `padding-left: 1.5rem` and
+`.prose li` has `margin-bottom: 0.375rem`.
+Browser default padding-left is 40px (too wide) or 0px depending on reset;
+specify it explicitly.
+
+**Blockquote — border and padding.**
+Verify `.prose blockquote` has:
+- `border-left: 3px solid var(--color-accent)` (accent, not muted border)
+- `padding: 0.375rem 0 0.375rem 1.25rem`
+- `margin: 1.75rem 0`
+- `.prose blockquote strong { color: var(--color-text); }` so bold labels
+  inside blockquotes stay readable (they inherit muted color otherwise).
+
+**Code blocks — padding.**
+Verify `.prose pre` has `padding: 1.25rem 1.5rem` and `line-height: 1.7`.
+A pre with no explicit padding has code text touching the border.
+
+**Tables — the most frequently missing style block.**
+Verify all of the following exist. If the table block is absent entirely,
+add it in full:
+
+```css
+.prose table {
+  width: 100%; border-collapse: collapse; font-size: 0.9rem;
+  margin: 2rem 0; display: block;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.prose thead th {
+  text-align: left; font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.07em;
+  color: var(--color-muted); padding: 8px 14px;
+  border-bottom: 2px solid var(--color-border); white-space: nowrap;
+}
+.prose tbody td {
+  padding: 10px 14px; border-bottom: 1px solid var(--color-border);
+  vertical-align: top; line-height: 1.5;
+}
+.prose tbody tr:last-child td { border-bottom: none; }
+.prose tbody tr:nth-child(even) td { background-color: var(--color-surface); }
+```
+
+Replace `--color-surface` with the correct surface/alternate background
+variable if CLAUDE.md uses a different name (e.g. `--color-origin-bg`).
+
+**Dark mode — surface color in tables and code blocks.**
+In dark mode, `--color-surface` must be a dark shade (not white).
+Verify the `[data-theme="dark"]` block in global.css defines `--color-surface`
+as a dark background. If the table alternating rows or code blocks appear
+white-on-dark, the dark mode surface variable is wrong — fix it.
+
+After all checks: open the example article in a browser (or read the rendered
+HTML) and confirm that:
+- Section headings (h2) are clearly larger than body text
+- Horizontal rules have generous whitespace above and below
+- Any markdown table has visible header styling and alternating row tints
+- Code blocks have interior padding (text does not touch the border)
+- Blockquotes have an accent-color left border
+
+---
+
 ### 3. Dark Mode Completeness
 
 Verify the FOUC-prevention script is present in src/layouts/BaseLayout.astro
@@ -557,6 +647,15 @@ After all fixes:
 - [ ] Base font 18px, line-height 1.75, max-width 680px in global.css
 - [ ] Heading font and body font applied correctly
 - [ ] Dark mode block in global.css is complete
+- [ ] .prose h2 has font-size ≥ 1.35rem and font-weight: 700 (explicit, not browser default)
+- [ ] .prose h3 has font-size ≥ 1.05rem and font-weight: 700 (explicit, not browser default)
+- [ ] .prose hr has margin: 2.5rem 0 (section breaks breathe)
+- [ ] .prose ul, .prose ol have explicit padding-left and .prose li has margin-bottom
+- [ ] .prose blockquote has accent-color left border, padding, and strong override
+- [ ] .prose pre has explicit padding (1.25rem 1.5rem) and line-height: 1.7
+- [ ] .prose table block is present with th/td padding, border-bottom, and alternating rows
+- [ ] Tables use display: block + overflow-x: auto (mobile-safe)
+- [ ] --color-surface (or equivalent) is dark in [data-theme="dark"] (tables/code readable)
 - [ ] FOUC-prevention script present in BaseLayout.astro <head>
 - [ ] All <img> tags have alt attributes
 - [ ] ThemeToggle, BackToTop, and share button all have aria-label

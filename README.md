@@ -382,12 +382,12 @@ To use keyboard shortcut: press **`/`** anywhere on the blog (not while typing i
 ## 8. Analytics (Optional)
 
 Analytics is configured during setup (`node setup.js`, `setup.ps1`, or `setup.sh`). If you chose a
-provider, the pipeline automatically runs Step 10 to add the tracking script.
+provider, the pipeline automatically runs Step 11 to add the tracking script.
 If you chose "None" during setup, skip this section.
 
 > **Changing your choice after setup**: Edit `CLAUDE.md`, find the `ANALYTICS` section,
 > and change the `Provider:` line to `umami`, `cloudflare`, `vercel`, or `none`.
-> Then run: `node run.js --start-step 10` (or `.\run.ps1 -StartStep 10` on Windows / `./run.sh -s 10` on macOS).
+> Then run: `node run.js --start-step 11` (or `.\run.ps1 -StartStep 11` on Windows / `./run.sh -s 11` on macOS).
 
 ### Choosing a provider
 
@@ -702,10 +702,11 @@ architecture**:
 | 7 | `prompt_blog_07_keystatic.txt` | Keystatic CMS (browser editor, GitHub mode) |
 | 8 | `prompt_blog_08_e2e_check.txt` | E2E integration check, fix any cross-feature failures |
 | 9 | `prompt_blog_09_ui_review.txt` | UI/UX & design audit — accessibility, mobile responsiveness, consistency, polish, configuration completeness |
-| 10 | `prompt_blog_10_analytics.txt` | **Optional** — analytics tracking; only runs if configured during setup |
-| 11 | `prompt_blog_11_comments.txt` | **Optional** — comments section (Giscus or Utterances); only runs if configured during setup |
-| 12 | `prompt_blog_12_newsletter.txt` | **Optional** — newsletter signup form; only runs if configured during setup |
-| — | `prompt_blog_13_future_features.txt` | **Optional** — web-researched report of missing features and future improvements (no code changes) |
+| 10 | `prompt_blog_10_security_audit.txt` | Security & vulnerability audit |
+| 11 | `prompt_blog_11_analytics.txt` | **Optional** — analytics tracking; only runs if configured during setup |
+| 12 | `prompt_blog_12_comments.txt` | **Optional** — comments section (Giscus or Utterances); only runs if configured during setup |
+| 13 | `prompt_blog_13_newsletter.txt` | **Optional** — newsletter signup form; only runs if configured during setup |
+| — | `prompt_blog_14_future_features.txt` | **Optional** — web-researched report of missing features and future improvements (no code changes) |
 
 After every successful step, a git commit is created as a rollback point.
 
@@ -745,7 +746,7 @@ might be missing compared to the best personal blogs on the web today.
 **How to run it:**
 
 Open a new Claude Code session in your blog folder and paste the contents of
-`prompt_blog_13_future_features.txt`.
+`prompt_blog_14_future_features.txt`.
 
 Claude will:
 1. Search the web for what makes a great personal blog in the current year

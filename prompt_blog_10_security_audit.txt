@@ -1,0 +1,37 @@
+## FINAL STEP — Security & Vulnerability Audit
+
+All features are built and E2E-tested. This is the final quality gate.
+
+Your goal: audit every page, component, and configuration file for security vulnerabilities, information leaks, XSS risks, and other security issues.
+Fix every security issue you find. Do not add new features — only fix vulnerabilities.
+
+CRITICAL INSTRUCTION: Before fixing anything, use your web search tools to look up current Astro security best practices, dependency vulnerabilities, and common misconfigurations.
+If you encounter a vulnerability you cannot resolve from the code alone, search online before giving up.
+Your research findings always take precedence over any package versions, URLs, API signatures, or code patterns shown in this prompt. Treat all implementation examples as reference patterns — update them to match current reality based on what you find.
+
+---
+
+### 1. Cross-Site Scripting (XSS)
+Check all MDX components, React components, and Astro templates for user-supplied data being rendered without proper sanitization.
+Specifically audit `set:html` directives in Astro. If they render markdown content, ensure the content is trusted or sanitized.
+
+### 2. Dependency Check
+Run `npm audit` to check for any vulnerable dependencies. If any vulnerabilities are found, attempt to update the packages or apply necessary workarounds.
+
+### 3. Content Security Policy (CSP)
+Review the HTTP headers or meta tags for Content Security Policy. If one is missing or inadequate, add a strict but functional CSP to BaseLayout.astro.
+
+### 4. Configuration Security
+Ensure there are no hardcoded secrets or API keys in the client-facing code.
+Verify that `.env` files are not being improperly exposed.
+
+### 5. API & Form Security
+If Keystatic CMS, newsletters, or comments are configured, verify that their API routes and configurations are securely implemented and not leaking information.
+
+### Checklist before finishing
+- [ ] No XSS vulnerabilities in templates or components
+- [ ] Dependencies audited and updated if necessary
+- [ ] CSP added or verified
+- [ ] No hardcoded secrets exposed
+- [ ] npm run build succeeds
+- [ ] npm run test:unit passes

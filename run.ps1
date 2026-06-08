@@ -32,7 +32,8 @@ $prompts = @(
   "prompt_blog_06_related.txt",     # 6  Feature 05 - Related
   "prompt_blog_07_keystatic.txt",   # 7  Feature 06 - Keystatic CMS
   "prompt_blog_08_e2e_check.txt",   # 8  E2E integration check
-  "prompt_blog_09_ui_review.txt"    # 9  UI, UX & design quality review
+  "prompt_blog_09_ui_review.txt",   # 9  UI, UX & design quality review
+  "prompt_blog_10_security_audit.txt" # 10 Security & vulnerability audit
 )
 
 $stepNames = @(
@@ -45,25 +46,26 @@ $stepNames = @(
   "Related articles",
   "Keystatic CMS",
   "E2E integration check",
-  "UI & design review"
+  "UI & design review",
+  "Security & vulnerability audit"
 )
 
 # Conditionally append optional steps based on CLAUDE.md configuration
 $claudeMd = if (Test-Path "CLAUDE.md") { Get-Content "CLAUDE.md" -Raw } else { "" }
 
-# Analytics (step 10)
+# Analytics (step 11)
 if ($claudeMd -match '(?m)## ANALYTICS\s*\n\s*\nProvider:\s+(umami|cloudflare|vercel)\b') {
-  $prompts   += "prompt_blog_10_analytics.txt"
+  $prompts   += "prompt_blog_11_analytics.txt"
   $stepNames += "Analytics"
 }
-# Comments (step 11)
+# Comments (step 12)
 if ($claudeMd -match '(?m)## COMMENTS\s*\n\s*\nProvider:\s+(giscus|utterances)\b') {
-  $prompts   += "prompt_blog_11_comments.txt"
+  $prompts   += "prompt_blog_12_comments.txt"
   $stepNames += "Comments"
 }
-# Newsletter (step 12)
+# Newsletter (step 13)
 if ($claudeMd -match '(?m)## NEWSLETTER\s*\n\s*\nProvider:\s+(buttondown|substack|kit)\b') {
-  $prompts   += "prompt_blog_12_newsletter.txt"
+  $prompts   += "prompt_blog_13_newsletter.txt"
   $stepNames += "Newsletter"
 }
 

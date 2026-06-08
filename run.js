@@ -86,6 +86,7 @@ const prompts = [
   'prompt_blog_07_keystatic.txt',
   'prompt_blog_08_e2e_check.txt',
   'prompt_blog_09_ui_review.txt',
+  'prompt_blog_10_security_audit.txt',
 ]
 const stepNames = [
   'Foundation',
@@ -98,21 +99,22 @@ const stepNames = [
   'Keystatic CMS',
   'E2E integration check',
   'UI & design review',
+  'Security & vulnerability audit',
 ]
 
 // Conditionally append optional steps based on CLAUDE.md
 const claudeMd = fs.existsSync('CLAUDE.md') ? fs.readFileSync('CLAUDE.md', 'utf8') : ''
 
 if (/## ANALYTICS[\s\S]*?\nProvider:\s+(?:umami|cloudflare|vercel)\b/.test(claudeMd)) {
-  prompts.push('prompt_blog_10_analytics.txt')
+  prompts.push('prompt_blog_11_analytics.txt')
   stepNames.push('Analytics')
 }
 if (/## COMMENTS[\s\S]*?\nProvider:\s+(?:giscus|utterances)\b/.test(claudeMd)) {
-  prompts.push('prompt_blog_11_comments.txt')
+  prompts.push('prompt_blog_12_comments.txt')
   stepNames.push('Comments')
 }
 if (/## NEWSLETTER[\s\S]*?\nProvider:\s+(?:buttondown|substack|kit)\b/.test(claudeMd)) {
-  prompts.push('prompt_blog_12_newsletter.txt')
+  prompts.push('prompt_blog_13_newsletter.txt')
   stepNames.push('Newsletter')
 }
 

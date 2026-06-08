@@ -40,6 +40,7 @@ PROMPTS=(
   "prompt_blog_07_keystatic.txt"
   "prompt_blog_08_e2e_check.txt"
   "prompt_blog_09_ui_review.txt"
+  "prompt_blog_10_security_audit.txt"
 )
 
 STEP_NAMES=(
@@ -53,22 +54,23 @@ STEP_NAMES=(
   "Keystatic CMS"
   "E2E integration check"
   "UI & design review"
+  "Security & vulnerability audit"
 )
 
 # Conditionally append optional steps based on CLAUDE.md configuration
-# Analytics (step 10)
+# Analytics (step 11)
 if [ -f "CLAUDE.md" ] && awk '/^## ANALYTICS/{f=1} f && /^Provider:/{print; exit}' CLAUDE.md | grep -qE 'umami|cloudflare|vercel'; then
-  PROMPTS+=("prompt_blog_10_analytics.txt")
+  PROMPTS+=("prompt_blog_11_analytics.txt")
   STEP_NAMES+=("Analytics")
 fi
-# Comments (step 11)
+# Comments (step 12)
 if [ -f "CLAUDE.md" ] && awk '/^## COMMENTS/{f=1} f && /^Provider:/{print; exit}' CLAUDE.md | grep -qE 'giscus|utterances'; then
-  PROMPTS+=("prompt_blog_11_comments.txt")
+  PROMPTS+=("prompt_blog_12_comments.txt")
   STEP_NAMES+=("Comments")
 fi
-# Newsletter (step 12)
+# Newsletter (step 13)
 if [ -f "CLAUDE.md" ] && awk '/^## NEWSLETTER/{f=1} f && /^Provider:/{print; exit}' CLAUDE.md | grep -qE 'buttondown|substack|kit'; then
-  PROMPTS+=("prompt_blog_12_newsletter.txt")
+  PROMPTS+=("prompt_blog_13_newsletter.txt")
   STEP_NAMES+=("Newsletter")
 fi
 

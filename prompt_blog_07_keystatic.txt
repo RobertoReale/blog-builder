@@ -9,11 +9,13 @@ When the user writes an article and clicks "Create" or "Save", Keystatic commits
 
 CRITICAL INSTRUCTION: Before writing any code, use your web search tools to:
 1. Find the current latest versions of `@keystatic/core`, `@keystatic/astro`, and `@astrojs/vercel`.
-2. Verify the correct import path for the Vercel adapter (it changed between major versions — e.g. `@astrojs/vercel` vs `@astrojs/vercel/serverless`).
-3. Check the current `keystatic.config.ts` field API (the `fields.*` and `collection()` signatures change across minor versions).
-4. Search for known compatibility issues between the current Keystatic version and the current Astro version and Node.js version running on this machine (`node --version`).
-5. Determine which version of `@astrojs/react` is compatible with the current Astro major version (major versions of `@astrojs/react` track Astro major versions — the major must match). Keystatic uses React for its admin UI and lists `@astrojs/react` as a peer dependency; npm v7+ will auto-install it at the latest version unless you pin it explicitly. Install the correct matching version based on your search result.
-6. Verify that Keystatic is still a maintained and recommended CMS for Astro static blogs with GitHub-based storage — if a clearly better alternative has emerged (actively maintained, similar capabilities, compatible with the current Astro static output), add a `<!-- ALTERNATIVE: <name> — <reason> -->` comment at the top of keystatic.config.ts, but implement Keystatic as specified.
+2. Check `@keystatic/astro`'s declared peer-dependency range for Astro. Compare it against the Astro major already installed in this project (check `package.json`). If the installed Astro major is OUTSIDE that range, stop before installing anything: downgrade the project's Astro version to the highest major that `@keystatic/astro` supports (Keystatic has historically lagged behind Astro's latest major by one or more versions), re-run `npm install`, and confirm `npm run build` still passes before continuing with this step. Note the pinned version and the reason in CLAUDE.md's STACK section. Do not attempt to proceed with an incompatible Astro major just to keep it "latest".
+3. Verify the correct import path for the Vercel adapter (it changed between major versions — e.g. `@astrojs/vercel` vs `@astrojs/vercel/serverless`).
+4. Check the current `keystatic.config.ts` field API (the `fields.*` and `collection()` signatures change across minor versions).
+5. Search for known compatibility issues between the current Keystatic version and the current Astro version and Node.js version running on this machine (`node --version`).
+6. Determine which version of `@astrojs/react` is compatible with the current Astro major version (major versions of `@astrojs/react` track Astro major versions — the major must match). Keystatic uses React for its admin UI and lists `@astrojs/react` as a peer dependency; npm v7+ will auto-install it at the latest version unless you pin it explicitly. Install the correct matching version based on your search result.
+7. Verify the current Astro API for opting individual routes into server rendering. `output: 'hybrid'` was REMOVED in Astro 5 — it was merged into `output: 'static'`, with SSR opted into per-route via `export const prerender = false` on the specific route file. Confirm this is still accurate for the Astro major installed in this project (docs: https://docs.astro.build/en/guides/on-demand-rendering/) and adapt Step 2 below accordingly — do not blindly apply the `output: 'hybrid'` pattern shown as a reference below if your research shows it no longer exists.
+8. Verify that Keystatic is still a maintained and recommended CMS for Astro static blogs with GitHub-based storage — if a clearly better alternative has emerged (actively maintained, similar capabilities, compatible with the current Astro static output), add a `<!-- ALTERNATIVE: <name> — <reason> -->` comment at the top of keystatic.config.ts, but implement Keystatic as specified.
 If you encounter a bug you cannot resolve by reading the code, search for GitHub issues and community workarounds before giving up.
 Your research findings always take precedence over any package versions, URLs, API signatures, or code patterns shown in this prompt. Treat all implementation examples as reference patterns — update them to match current reality based on what you find.
 
@@ -25,14 +27,23 @@ Keystatic GitHub mode requires server-side routes (OAuth callbacks, GitHub API p
 This step intentionally overrides two constraints from CLAUDE.md that were correct for
 a fully static blog but must change for Keystatic:
 
-1. `output: 'static'` → must become `output: 'hybrid'`
+1. Astro needs an adapter-backed way to run `/keystatic` and `/api/keystatic/*` as
+   serverless functions while every other page stays statically pre-rendered. On
+   Astro 5+ this means: keep `output: 'static'` and add `export const prerender = false`
+   to Keystatic's own server routes only (Keystatic's integration handles this
+   internally — you should not need to hand-write those routes). On Astro versions
+   that still have `output: 'hybrid'` (Astro 3–4), use that mode instead. Use whichever
+   API matches the Astro major actually installed (CRITICAL INSTRUCTION item 7) — do
+   not mix the two.
 2. "No @astrojs/vercel adapter" → must be installed (Vercel needs it to run the SSR routes)
 
-These overrides are deliberate. All existing blog pages remain statically pre-rendered in
-hybrid mode — their behavior, performance, and deployment are completely unchanged.
-Only the `/keystatic` admin UI and `/api/keystatic/*` backend routes run as serverless
-functions. Every `export const prerender = true` is implicit for all existing pages in
-hybrid mode — do NOT add that annotation to existing files.
+These overrides are deliberate. All existing blog pages remain statically pre-rendered —
+their behavior, performance, and deployment are completely unchanged. Only the
+`/keystatic` admin UI and `/api/keystatic/*` backend routes run as serverless functions.
+On Astro 5+, existing pages need no annotation at all (static is still the default per
+route); do NOT add `export const prerender = false` to any existing page. On Astro 3–4's
+`output: 'hybrid'`, `export const prerender = true` is implicit for all existing pages —
+do NOT add that annotation to existing files either.
 
 ---
 
@@ -81,27 +92,33 @@ reliable. Search also works here because `npm run build` runs Pagefind.
 ### Step 2 — Update astro.config.mjs
 
 Add the Vercel adapter and Keystatic integration. Preserve ALL existing integrations
-(tailwind, mdx) and any existing config options (site URL, etc.).
+and Vite plugins (Tailwind, mdx) and any existing config options (site URL, etc.) —
+whatever form they take in the project as it exists today (e.g. Tailwind may be wired
+up as an integration or as a `vite.plugins` entry depending on what Step 0 settled on).
+
+On Astro 5+ (no `output: 'hybrid'` — verified in CRITICAL INSTRUCTION item 7):
 
 ```js
 import { defineConfig } from 'astro/config'
-import tailwind from '@astrojs/tailwind'
 import mdx from '@astrojs/mdx'
 import vercel from '@astrojs/vercel' // older versions (v1–v6) used '@astrojs/vercel/serverless'
 import keystatic from '@keystatic/astro'
 
 export default defineConfig({
-  output: 'hybrid',
+  output: 'static',
   adapter: vercel(),
   integrations: [
-    tailwind(),
     mdx(),
     keystatic(),
-    // keep any other integrations already present
+    // keep any other integrations already present (e.g. react() — required by Keystatic's admin UI)
   ],
-  // keep existing site, build, or other options unchanged
+  // keep existing vite.plugins, site, build, or other options unchanged
 })
 ```
+
+On Astro 3–4 (where `output: 'hybrid'` still exists), use `output: 'hybrid'` instead of
+`output: 'static'` — everything else is unchanged. Only use this branch if CRITICAL
+INSTRUCTION item 7 confirms the installed Astro major still supports `hybrid`.
 
 If any other integrations (e.g. pagefind-related plugins) are already present, keep them.
 
@@ -316,10 +333,13 @@ Do NOT modify any of the following:
 Keystatic adds its own routes automatically via the integration — no Astro page
 files need to be created for `/keystatic` or `/api/keystatic`.
 
-IMPORTANT: In `output: 'hybrid'` mode, all existing pages are already treated
-as pre-rendered by default. Do NOT add `export const prerender = true` to any
-existing page — this annotation is implicit and adding it is redundant.
-Only server-rendered (dynamic) pages need `export const prerender = false`.
+IMPORTANT: On Astro 5+ with `output: 'static'`, all existing pages are already
+statically pre-rendered by default — do NOT add any `prerender` annotation to
+them. On Astro 3–4's `output: 'hybrid'`, `export const prerender = true` is
+implicit for existing pages — do NOT add that annotation either. In both cases,
+only Keystatic's own server routes need `export const prerender = false`, and
+Keystatic's integration adds those routes itself — you should not need to
+hand-write this annotation anywhere.
 
 ---
 
@@ -353,7 +373,9 @@ After `npm run build` succeeds, update `CLAUDE.md` so all subsequent steps (E2E 
 UI review, optional analytics/comments/newsletter) know the project is now hybrid:
 
 1. Find the line in the STACK section: `- Astro, output: 'static'`
-   Replace it with:
+   On Astro 5+, replace it with:
+   `- Astro, output: 'static' (Keystatic's own routes opt into server rendering internally; all blog pages remain statically pre-rendered)`
+   On Astro 3–4 (only if CRITICAL INSTRUCTION item 7 confirmed `hybrid` still exists), replace it with:
    `- Astro, output: 'hybrid' (Keystatic requires hybrid — /keystatic and /api/keystatic run as serverless functions; all blog pages remain statically pre-rendered)`
 
 2. Find Rule 3 in FIXED RULES:
@@ -368,16 +390,16 @@ These changes ensure that if any future step reads CLAUDE.md, it won't incorrect
 ### Checklist before finishing
 
 - [ ] `npm install` succeeds (no blocking peer-dependency errors)
-- [ ] `astro.config.mjs` has `output: 'hybrid'`, `adapter: vercel()`, `keystatic()` in integrations
+- [ ] `astro.config.mjs` has the correct `output` value for the installed Astro major (`'static'` on Astro 5+, `'hybrid'` on Astro 3–4), `adapter: vercel()`, `keystatic()` in integrations
 - [ ] `keystatic.config.ts` exists at project root with the full schema above
 - [ ] `.env.example` exists with the three required variable names
 - [ ] `.env` is listed in `.gitignore`
 - [ ] Pagefind output path updated if Pagefind was already installed (Step 5)
 - [ ] `"dev:build"` script added to `package.json`
 - [ ] No modifications to existing pages, layouts, components, or utilities
-- [ ] No `export const prerender = true` added to any existing page
+- [ ] No `prerender` annotation added to any existing page
 - [ ] `npm run build` succeeds with zero TypeScript errors
-- [ ] CLAUDE.md STACK section updated: `output: 'hybrid'`
+- [ ] CLAUDE.md STACK section updated to reflect the actual `output` value used
 - [ ] CLAUDE.md Rule 3 updated to note the adapter is required
 - [ ] `npm run dev` starts without crashing (if it fails, verify `@astrojs/react` major matches the installed Astro major version; then use `npm run dev:build` as fallback)
 

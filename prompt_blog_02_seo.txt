@@ -145,7 +145,10 @@ import { SITE } from '../../config';
 export const getStaticPaths: GetStaticPaths = async () => {
   const articles = await getCollection('articles', (e) => e.data.status === 'published');
   return articles.map((a) => ({
-    params: { slug: a.slug },
+    // `.slug` is the legacy Content Collections identifier (Astro <5, `type: 'content'`).
+    // Under the Content Layer API (Astro 5+, `glob()` loader) it is `.id` instead — use
+    // whichever the rest of the codebase already uses (check src/pages/article/[slug].astro).
+    params: { slug: a.id },
     props: { title: a.data.title, description: a.data.description },
   }));
 };

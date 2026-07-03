@@ -95,9 +95,14 @@ The article-level computation to add (merge into the existing per-entry map):
 ```ts
 // allPublished is already fetched at the top of getStaticPaths.
 // Inside the existing `allPublished.map(entry => { ... })`:
+// NOTE: this reference uses `.id`, the Content Layer API identifier (Astro 5+,
+// `glob()` loader). If this project's collection still uses the legacy
+// `type: 'content'` config (src/content/config.ts, Astro <5), use `.slug`
+// instead — match whatever getStaticPaths already uses a few lines above for
+// `entry`'s own params, don't introduce a second identifier convention.
 
 const related = allPublished
-  .filter(other => other.slug !== entry.slug)
+  .filter(other => other.id !== entry.id)
   .map(other => ({
     ...other,
     sharedTags: other.data.tags.filter(t => entry.data.tags.includes(t)).length
@@ -108,7 +113,7 @@ const related = allPublished
   .slice(0, 3)
   .map(r => ({
     title: r.data.title,
-    slug: r.slug,
+    slug: r.id,
     date: r.data.date,
     tags: r.data.tags,
     description: r.data.description,
@@ -116,7 +121,7 @@ const related = allPublished
   }))
 
 return {
-  params: { slug: entry.slug },
+  params: { slug: entry.id },
   // Keep every prop the page already needs. If Feature 04 added seriesParts,
   // it MUST remain here — only `related` is new.
   props: { entry, related /*, seriesParts (from Feature 04, if present) */ }

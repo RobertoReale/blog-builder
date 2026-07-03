@@ -3,12 +3,15 @@ This is the FOUNDATION build — focus on correctness and completeness.
 Do not add anything beyond what is specified here. No extra features.
 
 CRITICAL INSTRUCTION: Before you begin writing code, use your web search tools to:
-1. Find the current latest stable release of Astro and note the major version number. Use that exact version throughout — do not downgrade or pin to an older major.
-2. Check for any breaking changes in @astrojs/tailwind and @astrojs/mdx since their latest releases.
-3. Verify the current @fontsource API for `lora` and `dm-sans` (confirm package names and import paths).
-4. Check for any known incompatibilities between the current Astro major version, Tailwind, and MDX. If the major version is newer than 4 (when this prompt was written), look for any API differences (content collections, image handling, config format) and adapt the code patterns below accordingly.
-5. Find the current Node.js LTS version (active, not end-of-life) — use that as the minimum in the `engines` field instead of the placeholder below.
-6. Verify that the core packages listed below (@astrojs/tailwind, @astrojs/mdx, @fontsource/*) are still the recommended choices for their roles — if a clearly better alternative has emerged, add a `<!-- ALTERNATIVE: <name> — <reason> -->` comment in the relevant config file, but implement what is specified here.
+1. Find the current latest stable release of Astro and note the major version number.
+2. Keystatic CMS is installed later in this pipeline (Feature 06) and has historically lagged behind Astro's latest major release by one or more versions (check `@keystatic/astro`'s `peerDependencies` on npm, or its changelog/GitHub issues). If the latest Astro major is newer than what `@keystatic/astro` currently declares support for, use the highest Astro major that IS within Keystatic's supported peer-dependency range instead — do not pick a version that will break the Keystatic step later. Record the version you settled on, and the reason, in a short note under CLAUDE.md's STACK section (e.g. "Astro pinned to major N — Keystatic does not yet support N+1"). If Keystatic has no compatibility gap at research time, use the current latest major.
+3. Check for any breaking changes in @astrojs/tailwind and @astrojs/mdx since their latest releases.
+4. Verify the current @fontsource API for `lora` and `dm-sans` (confirm package names and import paths).
+5. Check for any known incompatibilities between the current Astro major version, Tailwind, and MDX. If the major version is newer than 4 (when this prompt was written), look for any API differences (content collections, image handling, config format) and adapt the code patterns below accordingly.
+6. Find the current Node.js LTS version (active, not end-of-life) — use that as the minimum in the `engines` field instead of the placeholder below.
+7. Verify that the core packages listed below (@astrojs/tailwind, @astrojs/mdx, @fontsource/*) are still the recommended choices for their roles. Two distinct cases:
+   - A clearly better alternative exists but @astrojs/tailwind still installs and works: add a `<!-- ALTERNATIVE: <name> — <reason> -->` comment in the relevant config file, but implement what is specified here.
+   - @astrojs/tailwind's `peerDependencies` do not cover the Astro major you selected in item 1 (hard incompatibility, not just staleness — this has happened before, e.g. `@astrojs/tailwind` never added Astro 6 support and Tailwind moved to a native `@tailwindcss/vite` plugin instead): do NOT force the install. Use the current officially-recommended integration path instead (check the Astro docs' Tailwind guide for the version you're on), note the substitution in CLAUDE.md's STACK section, and adapt the CSS import syntax (e.g. Tailwind v4's `@import 'tailwindcss';` replaces the v3 `@tailwind base/components/utilities;` directives) and remove any now-unnecessary `tailwind.config.mjs` accordingly.
 If you encounter a bug you cannot resolve by reading the code, search online for known issues and solutions before giving up.
 Your research findings always take precedence over any package versions, URLs, API signatures, or code patterns shown in this prompt. Treat all implementation examples as reference patterns — update them to match current reality based on what you find.
 
